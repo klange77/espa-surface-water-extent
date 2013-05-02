@@ -669,8 +669,8 @@ void usage ()
             "reflectance, including a cloud cover correction and a terrain "
             "slope revision of the surface water extent\n\n");
     printf ("usage: scene_based_swe "
-            "--toa=input_TOA(or surface)_reflectance_Landsat_filename "
-            "--dem=input_DEM_filename "
+            "--toa=input_TOA(or surface)_reflectance_filename_with_full_path "
+            "--dem=input_DEM_filename_with_full_path "
             "--mgt=modified_normalized_difference_wetness_index_threshold "
             "--mlt1=mlt1_threshold "
             "--mlt2=mlt2_threshold "
@@ -700,12 +700,11 @@ void usage ()
             "\n");
     printf ("    -verbose: should intermediate messages be printed? (default "
             "is false)\n");
-    printf ("\nscene_based_swe --help will print the usage statement\n");
-    printf ("\nExample: scene_based_sca "
-            "--reflectance= lndsr.LT50450302001272LGS01.hdf"
-            "--dem=lsrd_scene_based_dem.bin "
-            "--mgt = 1.0 --mlt1 = 1.0 --mlt2 = 1.0 --b4t1 = 1000 "
-            "--b4t2 = 1500 --b5t1 = 500 --b5t2 = 800 --per_slope = 50.0"
-            "--snow_cover=snow_cover.hdf "
+    printf ("\n./scene_based_swe --help will print the usage statement\n");
+    printf ("\nExample: ./scene_based_swe "
+            "--reflectance=/data1/sguo/lndsr.LT50450302001272LGS01.hdf "
+            "--dem=/data1/sguo/lsrd_scene_based_dem.bin "
+            "--mgt=1.0 --mlt1=1.0 --mlt2=1.0 --b4t1=1000 "
+            "--b4t2=1500 --b5t1=500 --b5t2=800 --per_slope=50.0"
             "--write_binary --verbose\n");
 }

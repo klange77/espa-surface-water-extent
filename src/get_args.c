@@ -61,10 +61,10 @@ short get_args
         {"mlt1", required_argument, 0, '1'},
         {"mlt2", required_argument, 0, '2'},
         {"b4t1", required_argument, 0, '3'},
-        {"b4t1", required_argument, 0, '4'},
-        {"b4t1", required_argument, 0, '5'},
-        {"b4t1", required_argument, 0, '6'},
-        {"pcts", required_argument, 0, 'p'},
+        {"b4t2", required_argument, 0, '4'},
+        {"b5t1", required_argument, 0, '5'},
+        {"b5t2", required_argument, 0, '6'},
+        {"per_slope", required_argument, 0, 'p'},
         {"help", no_argument, 0, 'h'},
         {0, 0, 0, 0}
     };
@@ -130,7 +130,7 @@ short get_args
                 break;
      
             case 'p':  /* Percent Slope */
-                *mgt = atof(optarg);
+                *per_slope = atof(optarg);
                 break;
      
             case '?':
@@ -162,7 +162,7 @@ short get_args
 
     if (*mgt < MINSIGMA || (*mgt - 2.0) > MINSIGMA)
     {
-        sprintf (errmsg, "MGH is out of range");
+        sprintf (errmsg, "MGT is out of range");
         error_handler (true, FUNC_NAME, errmsg);
         usage ();
         return (ERROR);
