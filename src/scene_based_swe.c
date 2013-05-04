@@ -48,7 +48,16 @@ int main (int argc, char *argv[])
     float per_slope;
     char lndcal_name[STR_SIZE];
     char lndsr_name[STR_SIZE];
-    char swe_binary_name[STR_SIZE];
+    char raw_swe_bin[STR_SIZE];
+    char slope_revised_swe_bin[STR_SIZE];
+    char cloud_corrected_swe_bin[STR_SIZE];
+    char slope_cloud_swe_bin[STR_SIZE];
+    char scaled_percent_slope_bin[STR_SIZE];
+    char raw_swe_hdr[STR_SIZE];
+    char slope_revised_swe_hdr[STR_SIZE];
+    char cloud_corrected_swe_hdr[STR_SIZE];
+    char slope_cloud_swe_hdr[STR_SIZE];
+    char scaled_percent_slope_hdr[STR_SIZE];
     char swe_hdf_name[STR_SIZE];
     char scene_name[STR_SIZE];
     char directory[STR_SIZE];
@@ -62,7 +71,8 @@ int main (int argc, char *argv[])
     int retval;              /* return status */
     int k;                   /* variable to keep track of the % complete */
     int band;                /* current band to be processed */
-    int line;                /* current line to be processed */
+    int line;                /* current starting line to be processed */
+    int iline;               /* current line to be processed */
     int samp;                /* current samp to be processed */
     int nlines_proc;         /* number of lines to process at one time */
     int start_line;          /* line of DEM to start reading */
@@ -106,7 +116,9 @@ int main (int argc, char *argv[])
                        &mgt, &mlt1, &mlt2, &b4t1, &b4t2, &b5t1, &b5t2, 
                        &per_slope, &write_binary, &verbose);
     if (retval != SUCCESS)
-    {   /* get_args already printed the error message */
+    {   
+        sprintf (errmsg, "Error calling get_args");
+        error_handler (true, FUNC_NAME, errmsg);
         exit (ERROR);
     }
 
@@ -127,36 +139,55 @@ int main (int argc, char *argv[])
             printf ("    -- Also writing raw binary output.\n");
     }
 
-    ias_misc_split_filename(reflectance_infile, directory, scene_name, 
-                            extension);
+    split_filename(reflectance_infile, directory, scene_name, extension);
+
     if (verbose)
         printf("directory, scene_name, extension=%s,%s,%s\n", 
             directory, scene_name, extension);
+    sprintf(lndsr_name, "%slndsr.%s.hdf", directory, scene_name);
     sprintf(lndcal_name, "%slndcal.%s.hdf", directory, scene_name);
     if (strstr(reflectance_infile, "lndcal") != NULL)
-    {
         use_toa = true;
-        sprintf(lndsr_name, "%slndsr.%s.hdf", directory, scene_name);
-    }
     else
         use_toa = false;
-    sprintf(swe_binary_name, "%sswe.%s.img", directory, scene_name);
     sprintf(swe_hdf_name, "%sswe.%s.hdf", directory, scene_name);
+    sprintf(raw_swe_bin, "%sraw_swe.bin", directory);
+    sprintf(raw_swe_hdr, "%sraw_swe.bin.gdr", directory);
+    sprintf(slope_revised_swe_bin, "%sslope_revised_raw_swe.bin", directory);
+    sprintf(slope_revised_swe_hdr, "%sslope_revised_raw_swe.bin.hdr", 
+            directory);
+    sprintf(cloud_corrected_swe_bin, "%scloud_corrected_raw_swe.bin", 
+                                     directory);
+    sprintf(cloud_corrected_swe_hdr, "%scloud_corrected_raw_swe.bin.hdr", 
+                                     directory);
+    sprintf(slope_cloud_swe_bin, "%sslope_cloud_raw_swe.bin", directory);
+    sprintf(slope_cloud_swe_hdr, "%sslope_cloud_raw_swe.bin.hdr", directory);
+    sprintf(scaled_percent_slope_bin, "%sscaled_percent_slope.bin", directory);
+    sprintf(scaled_percent_slope_hdr, "%sscaled_percent_slope.bin.hdr", 
+            directory);
     if (verbose)
     {
         printf("lndcal_name, lndsr_name = %s, %s\n", lndcal_name, lndsr_name); 
-        printf("swe_binary_name, swe_hdf_name = %s, %s\n", swe_binary_name, 
-                swe_hdf_name); 
+        printf("swe_hdf_name = %s\n", swe_hdf_name); 
+        printf("raw_swe_binary_name = %s\n", raw_swe_bin); 
+        printf("slope_revised_swe_binary_name = %s\n", 
+               slope_revised_swe_bin); 
+        printf("cloud_corrected_raw_swe_binary_name = %s\n", 
+               cloud_corrected_swe_bin); 
+        printf("slope_revised_cloud_corrected_swe_binary_name = %s\n", 
+               slope_cloud_swe_bin); 
+        printf("scaled_percent_slope_binary_name = %s\n", 
+               scaled_percent_slope_bin); 
     }
 
     /* Open the output files for raw binary output */
     if (write_binary)
     {
-        raw_swe_fptr = fopen ("raw_swe.bin", "wb");
-        slope_swe_fptr = fopen ("slope_revised_swe.bin", "wb");
-        cloud_swe_fptr = fopen ("cloud_corrected_swe.bin", "wb");
-        slope_cloud_swe_fptr = fopen ("slope_cloud_swe.bin", "wb");
-        scaled_slope_fptr = fopen ("scaled_percent_slope.bin", "wb");
+        raw_swe_fptr = fopen (raw_swe_bin, "wb");
+        slope_swe_fptr = fopen (slope_revised_swe_bin, "wb");
+        cloud_swe_fptr = fopen (cloud_corrected_swe_bin, "wb");
+        slope_cloud_swe_fptr = fopen (slope_cloud_swe_bin, "wb");
+        scaled_slope_fptr = fopen (scaled_percent_slope_bin, "wb");
     }
 
     /* Open the TOA reflectance or surface reflectance products, set up
@@ -256,7 +287,8 @@ int main (int argc, char *argv[])
 
     /* Create and open the output HDF-EOS file */
     if (create_output (swe_hdf_name) != SUCCESS)
-    {   /* error message already printed */
+    {  
+        sprintf (errmsg, "Error calling create_output");
         error_handler (true, FUNC_NAME, errmsg);
         close_input (input);
         free_input (input);
@@ -266,7 +298,8 @@ int main (int argc, char *argv[])
     output = open_output (swe_hdf_name, NUM_OUT_SDS, out_sds_names,
         input->nlines, input->nsamps);
     if (output == NULL)
-    {   /* error message already printed */
+    {   
+        sprintf (errmsg, "Error calling open_output");
         error_handler (true, FUNC_NAME, errmsg);
         close_input (input);
         free_input (input);
@@ -385,26 +418,6 @@ int main (int argc, char *argv[])
             input->refl_scale_fact, mgt, mlt1, mlt2, b4t1, b4t2, b5t1, b5t2, 
             raw_swe);
 
-        /* Cloud screening to get cloud corrected SWE */
-        for (samp = 0; samp < input->nsamps; samp++)
-        {
-            if (input->refl_buf[1][line*input->nsamps+samp] == -9999 ||
-                input->refl_buf[2][line*input->nsamps+samp] == -9999 ||
-                input->refl_buf[3][line*input->nsamps+samp] == -9999 ||
-                input->refl_buf[4][line*input->nsamps+samp] == -9999)
-                raw_swe[line*input->nsamps+samp] = NO_VALUE;
-        }
-
-        /* Cloud screening to get cloud corrected SWE */
-        for (samp = 0; samp < input->nsamps; samp++)
-        {
-            if (input->qa_buf[line*input->nsamps+samp] == 255)
-                cloud_corrected_swe[line*input->nsamps+samp] = NO_VALUE;
-            else
-                cloud_corrected_swe[line*input->nsamps+samp] = 
-                    raw_swe[line*input->nsamps+samp];
-        }
-
         /* Prepare to read the current lines from the DEM.  We need an extra
            line at the start and end for the slope calculation.  If we are just
            starting at line 0, then read an extra line from the end of the
@@ -457,31 +470,47 @@ int main (int argc, char *argv[])
         calc_slope (dem, dem_top, dem_bottom, nlines_proc, input->nsamps,
             input->meta.pixsize, input->meta.pixsize,
             percent_slope);
-
-        /* Use percent slope to get slope revised SWE and cloud corrected &
-           slope revised SWE */
-        for (samp = 0; samp < input->nsamps; samp++)
+    
+        for (iline = 0; iline < PROC_NLINES; iline++)
         {
-            if ((percent_slope[line*input->nsamps+samp] - per_slope) <= 
-                 MINSIGMA)
+            /* Cloud screening to get cloud corrected SWE */
+            for (samp = 0; samp < input->nsamps; samp++)
             {
-                slope_revised_swe[line*input->nsamps+samp] = 
-                    raw_swe[line*input->nsamps+samp];
-                slope_cloud_swe[line*input->nsamps+samp] = 
-                    cloud_corrected_swe[line*input->nsamps+samp];
-            }
-            else
-            {
-                slope_revised_swe[line*input->nsamps+samp] = 0;
-                slope_cloud_swe[line*input->nsamps+samp] = 0;
+                if (input->refl_buf[1][iline*input->nsamps+samp] == -9999 ||
+                    input->refl_buf[2][iline*input->nsamps+samp] == -9999 ||
+                    input->refl_buf[3][iline*input->nsamps+samp] == -9999 ||
+                    input->refl_buf[4][iline*input->nsamps+samp] == -9999)
+                    raw_swe[iline*input->nsamps+samp] = NO_VALUE;
+
+                /* Cloud screening to get cloud corrected SWE */
+                if (input->qa_buf[iline*input->nsamps+samp] == 255)
+                    cloud_corrected_swe[iline*input->nsamps+samp] = NO_VALUE;
+                else
+                    cloud_corrected_swe[iline*input->nsamps+samp] = 
+                        raw_swe[iline*input->nsamps+samp];
+
+                /* Use percent slope to get slope revised SWE and cloud 
+                   corrected & slope revised SWE */
+                if ((percent_slope[iline*input->nsamps+samp] - per_slope) <= 
+                     MINSIGMA)
+                {
+                    slope_revised_swe[iline*input->nsamps+samp] = 
+                       raw_swe[iline*input->nsamps+samp];
+                    slope_cloud_swe[iline*input->nsamps+samp] = 
+                        cloud_corrected_swe[iline*input->nsamps+samp];
+                }
+                else
+                {
+                    slope_revised_swe[iline*input->nsamps+samp] = 0;
+                    slope_cloud_swe[iline*input->nsamps+samp] = 0;
+                }
+
+                /* Convert percent slope to int16 with values between 0 and 
+                   10000 */
+                scaled_slope[iline*input->nsamps+samp] = 
+                    (int)rint(100.0 * percent_slope[iline*input->nsamps+samp]);
             }
         }
-
-        /* Convert percent slope to int16 with values between 0 and 10000 */
-        for (samp = 0; samp < input->nsamps; samp++)
-             scaled_slope[line*input->nsamps+samp] = 
-                 (int)rint(100.0 * percent_slope[line*input->nsamps+samp]);
-
         /* write the non snow-related masks to raw binary output */
         if (write_binary)
         {
@@ -507,7 +536,7 @@ int main (int argc, char *argv[])
     if (write_binary)
     {
         fclose (raw_swe_fptr);
-        fclose (cloud_swe_fptr);
+        fclose (slope_swe_fptr);
         fclose (cloud_swe_fptr);
         fclose (slope_cloud_swe_fptr);
         fclose (scaled_slope_fptr);
@@ -573,22 +602,22 @@ int main (int argc, char *argv[])
     {
         if (verbose)
             printf ("  Creating ENVI headers for each mask.\n");
-        if (write_envi_hdr ("raw_swe.bin.hdr", input, &space_def)
+        if (write_envi_hdr (raw_swe_hdr, input, &space_def)
             == ERROR)
             exit (ERROR);
-        if (write_envi_hdr ("slope_revised_swe.bin.hdr", input,
+        if (write_envi_hdr (slope_revised_swe_hdr, input,
             &space_def) == ERROR)
             exit (ERROR);
-        if (write_envi_hdr ("cloud_corrected_swe.bin.hdr", input, &space_def)
+        if (write_envi_hdr (cloud_corrected_swe_hdr, input, &space_def)
             == ERROR)
             exit (ERROR);
-        if (write_envi_hdr ("slope_cloud_swe.bin.hdr", input, &space_def)
+        if (write_envi_hdr (slope_cloud_swe_hdr, input, &space_def)
             == ERROR)
             exit (ERROR);
-        if (write_envi_hdr ("scaled_percent_slope.bin.hdr", input, 
+        if (write_envi_hdr (scaled_percent_slope_hdr, input, 
             &space_def) == ERROR)
             exit (ERROR);
-        sprintf(dem_envi_hdr,"%s%s",dem_infile,".hdr");
+        sprintf(dem_envi_hdr, "%s%s", dem_infile, ".hdr");
         if (write_envi_hdr (dem_envi_hdr, input, &space_def)
             == ERROR)
             exit (ERROR);
@@ -662,7 +691,7 @@ Date        Programmer       Reason
 
 NOTES:
 ******************************************************************************/
-void usage ()
+void usage()
 {
     printf ("scene_based_swe handles the surface water extent classification "
             "for the input Landsat scene using either TOA or surface "
@@ -671,14 +700,14 @@ void usage ()
     printf ("usage: scene_based_swe "
             "--toa=input_TOA(or surface)_reflectance_filename_with_full_path "
             "--dem=input_DEM_filename_with_full_path "
-            "--mgt=modified_normalized_difference_wetness_index_threshold "
-            "--mlt1=mlt1_threshold "
-            "--mlt2=mlt2_threshold "
+            "--mgt=mgt_threshold (value between 0.00 and 2.00) "
+            "--mlt1=mlt1_threshold (value between -2.00 and 2.00) "
+            "--mlt2=mlt2_threshold (value between -2.00 and 2.00) "
             "--b4t1=b4t1_threshold "
             "--b4t2=b4t2_threshold "
             "--b5t1=b5t1_threshold "
             "--b5t2=b5t2_threshold "
-            "--per_slope=percent_slope_threshold "
+            "--per_slope=percent_slope_threshold (value between 0.00 & 100.00 "
             "[--write_binary] [--verbose]\n");
 
     printf ("\nwhere the following parameters are required:\n");
@@ -705,6 +734,6 @@ void usage ()
             "--reflectance=/data1/sguo/lndsr.LT50450302001272LGS01.hdf "
             "--dem=/data1/sguo/lsrd_scene_based_dem.bin "
             "--mgt=1.0 --mlt1=1.0 --mlt2=1.0 --b4t1=1000 "
-            "--b4t2=1500 --b5t1=500 --b5t2=800 --per_slope=50.0"
+            "--b4t2=1500 --b5t1=500 --b5t2=800 --per_slope=50.0 "
             "--write_binary --verbose\n");
 }

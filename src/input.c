@@ -30,6 +30,10 @@
 
 #define SDS_PREFIX ("band")
 
+/* Band names for the QA bands */
+const char *qa_band_names[NUM_QA_BAND] = {"fill_QA", "DDV_QA", "cloud_QA",
+  "cloud_shadow_QA", "snow_QA", "land_water_QA", "adjacent_cloud_QA"};
+
 /******************************************************************************
 MODULE:  open_input
 
@@ -60,7 +64,6 @@ Input_t *open_input
 {
     char FUNC_NAME[] = "open_input";   /* function name */
     char errmsg[STR_SIZE];    /* error message */
-    char qa_band_name[STR_SIZE];  /* name of the QA cloud band SDS */
     char sds_name[STR_SIZE];  /* name of the current SDS */
     int ib;                   /* index for bands */
     int ir;                   /* index for dimension rank */
@@ -88,7 +91,7 @@ Input_t *open_input
     if (this->sr_file_name == NULL)
     {
         free (this);
-        strcpy (errmsg, "Error duplicating the TOA reflectance filename");
+        strcpy (errmsg, "Error duplicating the surface reflectance filename");
         error_handler (true, FUNC_NAME, errmsg);
         return (NULL);
     }
@@ -109,7 +112,7 @@ Input_t *open_input
     /* Get the global metadata from the input reflectance file */
     if (get_input_meta (this) != SUCCESS)
     {
-        free (this->refl_file_name);
+        free (this->sr_file_name);
         free (this);  
         sprintf (errmsg, "Error reading the input metadata from file: %s",
             lndsr_name);
@@ -117,12 +120,13 @@ Input_t *open_input
         return (NULL);
     }
   
-    if (use_toa == true)
+    if (use_toa)
     {
         this->refl_file_name = dup_string (lndcal_name);
         if (this->refl_file_name == NULL)
         {
             free(this->sr_file_name);
+            free(this->refl_file_name);
             free (this);
             strcpy (errmsg, "Error duplicating the TOA reflectance filename");
             error_handler (true, FUNC_NAME, errmsg);
@@ -130,20 +134,20 @@ Input_t *open_input
         }        
 
         /* Open the files for SD access */
-        this->sr_sds_file_id = SDstart ((char *)lndsr_name, DFACC_RDONLY);
-        if (this->sr_sds_file_id == HDF_ERROR)
+        this->refl_sds_file_id = SDstart ((char *)lndcal_name, DFACC_RDONLY);
+        if (this->refl_sds_file_id == HDF_ERROR)
         {
             free (this->sr_file_name);
+            free (this->refl_file_name);
             free (this);  
             sprintf (errmsg, "Error opening the input surface reflectance "
-                "file: %s", lndsr_name);
+                    "file: %s", lndsr_name);
             error_handler (true, FUNC_NAME, errmsg);
             return (NULL);
         }
         this->refl_open = true;
     }
-
-
+  
     /* Get SDS information and start SDS access */
     for (ib = 0; ib < this->nrefl_band; ib++)
     {
@@ -153,6 +157,14 @@ Input_t *open_input
         this->refl_buf[ib] = NULL;
     }
     
+    for (ib = 0; ib < this->nqa_band; ib++) 
+    {   /* QA data */
+        this->qa_sds[ib].name = NULL;
+        this->qa_sds[ib].dim[0].name = NULL;
+        this->qa_sds[ib].dim[1].name = NULL;
+    }
+    this->qa_buf = NULL;
+
     /* Loop through the image bands and obtain the SDS information */
     strcpy (errmsg, "none");
     for (ib = 0; ib < this->nrefl_band; ib++)
@@ -162,7 +174,7 @@ Input_t *open_input
         this->refl_sds[ib].name = dup_string (sds_name);
         if (this->refl_sds[ib].name == NULL)
         {
-            sprintf (errmsg, "Error getting the SDS name for surface "
+            sprintf (errmsg, "Error getting the SDS name for "
                 "reflectance band %d", ib);
             break;
         }
@@ -182,7 +194,7 @@ Input_t *open_input
             if (get_sds_info (this->sr_sds_file_id, &this->refl_sds[ib])
                 != SUCCESS)
             {
-                sprintf (errmsg, "Error getting the SDS info for TOA "
+                sprintf (errmsg, "Error getting the SDS info for surface "
                          "reflectance band %d", ib);
                 break;
             }
@@ -300,55 +312,62 @@ Input_t *open_input
         }  /* end if first band */
     }  /* for ib */
   
-    /* For the single QA cloud band, obtain the SDS information */
-    strcpy (qa_band_name, "cloud_QA");
-    this->qa_sds.name = NULL;
-    this->qa_sds.dim[0].name = NULL;
-    this->qa_sds.dim[1].name = NULL;
-    this->qa_buf = NULL;
+    /* Loop through the QA bands and obtain the SDS information */
+    for (ib = 0; ib < this->nqa_band; ib++) 
+    {
+        strcpy (sds_name, qa_band_names[ib]);
+        this->qa_sds[ib].name = dup_string(sds_name);
 
-    
-    this->qa_sds.name = dup_string(qa_band_name);
-    if (this->qa_sds.name == NULL) 
-    {
-        sprintf (errmsg, "Error getting the QA SDS name");
-    }
-    if (!get_sds_info(this->sr_sds_file_id, &this->qa_sds)) 
-    {
-        sprintf (errmsg, "Error getting the QA SDS info");
-    }
-
-    /* Check rank */
-    if (this->qa_sds.rank != 2) 
-    {
-        sprintf (errmsg, "Invalid QA rank");
-    }
-
-    /* Check SDS type */
-    if (this->qa_sds.type != DFNT_UINT8) 
-    {
-        sprintf (errmsg, "Invalid QA number type");
-    }
-
-    /* Get dimensions */
-    for (ir = 0; ir < this->qa_sds.rank; ir++) 
-    {
-        dim[ir] = &this->qa_sds.dim[ir];
-        if (!get_sds_dim_info(this->qa_sds.id, ir, dim[ir])) 
+        if (this->qa_sds[ib].name == NULL) 
         {
-            sprintf (errmsg, "Error getting QA dimensions");
-
+            sprintf (errmsg, "Error getting the QA SDS name");
         }
-    }
 
-    if (this->nlines != dim[0]->nval) 
-    {
-        sprintf (errmsg, "All line dimensions do not match");
-    }
-    if (this->nsamps != dim[1]->nval) 
-    {
-        sprintf (errmsg, "All sample dimensions do not match");
-    }
+        if (get_sds_info(this->sr_sds_file_id, &this->qa_sds[ib]) != SUCCESS) 
+        {
+            sprintf (errmsg, "Error getting the QA SDS info");
+        }
+
+        /* Check rank */
+        if (this->qa_sds[ib].rank != 2) 
+        {
+            sprintf (errmsg, "Invalid QA rank");
+        }
+
+        /* Check SDS type */
+        if (this->qa_sds[ib].type != DFNT_UINT8) 
+        {
+            sprintf (errmsg, "Invalid QA number type");
+        }
+
+        /* Get dimensions, because  */
+        for (ir = 0; ir < this->qa_sds[ib].rank; ir++) 
+        {
+            dim[ir] = &this->qa_sds[ib].dim[ir];
+            if (get_sds_dim_info(this->qa_sds[ib].id, ir, dim[ir]) != SUCCESS) 
+            {
+                sprintf (errmsg, "Error getting QA dimensions");
+            }
+        }
+
+        /* Save and check line and sample dimensions */
+        if (ib == 0) 
+        {
+            this->nlines = dim[0]->nval;
+            this->nsamps = dim[1]->nval;
+        } 
+        else 
+        {
+            if (this->nlines != dim[0]->nval) 
+            {
+                sprintf (errmsg, "All line dimensions do not match");
+            }
+            if (this->nsamps != dim[1]->nval) 
+            {
+                sprintf (errmsg, "All sample dimensions do not match");
+            }
+        }
+    }  /* for ib */
 
     /* Check for any errors processing the reflectance bands and use the
        error message already created */
@@ -442,11 +461,12 @@ void close_input
             SDendaccess (this->refl_sds[ib].id);
   
         /* Close QA SDSs */
-        SDendaccess(this->qa_sds.id); 
+        for (ib = 0; ib < this->nqa_band; ib++)
+            SDendaccess(this->qa_sds[ib].id); 
 
         /* Close the HDF file */
         SDend (this->refl_sds_file_id);
-        this->refl_open = false;
+        this->sr_open = false;
     }
 }
 
@@ -511,13 +531,16 @@ void free_input
         }
     
         /* Free QA band SDSs */
-        for (ir = 0; ir < this->qa_sds.rank; ir++) 
+        for (ib = 0; ib < this->nqa_band; ib++) 
         {
-            if (this->qa_sds.dim[ir].name != NULL) 
-                  free(this->qa_sds.dim[ir].name);
+            for (ir = 0; ir < this->qa_sds[ib].rank; ir++) 
+            {
+                if (this->qa_sds[ib].dim[ir].name != NULL) 
+                    free(this->qa_sds[ib].dim[ir].name);
+            }
+            if (this->qa_sds[ib].name != NULL) 
+                free(this->qa_sds[ib].name);
         }
-        if (this->qa_sds.name != NULL) 
-            free(this->qa_sds.name);
     
         /* Free the data buffers */
         if (this->refl_buf[0] != NULL)
@@ -581,12 +604,14 @@ int get_input_refl_lines
         error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
     }
-    if (!this->refl_open)
+
+    if (!this->sr_open && !this->refl_open)
     {
-        strcpy (errmsg, "TOA reflectance file has not been opened");
+        strcpy (errmsg, "Reflectance file has not been opened");
         error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
     }
+
     if (iband < 0 || iband >= this->nrefl_band)
     {
         strcpy (errmsg, "Invalid band number for the TOA reflectance file");
@@ -684,7 +709,7 @@ int get_input_qa_line
     nval[1] = this->nsamps;   /* number of samples to read */
     buf = (void *) this->qa_buf;
   
-    if (SDreaddata (this->qa_sds.id, start, NULL, nval, buf) ==
+    if (SDreaddata (this->qa_sds[2].id, start, NULL, nval, buf) ==
         HDF_ERROR)
     {
         sprintf (errmsg, "Error reading %d lines from TOA QA band 10"
@@ -735,9 +760,9 @@ int get_input_meta
                                      within the metadata structure */
 
     /* Check the parameters */
-    if (!this->refl_open)
+    if (!this->sr_open)
     {
-        strcpy (errmsg, "TOA reflectance file is not open");
+        strcpy (errmsg, "Reflectance files are not open");
         error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
     }
@@ -749,7 +774,7 @@ int get_input_meta
     attr.type = DFNT_CHAR8;
     attr.nval = STR_SIZE;
     attr.name = INPUT_PROVIDER;
-    if (get_attr_string (this->refl_sds_file_id, &attr, meta->provider)
+    if (get_attr_string (this->sr_sds_file_id, &attr, meta->provider)
         != SUCCESS)
     {
         strcpy (errmsg, "Error reading data provider attribute");
@@ -760,7 +785,7 @@ int get_input_meta
     attr.type = DFNT_CHAR8;
     attr.nval = STR_SIZE;
     attr.name = INPUT_SAT;
-    if (get_attr_string (this->refl_sds_file_id, &attr, meta->sat) != SUCCESS)
+    if (get_attr_string (this->sr_sds_file_id, &attr, meta->sat) != SUCCESS)
     {
         strcpy (errmsg, "Error reading satellite attribute");
         error_handler (true, FUNC_NAME, errmsg);
@@ -770,7 +795,7 @@ int get_input_meta
     attr.type = DFNT_CHAR8;
     attr.nval = STR_SIZE;
     attr.name = INPUT_INST;
-    if (get_attr_string (this->refl_sds_file_id, &attr, meta->inst) != SUCCESS)
+    if (get_attr_string (this->sr_sds_file_id, &attr, meta->inst) != SUCCESS)
     {
         strcpy (errmsg, "Error reading instrument attribute");
         error_handler (true, FUNC_NAME, errmsg);
@@ -780,7 +805,7 @@ int get_input_meta
     attr.type = DFNT_CHAR8;
     attr.nval = MAX_DATE_LEN;
     attr.name = INPUT_ACQ_DATE;
-    if (get_attr_string (this->refl_sds_file_id, &attr, date) != SUCCESS)
+    if (get_attr_string (this->sr_sds_file_id, &attr, date) != SUCCESS)
     {
         strcpy (errmsg, "Error reading acquisition date attribute");
         error_handler (true, FUNC_NAME, errmsg);
@@ -796,7 +821,7 @@ int get_input_meta
     attr.type = DFNT_CHAR8;
     attr.nval = MAX_DATE_LEN;
     attr.name = INPUT_PROD_DATE;
-    if (get_attr_string (this->refl_sds_file_id, &attr, date) != SUCCESS)
+    if (get_attr_string (this->sr_sds_file_id, &attr, date) != SUCCESS)
     {
         strcpy (errmsg, "Error reading production date attribute");
         error_handler (true, FUNC_NAME, errmsg);
@@ -814,7 +839,7 @@ int get_input_meta
     attr.type = DFNT_FLOAT32;
     attr.nval = 1;
     attr.name = INPUT_SUN_ZEN;
-    if (get_attr_double (this->refl_sds_file_id, &attr, dval) != SUCCESS)
+    if (get_attr_double (this->sr_sds_file_id, &attr, dval) != SUCCESS)
     {
         strcpy (errmsg, "Error reading solar zenith attribute");
         error_handler (true, FUNC_NAME, errmsg);
@@ -837,7 +862,7 @@ int get_input_meta
     attr.type = DFNT_FLOAT32;
     attr.nval = 1;
     attr.name = INPUT_SUN_AZ;
-    if (get_attr_double (this->refl_sds_file_id, &attr, dval) != SUCCESS)
+    if (get_attr_double (this->sr_sds_file_id, &attr, dval) != SUCCESS)
     {
         strcpy (errmsg, "Error reading solar azimuth attribute");
         error_handler (true, FUNC_NAME, errmsg);
@@ -860,7 +885,7 @@ int get_input_meta
     attr.type = DFNT_CHAR8;
     attr.nval = STR_SIZE;
     attr.name = INPUT_WRS_SYS;
-    if (get_attr_string (this->refl_sds_file_id, &attr, meta->wrs_sys)
+    if (get_attr_string (this->sr_sds_file_id, &attr, meta->wrs_sys)
         != SUCCESS)
     {
         strcpy (errmsg, "Error reading WRS system attribute");
@@ -871,7 +896,7 @@ int get_input_meta
     attr.type = DFNT_INT16;
     attr.nval = 1;
     attr.name = INPUT_WRS_PATH;
-    if (get_attr_double (this->refl_sds_file_id, &attr, dval) != SUCCESS)
+    if (get_attr_double (this->sr_sds_file_id, &attr, dval) != SUCCESS)
     {
         strcpy (errmsg, "Error reading WRS path attribute");
         error_handler (true, FUNC_NAME, errmsg);
@@ -894,7 +919,7 @@ int get_input_meta
     attr.type = DFNT_INT16;
     attr.nval = 1;
     attr.name = INPUT_WRS_ROW;
-    if (get_attr_double (this->refl_sds_file_id, &attr, dval) != SUCCESS)
+    if (get_attr_double (this->sr_sds_file_id, &attr, dval) != SUCCESS)
     {
         strcpy (errmsg, "Error reading WRS row attribute");
         error_handler (true, FUNC_NAME, errmsg);
@@ -913,7 +938,7 @@ int get_input_meta
         error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
     }
-
+#if 0
     attr.type = DFNT_INT8;
     attr.nval = 1;
     attr.name = INPUT_NBAND;
@@ -938,8 +963,6 @@ int get_input_meta
         return (ERROR);
     }
 
-    meta->btemp_band = 6;   /* brightness temp band is band 6 */
-
     attr.type = DFNT_INT8;
     attr.nval = this->nrefl_band;
     attr.name = INPUT_BANDS;
@@ -956,13 +979,17 @@ int get_input_meta
         error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
     }
-    for (ib = 0; ib < this->nrefl_band; ib++)
-        meta->refl_band[ib] = (int) floor (dval[ib] + 0.5);
+#endif
+    this->nrefl_band = NBAND_REFL_MAX;
+    this->nqa_band = NUM_QA_BAND;
+    for (ib = 0; ib < this->nrefl_band - 1; ib++)
+        meta->refl_band[ib] = ib + 1;
+    meta->refl_band[this->nrefl_band - 1] = 7;
 
     attr.type = DFNT_FLOAT32;
     attr.nval = 1;
     attr.name = INPUT_PIXEL_SIZE;
-    if (get_attr_double (this->refl_sds_file_id, &attr, dval) != SUCCESS)
+    if (get_attr_double (this->sr_sds_file_id, &attr, dval) != SUCCESS)
     {
         strcpy (errmsg, "Error reading pixel size attribute");
         error_handler (true, FUNC_NAME, errmsg);
@@ -981,7 +1008,7 @@ int get_input_meta
     attr.type = DFNT_FLOAT32;
     attr.nval = 2;
     attr.name = INPUT_UL_LAT_LONG;
-    if (get_attr_double (this->refl_sds_file_id, &attr, dval) != SUCCESS)
+    if (get_attr_double (this->sr_sds_file_id, &attr, dval) != SUCCESS)
     {
         strcpy (errmsg, "Unable to read the UL lat/long coordinates.  "
             "Processing will continue but the scene will be assumed to be "
@@ -1005,7 +1032,7 @@ int get_input_meta
     attr.type = DFNT_FLOAT32;
     attr.nval = 2;
     attr.name = INPUT_LR_LAT_LONG;
-    if (get_attr_double (this->refl_sds_file_id, &attr, dval) != SUCCESS)
+    if (get_attr_double (this->sr_sds_file_id, &attr, dval) != SUCCESS)
     {
         strcpy (errmsg, "Unable to read the LR lat/long coordinates.  "
             "Processing will continue but the scene will be assumed to be "
@@ -1030,7 +1057,7 @@ int get_input_meta
     attr.type = DFNT_FLOAT32;
     attr.nval = 1;
     attr.name = INPUT_WEST_BOUND;
-    if (get_attr_double (this->refl_sds_file_id, &attr, dval) != SUCCESS)
+    if (get_attr_double (this->sr_sds_file_id, &attr, dval) != SUCCESS)
     {
         strcpy (errmsg, "Unable to read the west bounding coordinate.  "
             "Processing will continue but the bounding coordinates will not "
@@ -1051,7 +1078,7 @@ int get_input_meta
     attr.type = DFNT_FLOAT32;
     attr.nval = 1;
     attr.name = INPUT_EAST_BOUND;
-    if (get_attr_double (this->refl_sds_file_id, &attr, dval) != SUCCESS)
+    if (get_attr_double (this->sr_sds_file_id, &attr, dval) != SUCCESS)
     {
         strcpy (errmsg, "Unable to read the east bounding coordinate.  "
             "Processing will continue but the bounding coordinates will not "
@@ -1072,7 +1099,7 @@ int get_input_meta
     attr.type = DFNT_FLOAT32;
     attr.nval = 1;
     attr.name = INPUT_NORTH_BOUND;
-    if (get_attr_double (this->refl_sds_file_id, &attr, dval) != SUCCESS)
+    if (get_attr_double (this->sr_sds_file_id, &attr, dval) != SUCCESS)
     {
         strcpy (errmsg, "Unable to read the north bounding coordinate.  "
             "Processing will continue but the bounding coordinates will not "
@@ -1093,7 +1120,7 @@ int get_input_meta
     attr.type = DFNT_FLOAT32;
     attr.nval = 1;
     attr.name = INPUT_SOUTH_BOUND;
-    if (get_attr_double (this->refl_sds_file_id, &attr, dval) != SUCCESS)
+    if (get_attr_double (this->sr_sds_file_id, &attr, dval) != SUCCESS)
     {
         strcpy (errmsg, "Unable to read the south bounding coordinate.  "
             "Processing will continue but the bounding coordinates will not "

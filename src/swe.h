@@ -13,7 +13,7 @@
 #include "space.h"
 
 /* Prototypes */
-void usage ();
+void usage();
 
 short get_args
 (
@@ -80,7 +80,7 @@ int write_envi_hdr
     Space_def_t *space_def /* I: spatial definition information */
 );
 
-void ias_misc_split_filename 
+void split_filename 
 (
     const char *filename,       /* I: Name of file to split */
     char *directory,            /* O: Directory portion of file name */

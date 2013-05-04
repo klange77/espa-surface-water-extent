@@ -89,7 +89,7 @@ short get_args
                     break;
      
             case 'h':  /* help */
-                usage ();
+                usage();
                 return (ERROR);
                 break;
 
@@ -137,7 +137,7 @@ short get_args
             default:
                 sprintf (errmsg, "Unknown option %s", argv[optind-1]);
                 error_handler (true, FUNC_NAME, errmsg);
-                usage ();
+                usage();
                 return (ERROR);
                 break;
         }
@@ -148,7 +148,7 @@ short get_args
     {
         sprintf (errmsg, "TOA input file is a required argument");
         error_handler (true, FUNC_NAME, errmsg);
-        usage ();
+        usage();
         return (ERROR);
     }
 
@@ -156,7 +156,7 @@ short get_args
     {
         sprintf (errmsg, "DEM input file is a required argument");
         error_handler (true, FUNC_NAME, errmsg);
-        usage ();
+        usage();
         return (ERROR);
     }
 
@@ -164,7 +164,7 @@ short get_args
     {
         sprintf (errmsg, "MGT is out of range");
         error_handler (true, FUNC_NAME, errmsg);
-        usage ();
+        usage();
         return (ERROR);
     }
 
@@ -172,7 +172,7 @@ short get_args
     {
         sprintf (errmsg, "MLT1 is out of range");
         error_handler (true, FUNC_NAME, errmsg);
-        usage ();
+        usage();
         return (ERROR);
     }
 
@@ -180,7 +180,7 @@ short get_args
     {
         sprintf (errmsg, "MLT2 is out of range");
         error_handler (true, FUNC_NAME, errmsg);
-        usage ();
+        usage();
         return (ERROR);
     }
 
@@ -188,7 +188,7 @@ short get_args
     {
         sprintf (errmsg, "Percent slope is out of range");
         error_handler (true, FUNC_NAME, errmsg);
-        usage ();
+        usage();
         return (ERROR);
     }
 

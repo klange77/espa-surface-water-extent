@@ -1,9 +1,23 @@
 /******************************************************************************
-NAME:           ias_misc_split_filename
+NAME:           split_filename
 
 PURPOSE:
 Split the specified filename into a directory, a root file name, and an
 extension.  The last character of the directory path will be a '/'.
+
+RETURN VALUE:
+Type = int
+Value           Description
+-----           -----------
+ERROR           An error occurred during processing of the snow cover
+SUCCESS         Processing was successful
+
+HISTORY:
+Date          Programmer       Reason
+----------    ---------------  -------------------------------------
+05/03/2013    Song Guo         Original Development based on
+                               ias_misc_split_filename routine
+
 ******************************************************************************/
 #include <string.h>
 #include <limits.h>         /* For PATH_MAX */
@@ -16,7 +30,7 @@ extension.  The last character of the directory path will be a '/'.
 
 #define SUCCESS 0
 
-void ias_misc_split_filename 
+void split_filename 
 (
     const char *filename,       /* I: Name of file to split */
     char *directory,            /* O: Directory portion of file name */
@@ -55,6 +69,20 @@ void ias_misc_split_filename
     else
     {
         strcpy (root, file_name);
+        strcpy (extension, "");
+    }
+
+    /* Check for a file extension */
+    ptr = (char *) strchr(extension, '.');
+    if (ptr != NULL)
+    {
+        *(ptr++) = '\0';
+        strcpy (root, extension);
+        strcpy (extension, ptr);
+    }
+    else
+    {
+        strcpy (root, extension);
         strcpy (extension, "");
     }
 

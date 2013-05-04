@@ -23,7 +23,7 @@ SRC = calculate_slope.c         \
       mystring.c                \
       output.c                  \
       surface_water_extent.c    \
-      ias_misc_split_filename.c \
+      split_filename.c \
       space.c                   \
       write_envi_hdr.c          \
       scene_based_swe.c

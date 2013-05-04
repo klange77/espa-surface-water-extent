@@ -29,7 +29,7 @@
 /* There are currently a maximum of 6 reflective bands in the output surface
    reflectance product */
 #define NBAND_REFL_MAX 6
-#define NUM_QA_BAND 6
+#define NUM_QA_BAND 7
 
 /* How many lines of TOA reflectance and brightness temperature data should be
    processed at one time */
@@ -73,7 +73,6 @@ typedef struct {
     Geo_coord_t lr_corner;   /* LR lat/long corner coord */
     Geo_bounds_t bounds;     /* Geographic bounding coordinates */
     int refl_band[NBAND_REFL_MAX]; /* band numbers for TOA reflectance data */
-    int btemp_band;          /* band number for brightness temp data */
 } Input_meta_t;
 
 /* Structure for the 'input' data type, particularly to handle the file/SDS
@@ -81,21 +80,23 @@ typedef struct {
 typedef struct {
     Input_meta_t meta;       /* input metadata */
     char *refl_file_name;    /* input TOA reflectance file name */
-    char *sr_file_name;    /* input TOA reflectance file name */
+    char *sr_file_name;      /* input surface reflectance file name */
     bool use_toa;            /* use TOA reflectance flag; use = true */
-    bool refl_open;          /* open reflectance file flag; open = true */
-    bool sr_open;          /* open reflectance file flag; open = true */
-    int nrefl_band;          /* number of input TOA reflectance bands */
+    bool refl_open;          /* open TOS reflectance file flag; open = true */
+    bool sr_open;            /* open surface reflectance file flag; 
+                                open = true */
+    int nrefl_band;          /* number of input reflectance bands */
+    int nqa_band;            /* number of qa bands */
     int nlines;              /* number of input lines */
     int nsamps;              /* number of input samples */
     int32 refl_sds_file_id;  /* SDS file id for TOA reflectance */
-    int32 sr_sds_file_id;  /* SDS file id for TOA reflectance */
+    int32 sr_sds_file_id;    /* SDS file id for Surface reflectance */
     Myhdf_sds_t refl_sds[NBAND_REFL_MAX]; /* SDS data structures for 
                                 reflectance data */
-    Myhdf_sds_t qa_sds;   /* SDS data structures for QA cloud band (10) */
+    Myhdf_sds_t qa_sds[NUM_QA_BAND]; /* SDS data structures for QA bands */
     int16 *refl_buf[NBAND_REFL_MAX]; /* input data buffer for unscaled 
                                 reflectance data (PROC_NLINES lines of data) */
-    uint8 *qa_buf;           /* Buffer for qa cloud band (band 10 in sr file) */
+    uint8 *qa_buf;           /* Buffer for qa cloud band 10 */
     int refl_fill;           /* fill value for TOA reflectance bands */
     float refl_scale_fact;   /* scale factor for TOA reflectance bands */
     int refl_saturate_val;   /* saturation value for TOA reflectance bands */
