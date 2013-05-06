@@ -152,7 +152,7 @@ int main (int argc, char *argv[])
         use_toa = false;
     sprintf(swe_hdf_name, "%sswe.%s.hdf", directory, scene_name);
     sprintf(raw_swe_bin, "%sraw_swe.bin", directory);
-    sprintf(raw_swe_hdr, "%sraw_swe.bin.gdr", directory);
+    sprintf(raw_swe_hdr, "%sraw_swe.bin.hdr", directory);
     sprintf(slope_revised_swe_bin, "%sslope_revised_raw_swe.bin", directory);
     sprintf(slope_revised_swe_hdr, "%sslope_revised_raw_swe.bin.hdr", 
             directory);
@@ -471,7 +471,7 @@ int main (int argc, char *argv[])
             input->meta.pixsize, input->meta.pixsize,
             percent_slope);
     
-        for (iline = 0; iline < PROC_NLINES; iline++)
+        for (iline = 0; iline < nlines_proc; iline++)
         {
             /* Cloud screening to get cloud corrected SWE */
             for (samp = 0; samp < input->nsamps; samp++)
@@ -509,21 +509,21 @@ int main (int argc, char *argv[])
                    10000 */
                 scaled_slope[iline*input->nsamps+samp] = 
                     (int)rint(100.0 * percent_slope[iline*input->nsamps+samp]);
-            }
-        }
+            } /* end for samp */
+        } /* end for iline */
         /* write the non snow-related masks to raw binary output */
         if (write_binary)
         {
-            fwrite (raw_swe, 1, nlines_proc*input->nsamps * sizeof(int16),
+            fwrite (raw_swe, sizeof(int16), nlines_proc * input->nsamps,
                 raw_swe_fptr);
-            fwrite (cloud_corrected_swe, 1, nlines_proc*input->nsamps * 
-                sizeof(int16), cloud_swe_fptr);
-            fwrite (cloud_corrected_swe, 1, nlines_proc*input->nsamps * 
-                    sizeof(int16), cloud_swe_fptr);
-            fwrite (slope_cloud_swe, 1, nlines_proc*input->nsamps * 
-                    sizeof(int16), slope_cloud_swe_fptr);
-            fwrite (scaled_slope, 1, nlines_proc*input->nsamps * 
-                    sizeof(int16), scaled_slope_fptr);
+            fwrite (slope_revised_swe, sizeof(int16), nlines_proc * 
+                    input->nsamps, slope_swe_fptr);
+            fwrite (cloud_corrected_swe, sizeof(int16), nlines_proc * 
+                    input->nsamps, cloud_swe_fptr);
+            fwrite (slope_cloud_swe, sizeof(int16), nlines_proc * 
+                    input->nsamps, slope_cloud_swe_fptr);
+            fwrite (scaled_slope, sizeof(int16), nlines_proc * input->nsamps, 
+                    scaled_slope_fptr);
         }
     }  /* end for line */
 
