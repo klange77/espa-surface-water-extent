@@ -525,6 +525,26 @@ int main (int argc, char *argv[])
             fwrite (scaled_slope, sizeof(int16), nlines_proc * input->nsamps, 
                     scaled_slope_fptr);
         }
+
+        /* Write the data to the HDF file */
+        output->buf[0] = raw_swe;
+        output->buf[1] = slope_revised_swe;
+        output->buf[2] = cloud_corrected_swe;
+        output->buf[3] = slope_cloud_swe;
+        output->buf[4] = &dem[input->nsamps];
+        output->buf[5] = scaled_slope;
+        for (band = 0; band < NUM_OUT_SDS; band++)
+        {
+            if (put_output_line (output, band, 0, nlines_proc) != SUCCESS)
+            {
+                sprintf (errmsg, "Writing output data to HDF for band %d", 
+                         band);
+                error_handler (true, FUNC_NAME, errmsg);
+                close_input (input);
+                free_input (input);
+                exit (ERROR);
+            }
+        }
     }  /* end for line */
 
 
@@ -540,29 +560,6 @@ int main (int argc, char *argv[])
         fclose (cloud_swe_fptr);
         fclose (slope_cloud_swe_fptr);
         fclose (scaled_slope_fptr);
-    }
-
-    /* Write the data to the HDF file for the entire image. Note: look at the
-       order of the SDS names in out_sds_names for setting up the output
-       buffer correctly. */
-    if (verbose)
-        printf ("  Writing data to the HDF file.\n");
-    output->buf[0] = raw_swe;
-    output->buf[1] = slope_revised_swe;
-    output->buf[2] = cloud_corrected_swe;
-    output->buf[3] = slope_cloud_swe;
-    output->buf[4] = dem;
-    output->buf[5] = scaled_slope;
-    for (band = 0; band < NUM_OUT_SDS; band++)
-    {
-        if (put_output_line (output, band, 0, input->nlines) != SUCCESS)
-        {
-            sprintf (errmsg, "Writing output data to HDF for band %d", band);
-            error_handler (true, FUNC_NAME, errmsg);
-            close_input (input);
-            free_input (input);
-            exit (ERROR);
-        }
     }
 
     /* Write the output metadata */
@@ -584,7 +581,7 @@ int main (int argc, char *argv[])
 
     /* Write the spatial information, after the file has been closed */
     for (band = 0; band < NUM_OUT_SDS; band++)
-        out_sds_types[band] = DFNT_UINT8;
+        out_sds_types[band] = DFNT_INT16;
     if (put_space_def_hdf (&space_def, swe_hdf_name, NUM_OUT_SDS, out_sds_names,
         out_sds_types, hdf_grid_name) != SUCCESS)
     {
@@ -595,7 +592,6 @@ int main (int argc, char *argv[])
         free_input (input);
         exit (ERROR);
     }
-
 
     /* write the ENVI headers */
     if (write_binary)
