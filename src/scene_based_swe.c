@@ -72,8 +72,7 @@ int main (int argc, char *argv[])
     int k;                   /* variable to keep track of the % complete */
     int band;                /* current band to be processed */
     int line;                /* current starting line to be processed */
-    int iline;               /* current line to be processed */
-    int samp;                /* current samp to be processed */
+    int pix;                 /* current pixel to be processed */
     int nlines_proc;         /* number of lines to process at one time */
     int start_line;          /* line of DEM to start reading */
     int extra_lines_start;   /* number of extra lines at the start of the DEM
@@ -153,15 +152,15 @@ int main (int argc, char *argv[])
     sprintf(swe_hdf_name, "%sswe.%s.hdf", directory, scene_name);
     sprintf(raw_swe_bin, "%sraw_swe.bin", directory);
     sprintf(raw_swe_hdr, "%sraw_swe.bin.hdr", directory);
-    sprintf(slope_revised_swe_bin, "%sslope_revised_raw_swe.bin", directory);
-    sprintf(slope_revised_swe_hdr, "%sslope_revised_raw_swe.bin.hdr", 
+    sprintf(slope_revised_swe_bin, "%sslope_revised_swe.bin", directory);
+    sprintf(slope_revised_swe_hdr, "%sslope_revised_swe.bin.hdr", 
             directory);
-    sprintf(cloud_corrected_swe_bin, "%scloud_corrected_raw_swe.bin", 
+    sprintf(cloud_corrected_swe_bin, "%scloud_corrected_swe.bin", 
                                      directory);
-    sprintf(cloud_corrected_swe_hdr, "%scloud_corrected_raw_swe.bin.hdr", 
+    sprintf(cloud_corrected_swe_hdr, "%scloud_corrected_swe.bin.hdr", 
                                      directory);
-    sprintf(slope_cloud_swe_bin, "%sslope_cloud_raw_swe.bin", directory);
-    sprintf(slope_cloud_swe_hdr, "%sslope_cloud_raw_swe.bin.hdr", directory);
+    sprintf(slope_cloud_swe_bin, "%sslope_cloud_swe.bin", directory);
+    sprintf(slope_cloud_swe_hdr, "%sslope_cloud_swe.bin.hdr", directory);
     sprintf(scaled_percent_slope_bin, "%sscaled_percent_slope.bin", directory);
     sprintf(scaled_percent_slope_hdr, "%sscaled_percent_slope.bin.hdr", 
             directory);
@@ -172,7 +171,7 @@ int main (int argc, char *argv[])
         printf("raw_swe_binary_name = %s\n", raw_swe_bin); 
         printf("slope_revised_swe_binary_name = %s\n", 
                slope_revised_swe_bin); 
-        printf("cloud_corrected_raw_swe_binary_name = %s\n", 
+        printf("cloud_corrected_swe_binary_name = %s\n", 
                cloud_corrected_swe_bin); 
         printf("slope_revised_cloud_corrected_swe_binary_name = %s\n", 
                slope_cloud_swe_bin); 
@@ -471,46 +470,43 @@ int main (int argc, char *argv[])
             input->meta.pixsize, input->meta.pixsize,
             percent_slope);
     
-        for (iline = 0; iline < nlines_proc; iline++)
+        for (pix = 0; pix < nlines_proc * input->nsamps; pix++)
         {
             /* Cloud screening to get cloud corrected SWE */
-            for (samp = 0; samp < input->nsamps; samp++)
+            if (input->qa_buf[pix] == 255)
+                cloud_corrected_swe[pix] = NO_VALUE;
+            else
+                cloud_corrected_swe[pix] = raw_swe[pix];
+
+            /* Use percent slope to get slope revised SWE and cloud 
+               corrected & slope revised SWE */
+            if ((percent_slope[pix] - per_slope) <= MINSIGMA)
             {
-                if (input->refl_buf[1][iline*input->nsamps+samp] == -9999 ||
-                    input->refl_buf[2][iline*input->nsamps+samp] == -9999 ||
-                    input->refl_buf[3][iline*input->nsamps+samp] == -9999 ||
-                    input->refl_buf[4][iline*input->nsamps+samp] == -9999)
-                    raw_swe[iline*input->nsamps+samp] = NO_VALUE;
+                 slope_revised_swe[pix] = raw_swe[pix];
+                 slope_cloud_swe[pix] = cloud_corrected_swe[pix];
+            }
+            else
+            {
+                 slope_revised_swe[pix] = 0;
+                 slope_cloud_swe[pix] = 0;
+            }
 
-                /* Cloud screening to get cloud corrected SWE */
-                if (input->qa_buf[iline*input->nsamps+samp] == 255)
-                    cloud_corrected_swe[iline*input->nsamps+samp] = NO_VALUE;
-                else
-                    cloud_corrected_swe[iline*input->nsamps+samp] = 
-                        raw_swe[iline*input->nsamps+samp];
+            /* Set SWE mask values to NO_VALUE if either band data is -9999 */
+            if (input->refl_buf[1][pix] == -9999 ||
+                input->refl_buf[2][pix] == -9999 ||
+                input->refl_buf[3][pix] == -9999 ||
+                input->refl_buf[4][pix] == -9999)
+            {
+                raw_swe[pix] = NO_VALUE;
+                cloud_corrected_swe[pix] = NO_VALUE;
+                slope_revised_swe[pix] = NO_VALUE;
+                slope_cloud_swe[pix] = NO_VALUE;
+            }
 
-                /* Use percent slope to get slope revised SWE and cloud 
-                   corrected & slope revised SWE */
-                if ((percent_slope[iline*input->nsamps+samp] - per_slope) <= 
-                     MINSIGMA)
-                {
-                    slope_revised_swe[iline*input->nsamps+samp] = 
-                       raw_swe[iline*input->nsamps+samp];
-                    slope_cloud_swe[iline*input->nsamps+samp] = 
-                        cloud_corrected_swe[iline*input->nsamps+samp];
-                }
-                else
-                {
-                    slope_revised_swe[iline*input->nsamps+samp] = 0;
-                    slope_cloud_swe[iline*input->nsamps+samp] = 0;
-                }
+            /* Convert percent slope to int16 with values between 0 & 10000 */
+            scaled_slope[pix] =  (int)rint(100.0 * percent_slope[pix]);
+        } /* end for pix */
 
-                /* Convert percent slope to int16 with values between 0 and 
-                   10000 */
-                scaled_slope[iline*input->nsamps+samp] = 
-                    (int)rint(100.0 * percent_slope[iline*input->nsamps+samp]);
-            } /* end for samp */
-        } /* end for iline */
         /* write the non snow-related masks to raw binary output */
         if (write_binary)
         {
@@ -533,6 +529,7 @@ int main (int argc, char *argv[])
         output->buf[3] = slope_cloud_swe;
         output->buf[4] = &dem[input->nsamps];
         output->buf[5] = scaled_slope;
+
         for (band = 0; band < NUM_OUT_SDS; band++)
         {
             if (put_output_line (output, band, 0, nlines_proc) != SUCCESS)

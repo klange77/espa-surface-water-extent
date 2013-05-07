@@ -35,10 +35,6 @@
    processed at one time */
 #define PROC_NLINES 100
 
-/* How many lines of DEM data should be processed at one time, multiple of 3
-   since the shade relief input needs to be a factor of 3. */
-#define DEM_PROC_NLINES 300
-
 /* Structure for bounding geographic coords */
 typedef struct {
   double min_lon;  /* Geodetic longitude coordinate (degrees) */ 

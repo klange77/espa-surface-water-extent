@@ -89,7 +89,7 @@ int write_envi_hdr
         "bands   = 1\n"
         "header offset = 0\n"
         "file type = ENVI Standard\n"
-        "data type = 1\n"
+        "data type = 2\n"
         "interleave = bsq\n"
         "byte order = 0\n", bin_file, toa_input->nsamps, toa_input->nlines);
    
