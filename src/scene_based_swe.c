@@ -532,7 +532,7 @@ int main (int argc, char *argv[])
 
         for (band = 0; band < NUM_OUT_SDS; band++)
         {
-            if (put_output_line (output, band, 0, nlines_proc) != SUCCESS)
+            if (put_output_line (output, band, line, nlines_proc) != SUCCESS)
             {
                 sprintf (errmsg, "Writing output data to HDF for band %d", 
                          band);

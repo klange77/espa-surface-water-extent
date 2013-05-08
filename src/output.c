@@ -203,7 +203,7 @@ Output_t *open_output
     {
         sds = &this->sds[ib];
         sds->rank = 2;
-        sds->type = DFNT_UINT8;
+        sds->type = DFNT_INT16;
         sds->name = dup_string (sds_names[ib]);
         if (sds->name == NULL)
         {
