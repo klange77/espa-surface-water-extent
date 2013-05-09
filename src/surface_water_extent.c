@@ -68,12 +68,12 @@ void surface_water_extent
             mask = 0;
 
         /* Rule 2 */
-        if (((mndwi - mlt1) >= MINSIGMA) && ((b4_pix - b4t1) < MINSIGMA) &&
+        if (((mndwi - mlt1) > MINSIGMA) && ((b4_pix - b4t1) < MINSIGMA) &&
          ((b5_pix - b5t1) < MINSIGMA))
             mask += 10;
 
         /* Rule 3 */
-        if (((mndwi - mlt2) >= MINSIGMA) && ((b4_pix - b4t2) < MINSIGMA) &&
+        if (((mndwi - mlt2) > MINSIGMA) && ((b4_pix - b4t2) < MINSIGMA) &&
          ((b5_pix - b5t2) < MINSIGMA))
             mask += 100;
 
