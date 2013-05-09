@@ -129,13 +129,12 @@ void calc_slope
                               current pixel */
     float slope;           /* percent slope value */
 
-    /* Loop through the lines samples in the array to calculate the relief
-       shading and determine the terrain-derived deep shadow mask.  The first
-       line and column in the input array of DEM data is padding for the 3x3
-       window, so they won't get processed.  However if we are at the top of
-       the DEM then we don't have padding to do a 3x3 window, so just start at
-       line 1.  At the end of the DEM, the same applies, so don't process the
-       last line. */
+    /* Loop through the lines samples in the array to calculate the percent
+       slope.  The first line and column in the input array of DEM data is 
+       padding for the 3x3 window, so they won't get processed.  However if we 
+       are at the top of the DEM then we don't have padding to do a 3x3 window,
+       so just start at line 1.  At the end of the DEM, the same applies, so 
+       don't process the last line. */
     start_line = 0;
     proc_nlines = nlines;
     if (dem_top)

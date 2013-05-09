@@ -708,6 +708,7 @@ void usage()
             "reflectance file to be classified (HDF)\n");
     printf ("    -dem: name of the DEM associated with the Landsat TOA file "
             "(raw binary 16-bit integers)\n");
+    printf ("\nwhere the following parameters are optional:\n");
     printf ("    -mgt: MNDWI_threshold\n");
     printf ("    -mlt1: mlt1_threshold\n");
     printf ("    -mlt2: mlt2_threshold\n");
@@ -716,7 +717,6 @@ void usage()
     printf ("    -b5t1: b5t1_threshold\n");
     printf ("    -b5t2: b5t2_threshold\n");
     printf ("    -per_slope: percent_slope_threshold\n");
-    printf ("\nwhere the following parameters are optional:\n");
     printf ("    -write_binary: should raw binary outputs and ENVI header "
             "files be written in addition to the HDF file? (default is false)"
             "\n");

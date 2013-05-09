@@ -47,6 +47,14 @@ short get_args
 {
     int c;                           /* current argument index */
     int option_index;                /* index for the command-line option */
+    static float default_mgt = 0.123;/* Default MGT value */
+    static float default_mlt1 = -0.5;/* Default MLT1 value */
+    static float default_mlt2 = -0.4;/* Default MLT2 value */
+    static int16 default_b4t1 = 1500;/* Default B4T1 value */
+    static int16 default_b4t2 = 1500;/* Default B4T2 value */
+    static int16 default_b5t1 = 1000;/* Default B5T1 value */
+    static int16 default_b5t2 = 1700;/* Default B5T2 value */
+    static float default_per_s = 3.0;/* Default percent slope value */
     static int verbose_flag=0;       /* verbose flag */
     static int binary_flag=0;        /* write binary flag */
     char errmsg[STR_SIZE];           /* error message */
@@ -68,6 +76,16 @@ short get_args
         {"help", no_argument, 0, 'h'},
         {0, 0, 0, 0}
     };
+
+    /* Assign the default values */
+    *mgt = default_mgt;
+    *mlt1 = default_mlt1;
+    *mlt2 = default_mlt2;
+    *b4t1 = default_b4t1;
+    *b4t2 = default_b4t2;
+    *b5t1 = default_b5t1;
+    *b5t2 = default_b5t2;
+    *per_slope = default_per_s;
 
     /* Loop through all the cmd-line options */
     opterr = 0;   /* turn off getopt_long error msgs as we'll print our own */
