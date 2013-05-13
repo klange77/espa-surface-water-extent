@@ -37,7 +37,8 @@
 #define OUTPUT_CALIBRATED_NT    ("calibrated_nt")
 #define OUTPUT_QAMAP_INDEX      ("qa_bitmap_index")
 
-#define MASK_INDEX "0 - 1111"
+#define MASK_INDEX "0 - 1111 (each digit value can be 0 or 1, value 0/1 means \
+non-water/water pixel from one rule, total four rules applied)"
 /******************************************************************************
 MODULE:  create_output
 

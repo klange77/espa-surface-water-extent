@@ -150,33 +150,40 @@ int main (int argc, char *argv[])
     else
         use_toa = false;
     sprintf(swe_hdf_name, "%sswe.%s.hdf", directory, scene_name);
-    sprintf(raw_swe_bin, "%sraw_swe.bin", directory);
-    sprintf(raw_swe_hdr, "%sraw_swe.bin.hdr", directory);
-    sprintf(slope_revised_swe_bin, "%sslope_revised_swe.bin", directory);
-    sprintf(slope_revised_swe_hdr, "%sslope_revised_swe.bin.hdr", 
+    if (write_binary)
+    {
+        sprintf(raw_swe_bin, "%sraw_swe.bin", directory);
+        sprintf(raw_swe_hdr, "%sraw_swe.bin.hdr", directory);
+        sprintf(slope_revised_swe_bin, "%sslope_revised_swe.bin", directory);
+        sprintf(slope_revised_swe_hdr, "%sslope_revised_swe.bin.hdr", 
             directory);
-    sprintf(cloud_corrected_swe_bin, "%scloud_corrected_swe.bin", 
-                                     directory);
-    sprintf(cloud_corrected_swe_hdr, "%scloud_corrected_swe.bin.hdr", 
-                                     directory);
-    sprintf(slope_cloud_swe_bin, "%sslope_cloud_swe.bin", directory);
-    sprintf(slope_cloud_swe_hdr, "%sslope_cloud_swe.bin.hdr", directory);
-    sprintf(scaled_percent_slope_bin, "%sscaled_percent_slope.bin", directory);
-    sprintf(scaled_percent_slope_hdr, "%sscaled_percent_slope.bin.hdr", 
+        sprintf(cloud_corrected_swe_bin, "%scloud_corrected_swe.bin", 
             directory);
+        sprintf(cloud_corrected_swe_hdr, "%scloud_corrected_swe.bin.hdr", 
+            directory);
+        sprintf(slope_cloud_swe_bin, "%sslope_cloud_swe.bin", directory);
+        sprintf(slope_cloud_swe_hdr, "%sslope_cloud_swe.bin.hdr", directory);
+        sprintf(scaled_percent_slope_bin, "%sscaled_percent_slope.bin", 
+            directory);
+        sprintf(scaled_percent_slope_hdr, "%sscaled_percent_slope.bin.hdr", 
+            directory);
+    }
     if (verbose)
     {
         printf("lndcal_name, lndsr_name = %s, %s\n", lndcal_name, lndsr_name); 
-        printf("swe_hdf_name = %s\n", swe_hdf_name); 
-        printf("raw_swe_binary_name = %s\n", raw_swe_bin); 
-        printf("slope_revised_swe_binary_name = %s\n", 
-               slope_revised_swe_bin); 
-        printf("cloud_corrected_swe_binary_name = %s\n", 
-               cloud_corrected_swe_bin); 
-        printf("slope_revised_cloud_corrected_swe_binary_name = %s\n", 
-               slope_cloud_swe_bin); 
-        printf("scaled_percent_slope_binary_name = %s\n", 
-               scaled_percent_slope_bin); 
+        printf("Output swe_hdf_name = %s\n", swe_hdf_name); 
+        if (write_binary)
+        {
+            printf("raw_swe_binary_name = %s\n", raw_swe_bin); 
+            printf("slope_revised_swe_binary_name = %s\n", 
+                slope_revised_swe_bin); 
+            printf("cloud_corrected_swe_binary_name = %s\n", 
+                cloud_corrected_swe_bin); 
+            printf("slope_revised_cloud_corrected_swe_binary_name = %s\n", 
+                slope_cloud_swe_bin); 
+            printf("scaled_percent_slope_binary_name = %s\n", 
+                scaled_percent_slope_bin); 
+        }
     }
 
     /* Open the output files for raw binary output */
@@ -726,7 +733,7 @@ void usage()
     printf ("\nExample: ./scene_based_swe "
             "--reflectance=/data1/sguo/lndsr.LT50450302001272LGS01.hdf "
             "--dem=/data1/sguo/lsrd_scene_based_dem.bin "
-            "--mgt=1.0 --mlt1=1.0 --mlt2=1.0 --b4t1=1000 "
-            "--b4t2=1500 --b5t1=500 --b5t2=800 --per_slope=50.0 "
+            "--mgt=0.123 --mlt1=-0.5 --mlt2=-0.4 --b4t1=1500 "
+            "--b4t2=1500 --b5t1=1000 --b5t2=1700 --per_slope=3.0 "
             "--write_binary --verbose\n");
 }
