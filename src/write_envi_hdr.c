@@ -33,8 +33,8 @@ Date        Programmer       Reason
 4/26/2013   Song Guo         For surface water extent use
 
 NOTES:
-  1. It's assumed the header file will be for unsigned byte products and
-     therefore an ENVI data type of 1.
+  1. It's assumed the header file will be for 16 byte integer and
+     therefore an ENVI data type of 2.
 ******************************************************************************/
 int write_envi_hdr
 (

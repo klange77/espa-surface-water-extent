@@ -2,6 +2,15 @@
 # Makefile for sample HDF code
 #------------------------------------------------------------------------------
 
+#HDFINC=/home/gschmidt/hdf-4.2.5/include
+#HDFEOS_INC=/home/gschmidt/hdfeos2.17v1.00/hdfeos/include
+#HDFLIB=/home/gschmidt/hdf-4.2.5/lib
+#HDFEOS_LIB=/home/gschmidt/hdfeos2.17v1.00/hdfeos/lib
+#HDFEOS_GCTPINC=/home/gschmidt/hdfeos2.17v1.00-32bit/hdfeos/gctp/include
+#HDFEOS_GCTPLIB=/home/gschmidt/hdfeos2.17v1.00-32bit/hdfeos/lib
+#JPEGINC=/home/gschmidt/jpeg-6b-32bit/include
+#JPEGLIB=/home/gschmidt/jpeg-6b-32bit/lib
+
 # Set up compile options
 CC = gcc
 RM = rm -f
