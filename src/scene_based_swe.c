@@ -485,18 +485,17 @@ int main (int argc, char *argv[])
             else
                 cloud_corrected_swe[pix] = raw_swe[pix];
 
-            /* Use percent slope to get slope revised SWE and cloud 
-               corrected & slope revised SWE */
+            /* Use percent slope to get slope revised SWE */
             if ((percent_slope[pix] - per_slope) <= MINSIGMA)
-            {
                  slope_revised_swe[pix] = raw_swe[pix];
-                 slope_cloud_swe[pix] = cloud_corrected_swe[pix];
-            }
             else
-            {
                  slope_revised_swe[pix] = 0;
-                 slope_cloud_swe[pix] = 0;
-            }
+
+            /* Cloud screening to get slope revised & cloud corrected SWE */
+            if (input->qa_buf[pix] == 255)
+                slope_cloud_swe[pix] = NO_VALUE;
+            else
+                slope_cloud_swe[pix] = slope_revised_swe[pix];
 
             /* Set SWE mask values to NO_VALUE if either band data is -9999 */
             if (input->refl_buf[1][pix] == -9999 ||
