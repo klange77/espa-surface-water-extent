@@ -17,7 +17,7 @@
 #define OUTPUT_SHORT_NAME ("ShortName")
 #define OUTPUT_LOCAL_GRAN_ID ("LocalGranuleID")
 #define OUTPUT_PROD_DATE ("SCAProductionDate")
-#define OUTPUT_SCAVERSION ("SCAVersion")
+#define OUTPUT_SWEVERSION ("SWEVersion")
 
 #define OUTPUT_WEST_BOUND  ("WestBoundingCoordinate")
 #define OUTPUT_EAST_BOUND  ("EastBoundingCoordinate")
@@ -37,6 +37,7 @@
 #define OUTPUT_CALIBRATED_NT    ("calibrated_nt")
 #define OUTPUT_QAMAP_INDEX      ("qa_bitmap_index")
 
+#define SWE_VERSION "1.0.0"
 #define MASK_INDEX "0 - 1111 (each digit value can be 0 or 1, value 0/1 means \
 non-water/water pixel from one rule, total four rules applied)"
 /******************************************************************************
@@ -703,13 +704,13 @@ int put_metadata
         return (ERROR);
     }
 
-    sprintf (process_ver, "%s", SCA_VERSION);
+    sprintf (process_ver, "%s", SWE_VERSION);
     attr.type = DFNT_CHAR8;
     attr.nval = strlen(process_ver);
-    attr.name = OUTPUT_SCAVERSION;
+    attr.name = OUTPUT_SWEVERSION;
     if (put_attr_string (this->sds_file_id, &attr, process_ver) != SUCCESS)
     {
-        sprintf (errmsg, "Error writing attribute (SCA Version)");
+        sprintf (errmsg, "Error writing attribute (SWE Version)");
         error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
     }
