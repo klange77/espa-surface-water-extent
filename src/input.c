@@ -75,7 +75,9 @@ Input_t *open_input
                                  populated, and returned to the caller */
     Myhdf_attr_t attr;        /* values for the SDS attributes */
     int16 *buf = NULL;        /* temporary buffer to allocate memory for
-                                 the TOA reflectance bands */
+                                 the reflectance bands */
+    uint8 *qa_buf = NULL;     /* temporary buffer to allocate memory for
+                                 the QA bands */
   
     /* Create the Input data structure */
     this = (Input_t *) malloc (sizeof (Input_t));
@@ -162,8 +164,8 @@ Input_t *open_input
         this->qa_sds[ib].name = NULL;
         this->qa_sds[ib].dim[0].name = NULL;
         this->qa_sds[ib].dim[1].name = NULL;
+        this->qa_buf[ib] = NULL;
     }
-    this->qa_buf = NULL;
 
     /* Loop through the image bands and obtain the SDS information */
     strcpy (errmsg, "none");
@@ -400,9 +402,9 @@ Input_t *open_input
             this->refl_buf[ib] = this->refl_buf[ib-1] +
                 PROC_NLINES * this->nsamps;
     }
-    this->qa_buf = (uint8 *)calloc(PROC_NLINES * this->nsamps,
+    qa_buf = (uint8 *)calloc(PROC_NLINES * this->nsamps,
                                    sizeof(uint8));
-    if (this->qa_buf == NULL)
+    if (qa_buf == NULL)
     {
         close_input (this);
         free_input (this);
@@ -410,6 +412,14 @@ Input_t *open_input
             "buffer containing %d lines.", PROC_NLINES);
         error_handler (true, FUNC_NAME, errmsg);
         return (NULL);    
+    }
+    else
+    {
+        /* Set up the memory buffers for each band */
+        this->qa_buf[0] = qa_buf;
+        for (ib = 1; ib < this->nrefl_band; ib++)
+            this->qa_buf[ib] = this->qa_buf[ib-1] +
+                PROC_NLINES * this->nsamps;
     }
     return (this);
 }
@@ -545,8 +555,8 @@ void free_input
         /* Free the data buffers */
         if (this->refl_buf[0] != NULL)
             free (this->refl_buf[0]);
-        if (this->qa_buf != NULL)
-            free(this->qa_buf);
+        if (this->qa_buf[0] != NULL)
+            free(this->qa_buf[0]);
   
         if (this->refl_file_name != NULL)
             free (this->refl_file_name);
@@ -586,7 +596,7 @@ NOTES:
 int get_input_refl_lines
 (
     Input_t *this,   /* I: pointer to input data structure */
-    int iband,       /* I: current TOA band to read (0-based) */
+    int iband,       /* I: current reflectance band to read (0-based) */
     int iline,       /* I: current line to read (0-based) */
     int nlines       /* I: number of lines to read */
 )
@@ -672,6 +682,7 @@ NOTES:
 int get_input_qa_line
 (
     Input_t *this,   /* I: pointer to input data structure */
+    int iband,       /* I: current QA band to read (0-based) */
     int iline,       /* I: current line to read (0-based) */
     int nlines       /* I: number of lines to read */
 )
@@ -707,9 +718,9 @@ int get_input_qa_line
     start[1] = 0;        /* sample to start reading */
     nval[0] = nlines;         /* number of lines to read */
     nval[1] = this->nsamps;   /* number of samples to read */
-    buf = (void *) this->qa_buf;
+    buf = (void *) this->qa_buf[iband];
   
-    if (SDreaddata (this->qa_sds[2].id, start, NULL, nval, buf) ==
+    if (SDreaddata (this->qa_sds[iband].id, start, NULL, nval, buf) ==
         HDF_ERROR)
     {
         sprintf (errmsg, "Error reading %d lines from TOA QA band 10"

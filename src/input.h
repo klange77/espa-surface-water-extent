@@ -92,7 +92,7 @@ typedef struct {
     Myhdf_sds_t qa_sds[NUM_QA_BAND]; /* SDS data structures for QA bands */
     int16 *refl_buf[NBAND_REFL_MAX]; /* input data buffer for unscaled 
                                 reflectance data (PROC_NLINES lines of data) */
-    uint8 *qa_buf;           /* Buffer for qa cloud band 10 */
+    uint8 *qa_buf[NUM_QA_BAND];     /* Buffer for qa cloud band 10 */
     int refl_fill;           /* fill value for TOA reflectance bands */
     float refl_scale_fact;   /* scale factor for TOA reflectance bands */
     int refl_saturate_val;   /* saturation value for TOA reflectance bands */
@@ -127,6 +127,7 @@ int get_input_refl_lines
 int get_input_qa_line
 (
     Input_t *this,   /* I: pointer to input data structure */
+    int iband,       /* I: current QA band to read (0-based) */
     int iline,       /* I: current line to read (0-based) */
     int nlines       /* I: number of lines to read */
 );

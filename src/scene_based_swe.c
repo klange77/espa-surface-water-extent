@@ -404,18 +404,18 @@ int main (int argc, char *argv[])
                 free_input (input);
                 exit (ERROR);
             }
-        }  /* end for band */
 
-        /* Read the current lines for the qa cloud band */
-        if (get_input_qa_line (input, line, nlines_proc) != SUCCESS)
-        {
-            sprintf (errmsg, "Error reading %d lines from the brightness "
-                "temperature file starting at line %d", nlines_proc, line);
-            error_handler (true, FUNC_NAME, errmsg);
-            close_input (input);
-            free_input (input);
-            exit (ERROR);
-        }
+            /* Read the current lines for the qa cloud band */
+            if (get_input_qa_line (input, band, line, nlines_proc) != SUCCESS)
+            {
+                sprintf (errmsg, "Error reading %d lines from the brightness "
+                    "temperature file starting at line %d", nlines_proc, line);
+                error_handler (true, FUNC_NAME, errmsg);
+                close_input (input);
+                free_input (input);
+                exit (ERROR);
+            }
+        }  /* end for band */
 
         /* Set up mask for the TOA reflectance values */
         surface_water_extent(input->refl_buf[1] /*b2*/, 
@@ -480,7 +480,7 @@ int main (int argc, char *argv[])
         for (pix = 0; pix < nlines_proc * input->nsamps; pix++)
         {
             /* Cloud screening to get cloud corrected SWE */
-            if (input->qa_buf[pix] == 255)
+            if (input->qa_buf[2][pix] == 255 || input->qa_buf[3][pix] == 255)
                 cloud_corrected_swe[pix] = NO_VALUE;
             else
                 cloud_corrected_swe[pix] = raw_swe[pix];
@@ -492,7 +492,7 @@ int main (int argc, char *argv[])
                  slope_revised_swe[pix] = 0;
 
             /* Cloud screening to get slope revised & cloud corrected SWE */
-            if (input->qa_buf[pix] == 255)
+            if (input->qa_buf[2][pix] == 255 || input->qa_buf[3][pix] == 255)
                 slope_cloud_swe[pix] = NO_VALUE;
             else
                 slope_cloud_swe[pix] = slope_revised_swe[pix];
