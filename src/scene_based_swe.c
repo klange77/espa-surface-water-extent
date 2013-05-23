@@ -244,7 +244,7 @@ int main (int argc, char *argv[])
     /* Allocate memory for the slope revised Surface Water Extent (SWE) */
     slope_revised_swe = (int16 *) calloc (PROC_NLINES * input->nsamps,
         sizeof (int16));
-    if (raw_swe == NULL)
+    if (slope_revised_swe == NULL)
     {
         sprintf (errmsg, "Error allocating memory for the slope revised SWE");
         error_handler (true, FUNC_NAME, errmsg);
@@ -256,7 +256,7 @@ int main (int argc, char *argv[])
     /* Allocate memory for the cloud corrected Surface Water Extent (SWE) */
     cloud_corrected_swe = (int16 *) calloc (PROC_NLINES * input->nsamps,
         sizeof (int16));
-    if (raw_swe == NULL)
+    if (cloud_corrected_swe == NULL)
     {
         sprintf (errmsg, "Error allocating memory for the cloud corrected SWE");
         error_handler (true, FUNC_NAME, errmsg);
@@ -268,7 +268,7 @@ int main (int argc, char *argv[])
     /* Allocate memory for the slope revised & cloud corrected SWE */
     slope_cloud_swe = (int16 *) calloc (PROC_NLINES * input->nsamps,
         sizeof (int16));
-    if (raw_swe == NULL)
+    if (slope_cloud_swe == NULL)
     {
         sprintf (errmsg, "Error allocating memory for the slope revised & "
             "cloud corrected SWE");

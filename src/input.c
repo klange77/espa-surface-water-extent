@@ -402,7 +402,7 @@ Input_t *open_input
             this->refl_buf[ib] = this->refl_buf[ib-1] +
                 PROC_NLINES * this->nsamps;
     }
-    qa_buf = (uint8 *)calloc(PROC_NLINES * this->nsamps,
+    qa_buf = (uint8 *)calloc(PROC_NLINES * this->nsamps * this->nqa_band,
                                    sizeof(uint8));
     if (qa_buf == NULL)
     {
@@ -417,7 +417,7 @@ Input_t *open_input
     {
         /* Set up the memory buffers for each band */
         this->qa_buf[0] = qa_buf;
-        for (ib = 1; ib < this->nrefl_band; ib++)
+        for (ib = 1; ib < this->nqa_band; ib++)
             this->qa_buf[ib] = this->qa_buf[ib-1] +
                 PROC_NLINES * this->nsamps;
     }
@@ -560,6 +560,8 @@ void free_input
   
         if (this->refl_file_name != NULL)
             free (this->refl_file_name);
+        if (this->sr_file_name != NULL)
+            free (this->sr_file_name);
 
         /* Free the data structure */
         free (this);
