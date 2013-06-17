@@ -48,7 +48,6 @@ int main (int argc, char *argv[])
     float per_slope;
     char lndcal_name[STR_SIZE];
     char lndsr_name[STR_SIZE];
-    char fmask_hdf_name[STR_SIZE];
     char raw_swe_bin[STR_SIZE];
     char slope_revised_swe_bin[STR_SIZE];
     char cloud_corrected_swe_bin[STR_SIZE];
@@ -122,6 +121,11 @@ int main (int argc, char *argv[])
         exit (ERROR);
     }
 
+    printf("mgt, mlt1, mlt2, b4t1, b4t2, b5t1, b5t2, per_slope, write_binary,"
+           "use_fmask,verbose=%f,%f,%f,%d,%d,%d,%d,%f,%d,%d,%d\n",mgt, mlt1, mlt2, b4t1, 
+           b4t2, b5t1, b5t2, per_slope, write_binary,use_fmask,verbose);
+
+
     /* Provide user information if verbose is turned on */
     if (verbose)
     {
@@ -151,8 +155,6 @@ int main (int argc, char *argv[])
     else
         use_toa = false;
     sprintf(swe_hdf_name, "%sswe.%s.hdf", directory, scene_name);
-    if (use_fmask)
-        sprintf(fmask_hdf_name, "%sfmask.%s.hdf", directory, scene_name);
     if (write_binary)
     {
         sprintf(raw_swe_bin, "%sraw_swe.bin", directory);
@@ -174,8 +176,6 @@ int main (int argc, char *argv[])
     if (verbose)
     {
         printf("lndcal_name, lndsr_name = %s, %s\n", lndcal_name, lndsr_name); 
-        if (use_fmask)
-            printf("fmask_name=%s\n",fmask_hdf_name);
         printf("Output swe_hdf_name = %s\n", swe_hdf_name); 
         if (write_binary)
         {
@@ -204,8 +204,7 @@ int main (int argc, char *argv[])
     /* Open the TOA reflectance or surface reflectance products, set up
        the input data structure, allocate memory for the data buffers, and
        read the associated metadata and attributes. */
-    input = open_input (lndcal_name, lndsr_name, fmask_hdf_name, use_toa,
-                        use_fmask);
+    input = open_input (lndcal_name, lndsr_name, use_toa, use_fmask);
     if (input == (Input_t *)NULL)
     {
         sprintf (errmsg, "Error opening/reading the reflectance file: %s "

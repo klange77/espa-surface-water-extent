@@ -216,14 +216,20 @@ short get_args
     /* Check the write binary flag */
     if (binary_flag)
         *write_binary = true;
+    else
+        *write_binary = false;
 
     /* Check the use fmask flag */
     if (fmask_flag)
         *use_fmask = true;
+    else
+        *use_fmask = false;
 
     /* Check the verbose flag */
     if (verbose_flag)
         *verbose = true;
+    else
+        *verbose = false;
 
     return (SUCCESS);
 }

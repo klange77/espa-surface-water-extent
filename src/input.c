@@ -59,7 +59,6 @@ Input_t *open_input
 (
     char *lndcal_name,     /* I: input TOA reflectance filename */
     char *lndsr_name,      /* I: input TOA reflectance filename */
-    char *fmask_name,      /* I: input fmask filename */
     bool use_toa,          /* I: flag to indicate if TOA reflectance is used */
     bool use_fmask         /* I: flag to indicate if cfmask results are used */
 )
@@ -99,34 +98,7 @@ Input_t *open_input
         error_handler (true, FUNC_NAME, errmsg);
         return (NULL);
     }
-
-    if (use_fmask)
-    {
-        /* Populate the filenames in the data structure */
-        this->fmask_file_name = dup_string (fmask_name);
-        if (this->fmask_file_name == NULL)
-        {
-            free (this->sr_file_name);
-            free (this);
-            strcpy (errmsg, "Error duplicating the fmask filename");
-            error_handler (true, FUNC_NAME, errmsg);
-            return (NULL);
-        }
-
-        /* Open the files for SD access */
-        this->fmask_sds_file_id = SDstart ((char *)fmask_name, DFACC_RDONLY);
-        if (this->fmask_sds_file_id == HDF_ERROR)
-        {
-            free (this->sr_file_name);
-            free (this);  
-            sprintf (errmsg, "Error opening the input fmask file: %s",
-                lndsr_name);
-            error_handler (true, FUNC_NAME, errmsg);
-            return (NULL);
-        }
-        this->fmask_open = true;
-    }
-  
+ 
     /* Open the files for SD access */
     this->sr_sds_file_id = SDstart ((char *)lndsr_name, DFACC_RDONLY);
     if (this->sr_sds_file_id == HDF_ERROR)
@@ -418,7 +390,7 @@ Input_t *open_input
             sprintf (errmsg, "Error getting the fmask band SDS name");
         }
 
-        if (get_sds_info(this->fmask_sds_file_id, &this->fmask_sds) 
+        if (get_sds_info(this->sr_sds_file_id, &this->fmask_sds) 
             != SUCCESS) 
         {
         sprintf (errmsg, "Error getting the fmask band info");
@@ -575,7 +547,7 @@ void close_input
     /* Close the surface reflectance SDSs and HDF file */
     if (this->sr_open)
     {
-        /* Close TOA reflectance SDSs */
+        /* Close surface reflectance SDSs */
         for (ib = 0; ib < this->nrefl_band; ib++)
             SDendaccess (this->refl_sds[ib].id);
   
@@ -586,17 +558,6 @@ void close_input
         /* Close the HDF file */
         SDend (this->refl_sds_file_id);
         this->sr_open = false;
-    }
-
-    /* Close the cfmask file */ 
-    if (this->fmask_open)
-    {
-        /* Close fmask SDSs */
-        SDendaccess (this->fmask_sds.id);
-  
-        /* Close the HDF file */
-        SDend (this->fmask_sds_file_id);
-        this->fmask_open = false;
     }
 }
 
@@ -647,15 +608,7 @@ void free_input
                 "file and SDSs.");
             error_handler (false, FUNC_NAME, errmsg);
         }
-  
-        if (this->fmask_open)
-        {
-            strcpy (errmsg, "Freeing input data structure, but famsk "
-                "file is still open. Use close_input to close the "
-                "file and SDSs.");
-            error_handler (false, FUNC_NAME, errmsg);
-        }
-  
+    
         /* Free image band SDSs */
         for (ib = 0; ib < this->nrefl_band; ib++)
         {
@@ -701,8 +654,6 @@ void free_input
             free (this->refl_file_name);
         if (this->sr_file_name != NULL)
             free (this->sr_file_name);
-        if (this->fmask_file_name != NULL)
-            free (this->fmask_file_name);
 
         /* Free the data structure */
         free (this);
@@ -1367,11 +1318,6 @@ int get_input_meta
         meta->bounds.is_fill = true;
     }
     meta->bounds.min_lat = dval[0];
-printf ("DEBUG: Bounding coords:\n");
-printf ("DEBUG:   West - %f\n", meta->bounds.min_lon);
-printf ("DEBUG:   East - %f\n", meta->bounds.max_lon);
-printf ("DEBUG:   North - %f\n", meta->bounds.max_lat);
-printf ("DEBUG:   South - %f\n", meta->bounds.min_lat);
 
     /* Check WRS path/rows */
     if (!strcmp (meta->wrs_sys, "1"))
