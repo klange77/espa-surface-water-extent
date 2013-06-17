@@ -59,7 +59,9 @@ Input_t *open_input
 (
     char *lndcal_name,     /* I: input TOA reflectance filename */
     char *lndsr_name,      /* I: input TOA reflectance filename */
-    bool use_toa           /* I: flag to indicate if TOA reflectance is used */
+    char *fmask_name,      /* I: input fmask filename */
+    bool use_toa,          /* I: flag to indicate if TOA reflectance is used */
+    bool use_fmask         /* I: flag to indicate if cfmask results are used */
 )
 {
     char FUNC_NAME[] = "open_input";   /* function name */
@@ -96,6 +98,33 @@ Input_t *open_input
         strcpy (errmsg, "Error duplicating the surface reflectance filename");
         error_handler (true, FUNC_NAME, errmsg);
         return (NULL);
+    }
+
+    if (use_fmask)
+    {
+        /* Populate the filenames in the data structure */
+        this->fmask_file_name = dup_string (fmask_name);
+        if (this->fmask_file_name == NULL)
+        {
+            free (this->sr_file_name);
+            free (this);
+            strcpy (errmsg, "Error duplicating the fmask filename");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (NULL);
+        }
+
+        /* Open the files for SD access */
+        this->fmask_sds_file_id = SDstart ((char *)fmask_name, DFACC_RDONLY);
+        if (this->fmask_sds_file_id == HDF_ERROR)
+        {
+            free (this->sr_file_name);
+            free (this);  
+            sprintf (errmsg, "Error opening the input fmask file: %s",
+                lndsr_name);
+            error_handler (true, FUNC_NAME, errmsg);
+            return (NULL);
+        }
+        this->fmask_open = true;
     }
   
     /* Open the files for SD access */
@@ -165,6 +194,14 @@ Input_t *open_input
         this->qa_sds[ib].dim[0].name = NULL;
         this->qa_sds[ib].dim[1].name = NULL;
         this->qa_buf[ib] = NULL;
+    }
+
+    if (use_fmask)
+    {
+        this->fmask_sds.name = NULL;
+        this->fmask_sds.dim[0].name = NULL;
+        this->fmask_sds.dim[1].name = NULL;
+        this->fmask_buf = NULL;
     }
 
     /* Loop through the image bands and obtain the SDS information */
@@ -371,6 +408,63 @@ Input_t *open_input
         }
     }  /* for ib */
 
+    /* For the single fmask band */
+    if (use_fmask)
+    {
+        strcpy (sds_name, "fmask_band");
+        this->fmask_sds.name = dup_string(sds_name);
+        if (this->fmask_sds.name == NULL) 
+        {
+            sprintf (errmsg, "Error getting the fmask band SDS name");
+        }
+
+        if (get_sds_info(this->fmask_sds_file_id, &this->fmask_sds) 
+            != SUCCESS) 
+        {
+        sprintf (errmsg, "Error getting the fmask band info");
+        }
+
+        /* Check rank */
+        if (this->fmask_sds.rank != 2) 
+        {
+            sprintf (errmsg, "Invalid fmask band rank");
+        }
+
+        /* Check SDS type */
+        if (this->fmask_sds.type != DFNT_UINT8) 
+        {
+            sprintf (errmsg, "Invalid fmask band type");
+        }
+
+        /* Get dimensions, because  */
+        for (ir = 0; ir < this->fmask_sds.rank; ir++) 
+        {
+            dim[ir] = &this->fmask_sds.dim[ir];
+            if (get_sds_dim_info(this->fmask_sds.id, ir, dim[ir]) != SUCCESS) 
+            {
+                sprintf (errmsg, "Error getting QA dimensions");
+            }
+        }
+
+        /* Save and check line and sample dimensions */
+        if (ib == 0) 
+        {
+            this->nlines = dim[0]->nval;
+            this->nsamps = dim[1]->nval;
+        } 
+        else 
+        {
+            if (this->nlines != dim[0]->nval) 
+            {
+                sprintf (errmsg, "All line dimensions do not match");
+            }
+            if (this->nsamps != dim[1]->nval) 
+            {
+                sprintf (errmsg, "All sample dimensions do not match");
+            }
+        }
+    }
+
     /* Check for any errors processing the reflectance bands and use the
        error message already created */
     if (strcmp (errmsg, "none"))
@@ -421,6 +515,21 @@ Input_t *open_input
             this->qa_buf[ib] = this->qa_buf[ib-1] +
                 PROC_NLINES * this->nsamps;
     }
+    if (use_fmask)
+    {
+        this->fmask_buf = (uint8 *)calloc(PROC_NLINES * this->nsamps,
+                                      sizeof(uint8));
+        if (this->fmask_buf == NULL)
+        {
+            close_input (this);
+            free_input (this);
+            sprintf (errmsg, "Error allocating memory for fmask band "
+                "buffer containing %d lines.", PROC_NLINES);
+            error_handler (true, FUNC_NAME, errmsg);
+            return (NULL);  
+        }  
+    }
+
     return (this);
 }
 
@@ -478,6 +587,17 @@ void close_input
         SDend (this->refl_sds_file_id);
         this->sr_open = false;
     }
+
+    /* Close the cfmask file */ 
+    if (this->fmask_open)
+    {
+        /* Close fmask SDSs */
+        SDendaccess (this->fmask_sds.id);
+  
+        /* Close the HDF file */
+        SDend (this->fmask_sds_file_id);
+        this->fmask_open = false;
+    }
 }
 
 
@@ -528,6 +648,14 @@ void free_input
             error_handler (false, FUNC_NAME, errmsg);
         }
   
+        if (this->fmask_open)
+        {
+            strcpy (errmsg, "Freeing input data structure, but famsk "
+                "file is still open. Use close_input to close the "
+                "file and SDSs.");
+            error_handler (false, FUNC_NAME, errmsg);
+        }
+  
         /* Free image band SDSs */
         for (ib = 0; ib < this->nrefl_band; ib++)
         {
@@ -551,17 +679,30 @@ void free_input
             if (this->qa_sds[ib].name != NULL) 
                 free(this->qa_sds[ib].name);
         }
+
+        /* Free the fmask SDS */
+        for (ir = 0; ir < this->fmask_sds.rank; ir++) 
+        {
+            if (this->fmask_sds.dim[ir].name != NULL) 
+                free(this->fmask_sds.dim[ir].name);
+        }
+        if (this->fmask_sds.name != NULL) 
+            free(this->fmask_sds.name);
     
         /* Free the data buffers */
         if (this->refl_buf[0] != NULL)
             free (this->refl_buf[0]);
         if (this->qa_buf[0] != NULL)
             free(this->qa_buf[0]);
+        if (this->fmask_buf != NULL)
+            free(this->fmask_buf);
   
         if (this->refl_file_name != NULL)
             free (this->refl_file_name);
         if (this->sr_file_name != NULL)
             free (this->sr_file_name);
+        if (this->fmask_file_name != NULL)
+            free (this->fmask_file_name);
 
         /* Free the data structure */
         free (this);
@@ -734,6 +875,82 @@ int get_input_qa_line
     return (SUCCESS);
 }
 
+/******************************************************************************
+MODULE:  get_input_fmask_line
+
+PURPOSE:  Reads the CFmask band data 
+
+RETURN VALUE:
+Type = int
+Value      Description
+-----      -----------
+ERROR      Error occurred reading data for this band
+SUCCESS    Successful completion
+
+PROJECT:  Land Satellites Data System Science Research and Development (LSRD)
+at the USGS EROS
+
+HISTORY:
+Date        Programmer       Reason
+--------    ---------------  -------------------------------------
+04/23/2013  Song Guo         Modified from the input routines
+                             from the SCA and LEDAPS lndsr application
+
+NOTES:
+  1. The Input_t data structure needs to be populated and memory allocated
+     before calling this routine.  Use open_input to do do.
+******************************************************************************/
+int get_input_fmask_line
+(
+    Input_t *this,   /* I: pointer to input data structure */
+    int iline,       /* I: current line to read (0-based) */
+    int nlines       /* I: number of lines to read */
+)
+{
+    char FUNC_NAME[] = "get_input_refl_line";   /* function name */
+    char errmsg[STR_SIZE];    /* error message */
+    int32 start[2];           /* array of starting line/samp for reading */
+    int32 nval[2];            /* array of number of lines/samps to be read */
+    void *buf = NULL;         /* pointer to the buffer for the current band */
+  
+    /* Check the parameters */
+    if (this == (Input_t *) NULL) 
+    {
+        strcpy (errmsg, "Input structure has not been opened/initialized");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+    if (!this->sr_open)
+    {
+        strcpy (errmsg, "Surface reflectance file has not been opened");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+    if (iline < 0 || iline >= this->nlines)
+    {
+        strcpy (errmsg, "Invalid line number for TOA reflectance band");
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+  
+    /* Read the data */
+    start[0] = iline;    /* line to start reading */
+    start[1] = 0;        /* sample to start reading */
+    nval[0] = nlines;         /* number of lines to read */
+    nval[1] = this->nsamps;   /* number of samples to read */
+    buf = (void *) this->fmask_buf;
+  
+    if (SDreaddata (this->fmask_sds.id, start, NULL, nval, buf) ==
+        HDF_ERROR)
+    {
+        sprintf (errmsg, "Error reading %d lines from fmask band "
+            "starting at line %d", nlines, iline);
+        error_handler (true, FUNC_NAME, errmsg);
+        return (ERROR);
+    }
+  
+    return (SUCCESS);
+}
 
 /******************************************************************************
 MODULE:  get_input_meta

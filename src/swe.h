@@ -31,6 +31,7 @@ short get_args
     int16 *b5t2,          /* O: */
     float *percent_slope, /* O: percent slope */
     bool *write_binary,   /* O: write raw binary flag */
+    bool *use_fmask,      /* O: use fmask result flag */
     bool *verbose         /* O: verbose flag */
 );
 

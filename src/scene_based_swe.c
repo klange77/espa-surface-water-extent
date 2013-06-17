@@ -23,8 +23,7 @@ SUCCESS         Processing was successful
 HISTORY:
 Date          Programmer       Reason
 ----------    ---------------  -------------------------------------
-04/22/2013    Song Guo         Original Development (refer to Gail's 
-                               SCA code)
+04/22/2013    Song Guo         
                            
 NOTES:
   1. The scene-based surface water extent is based on an algorithm developed by
@@ -34,6 +33,7 @@ int main (int argc, char *argv[])
 {
     bool verbose;            /* verbose flag for printing messages */
     bool write_binary;       /* should we write raw binary output? */
+    bool use_fmask;          /* should we use cfmask results? */
     bool dem_top;            /* are we at the top of the dem for shaded
                                 relief processing */
     bool dem_bottom;         /* are we at the bottom of the dem for shaded
@@ -48,6 +48,7 @@ int main (int argc, char *argv[])
     float per_slope;
     char lndcal_name[STR_SIZE];
     char lndsr_name[STR_SIZE];
+    char fmask_hdf_name[STR_SIZE];
     char raw_swe_bin[STR_SIZE];
     char slope_revised_swe_bin[STR_SIZE];
     char cloud_corrected_swe_bin[STR_SIZE];
@@ -113,7 +114,7 @@ int main (int argc, char *argv[])
        Landsat TOA reflectance product and the DEM */
     retval = get_args (argc, argv, &reflectance_infile, &dem_infile,
                        &mgt, &mlt1, &mlt2, &b4t1, &b4t2, &b5t1, &b5t2, 
-                       &per_slope, &write_binary, &verbose);
+                       &per_slope, &write_binary, &use_fmask, &verbose);
     if (retval != SUCCESS)
     {   
         sprintf (errmsg, "Error calling get_args");
@@ -150,6 +151,8 @@ int main (int argc, char *argv[])
     else
         use_toa = false;
     sprintf(swe_hdf_name, "%sswe.%s.hdf", directory, scene_name);
+    if (use_fmask)
+        sprintf(fmask_hdf_name, "%sfmask.%s.hdf", directory, scene_name);
     if (write_binary)
     {
         sprintf(raw_swe_bin, "%sraw_swe.bin", directory);
@@ -171,6 +174,8 @@ int main (int argc, char *argv[])
     if (verbose)
     {
         printf("lndcal_name, lndsr_name = %s, %s\n", lndcal_name, lndsr_name); 
+        if (use_fmask)
+            printf("fmask_name=%s\n",fmask_hdf_name);
         printf("Output swe_hdf_name = %s\n", swe_hdf_name); 
         if (write_binary)
         {
@@ -199,7 +204,8 @@ int main (int argc, char *argv[])
     /* Open the TOA reflectance or surface reflectance products, set up
        the input data structure, allocate memory for the data buffers, and
        read the associated metadata and attributes. */
-    input = open_input (lndcal_name, lndsr_name, use_toa);
+    input = open_input (lndcal_name, lndsr_name, fmask_hdf_name, use_toa,
+                        use_fmask);
     if (input == (Input_t *)NULL)
     {
         sprintf (errmsg, "Error opening/reading the reflectance file: %s "
@@ -415,7 +421,22 @@ int main (int argc, char *argv[])
                 free_input (input);
                 exit (ERROR);
             }
-        }  /* end for band */
+        }
+
+        /* Read the current lines for the cfmask band */
+        if (use_fmask)
+        {
+            /* Read the current lines for the fmask band */
+            if (get_input_fmask_line (input, line, nlines_proc) != SUCCESS)
+            {
+                sprintf (errmsg, "Error reading %d lines from the fmask "
+                    "file starting at line %d", nlines_proc, line);
+                error_handler (true, FUNC_NAME, errmsg);
+                close_input (input);
+                free_input (input);
+                exit (ERROR);
+            }
+        } 
 
         /* Set up mask for the TOA reflectance values */
         surface_water_extent(input->refl_buf[1] /*b2*/, 
@@ -479,23 +500,48 @@ int main (int argc, char *argv[])
     
         for (pix = 0; pix < nlines_proc * input->nsamps; pix++)
         {
-            /* Cloud screening to get cloud corrected SWE */
-            if (input->qa_buf[2][pix] == 255 || input->qa_buf[3][pix] == 255)
-                cloud_corrected_swe[pix] = NO_VALUE;
-            else
-                cloud_corrected_swe[pix] = raw_swe[pix];
+            if (use_fmask)
+            {
+                /* Cloud screening to get cloud corrected SWE */
+                if (input->fmask_buf[pix] == 2 || input->fmask_buf[pix] == 4)
+                    cloud_corrected_swe[pix] = NO_VALUE;
+                else
+                    cloud_corrected_swe[pix] = raw_swe[pix];
 
-            /* Use percent slope to get slope revised SWE */
-            if ((percent_slope[pix] - per_slope) <= MINSIGMA)
-                 slope_revised_swe[pix] = raw_swe[pix];
-            else
-                 slope_revised_swe[pix] = 0;
+                /* Use percent slope to get slope revised SWE */
+                if ((percent_slope[pix] - per_slope) <= MINSIGMA)
+                    slope_revised_swe[pix] = raw_swe[pix];
+                else
+                    slope_revised_swe[pix] = 0;
 
-            /* Cloud screening to get slope revised & cloud corrected SWE */
-            if (input->qa_buf[2][pix] == 255 || input->qa_buf[3][pix] == 255)
-                slope_cloud_swe[pix] = NO_VALUE;
+                /* Cloud screening to get slope revised cloud corrected SWE */
+                if (input->fmask_buf[pix] == 2 || input->fmask_buf[pix] == 4)
+                    slope_cloud_swe[pix] = NO_VALUE;
+                else
+                    slope_cloud_swe[pix] = slope_revised_swe[pix];
+            }
             else
-                slope_cloud_swe[pix] = slope_revised_swe[pix];
+            {
+                /* Cloud screening to get cloud corrected SWE */
+                if (input->qa_buf[2][pix] == 255 || input->qa_buf[3][pix] == 
+                    255)
+                    cloud_corrected_swe[pix] = NO_VALUE;
+                else
+                    cloud_corrected_swe[pix] = raw_swe[pix];
+
+                /* Use percent slope to get slope revised SWE */
+                if ((percent_slope[pix] - per_slope) <= MINSIGMA)
+                    slope_revised_swe[pix] = raw_swe[pix];
+                else
+                    slope_revised_swe[pix] = 0;
+
+                /* Cloud screening to get slope revised cloud corrected SWE */
+                if (input->qa_buf[2][pix] == 255 || input->qa_buf[3][pix] == 
+                    255)
+                    slope_cloud_swe[pix] = NO_VALUE;
+                else
+                    slope_cloud_swe[pix] = slope_revised_swe[pix];
+            }
 
             /* Set SWE mask values to NO_VALUE if either band data is -9999 */
             if (input->refl_buf[1][pix] == -9999 ||
@@ -686,7 +732,7 @@ Type = None
 HISTORY:
 Date        Programmer       Reason
 --------    ---------------  -------------------------------------
-1/2/2013    Gail Schmidt     Original Development
+1/2/2013    Song Guo     
 
 NOTES:
 ******************************************************************************/
@@ -707,7 +753,7 @@ void usage()
             "--b5t1=b5t1_threshold "
             "--b5t2=b5t2_threshold "
             "--per_slope=percent_slope_threshold (value between 0.00 & 100.00 "
-            "[--write_binary] [--verbose]\n");
+            "[--write_binary] [--use_fmask] [--verbose]\n");
 
     printf ("\nwhere the following parameters are required:\n");
     printf ("    -reflectance: name of the input Landsat TOA or surface "
@@ -726,6 +772,8 @@ void usage()
     printf ("    -write_binary: should raw binary outputs and ENVI header "
             "files be written in addition to the HDF file? (default is false)"
             "\n");
+    printf ("    -use_fmask: should fmask cloud and shadow mask "
+            "be used? (default is false)\n");
     printf ("    -verbose: should intermediate messages be printed? (default "
             "is false)\n");
     printf ("\n./scene_based_swe --help will print the usage statement\n");
@@ -734,5 +782,5 @@ void usage()
             "--dem=/data1/sguo/lsrd_scene_based_dem.bin "
             "--mgt=0.123 --mlt1=-0.5 --mlt2=-0.4 --b4t1=1500 "
             "--b4t2=1500 --b5t1=1000 --b5t2=1700 --per_slope=3.0 "
-            "--write_binary --verbose\n");
+            "--write_binary --use_fmask --verbose\n");
 }

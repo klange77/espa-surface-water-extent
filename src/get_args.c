@@ -40,8 +40,9 @@ short get_args
     int16 *b4t2,          /* O: */
     int16 *b5t1,          /* O: */
     int16 *b5t2,          /* O: */
-    float *per_slope, /* O: percent slope */
+    float *per_slope,     /* O: percent slope */
     bool *write_binary,   /* O: write raw binary flag */
+    bool *use_fmask,      /* O: use fmask result flag */
     bool *verbose         /* O: verbose flag */
 )
 {
@@ -57,12 +58,14 @@ short get_args
     static float default_per_s = 3.0;/* Default percent slope value */
     static int verbose_flag=0;       /* verbose flag */
     static int binary_flag=0;        /* write binary flag */
+    static int fmask_flag=0;         /* use fmask cloud/shadow flag */
     char errmsg[STR_SIZE];           /* error message */
     char FUNC_NAME[] = "get_args";   /* function name */
     static struct option long_options[] =
     {
         {"verbose", no_argument, &verbose_flag, 1},
         {"write_binary", no_argument, &binary_flag, 1},
+        {"use_fmask", no_argument, &fmask_flag, 1},
         {"reflectance", required_argument, 0, 'r'},
         {"dem", required_argument, 0, 'd'},
         {"mgt", required_argument, 0, 'g'},
@@ -213,6 +216,10 @@ short get_args
     /* Check the write binary flag */
     if (binary_flag)
         *write_binary = true;
+
+    /* Check the use fmask flag */
+    if (fmask_flag)
+        *use_fmask = true;
 
     /* Check the verbose flag */
     if (verbose_flag)

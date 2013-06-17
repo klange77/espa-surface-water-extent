@@ -77,22 +77,27 @@ typedef struct {
     Input_meta_t meta;       /* input metadata */
     char *refl_file_name;    /* input TOA reflectance file name */
     char *sr_file_name;      /* input surface reflectance file name */
+    char *fmask_file_name;   /* input fmask file name */
     bool use_toa;            /* use TOA reflectance flag; use = true */
     bool refl_open;          /* open TOS reflectance file flag; open = true */
     bool sr_open;            /* open surface reflectance file flag; 
                                 open = true */
+    bool fmask_open;         /* open fmask file flag; open = true */
     int nrefl_band;          /* number of input reflectance bands */
     int nqa_band;            /* number of qa bands */
     int nlines;              /* number of input lines */
     int nsamps;              /* number of input samples */
     int32 refl_sds_file_id;  /* SDS file id for TOA reflectance */
     int32 sr_sds_file_id;    /* SDS file id for Surface reflectance */
+    int32 fmask_sds_file_id; /* SDS file id for CFmask */
     Myhdf_sds_t refl_sds[NBAND_REFL_MAX]; /* SDS data structures for 
                                 reflectance data */
     Myhdf_sds_t qa_sds[NUM_QA_BAND]; /* SDS data structures for QA bands */
+    Myhdf_sds_t fmask_sds;   /* SDS data structures for CFmask */
     int16 *refl_buf[NBAND_REFL_MAX]; /* input data buffer for unscaled 
                                 reflectance data (PROC_NLINES lines of data) */
     uint8 *qa_buf[NUM_QA_BAND];     /* Buffer for qa cloud band 10 */
+    uint8 *fmask_buf;        /* Buffer for fmask */
     int refl_fill;           /* fill value for TOA reflectance bands */
     float refl_scale_fact;   /* scale factor for TOA reflectance bands */
     int refl_saturate_val;   /* saturation value for TOA reflectance bands */
@@ -103,7 +108,9 @@ Input_t *open_input
 (
     char *lndcal_name,     /* I: input TOA reflectance filename */
     char *lndsr_name,      /* I: input TOA reflectance filename */
-    bool use_toa           /* I: flag to indicate if TOA reflectance is used */
+    char *fmask_name,      /* I: input fmask filename */
+    bool use_toa,          /* I: flag to indicate if TOA reflectance is used */
+    bool use_fmask         /* I: flag to indicate if cfmask results are used */
 );
 
 void close_input
@@ -128,6 +135,13 @@ int get_input_qa_line
 (
     Input_t *this,   /* I: pointer to input data structure */
     int iband,       /* I: current QA band to read (0-based) */
+    int iline,       /* I: current line to read (0-based) */
+    int nlines       /* I: number of lines to read */
+);
+
+int get_input_fmask_line
+(
+    Input_t *this,   /* I: pointer to input data structure */
     int iline,       /* I: current line to read (0-based) */
     int nlines       /* I: number of lines to read */
 );
