@@ -41,45 +41,6 @@ class Swe():
     def __init__(self):
         pass
 
-
-    ########################################################################
-    # Description: runSwe will use the parameters passed for the input/output
-    # files, logfile, and usebin.  If input/output files are None (i.e. not
-    # specified) then the command-line parameters will be parsed for this
-    # information.  The scene-based DEM and snow cover applications are then
-    # executed on the specified input files.  If a log file was specified,
-    # then the output from each application will be logged to that file.
-    #
-    # Inputs:
-    #   metafile - name of the Landsat metadata file to be processed
-    #   toa_infile - name of the input TOA reflectance HDF file to be processed
-    #   btemp_infile - name of the input brightness temp HDF file to
-    #       be processed
-    #   sca_outfile - name of the output snow cover HDF file
-    #   logfile - name of the logfile for logging information; if None then
-    #       the output will be written to stdout
-    #   usebin - this specifies if the DEM and SCE exes reside in the $BIN
-    #       directory; if None then the DEM and SCA exes are expected to be in
-    #       the PATH
-    #
-    # Returns:
-    #     ERROR - error running the DEM and SCA applications
-    #     SUCCESS - successful processing
-    #
-    # Notes:
-    #   1. The script obtains the path of the metadata file and changes
-    #      directory to that path for running the scene-based DEM and SCA
-    #      code.  If the metafile directory is not writable, then this script
-    #      exits with an error.
-    #   2. If the metadata file is not specified and the information is going
-    #      to be grabbed from the command line, then it's assumed all the
-    #      parameters will be pulled from the command line.
-    #   3. Currently the raw binary products are automatically written in
-    #      addition to the HDF-EOS product for the snow cover algorithm.
-    #      The raw binary products will be used for downstream processing,
-    #      but only the output HDF-EOS product should be delivered to the
-    #      general public.
-    #######################################################################
     def runSwe (self, metafile=None, reflectance=None, mgt=None, 
                 mlt1=None, mlt2=None, b4t1=None, b4t2=None, b5t1=None, 
                 b5t2=None, per_slope=None, write_binary=None, use_fmask=None, 
