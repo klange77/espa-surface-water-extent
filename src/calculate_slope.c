@@ -10,7 +10,7 @@ RETURN VALUE:
 Type = float 
 Value      Description
 -----      -----------
-0.0 - 1.0  Represents the percent slope for the current pixel area
+0.0 - 100.0  Represents the percent slope for the current pixel area
 
 HISTORY:
 Date        Programmer       Reason
@@ -63,6 +63,55 @@ float horn_slope
 
 
 /******************************************************************************
+MODULE:  zevenbergen_thorne_slope
+
+PURPOSE:  Performs the Zevenbergen and Thorne's slope algorithm  
+          to compute the terrain slope for the current 3x3 window.
+
+RETURN VALUE:
+Type = float 
+Value      Description
+-----      -----------
+0.0 - 1.000  Represents the percent slope for the current pixel area
+
+HISTORY:
+Date        Programmer       Reason
+--------    ---------------  -------------------------------------
+06/21/2013  Song Guo         Original Development (based on Zevenbergen and 
+                             Thorne, 1987)
+
+NOTES:
+  1. Algorithm is based on Zevenbergen and Thorn's algorithm.  The litterature 
+     suggests Zevenbergen and Thorne to be more suited to smooth landscapes, 
+     whereas Horn's formula to perform better on rougher terrain.
+  2. Input and output arrays are 1D arrays of size 3 lines x 3 samples where
+     the 3x3 indices are and the current pixel being processed is 4.
+       0 1 2
+       3 4 5
+       6 7 8
+******************************************************************************/
+float zevenbergen_thorne_slope
+(
+    int16 *elev_window,   /* I: 3x3 array of elevation values in meters */
+    float res             /* I: resolution of the elevation data in meters */
+)
+{
+    float g;        /* G parameter in the algorithm */
+    float h;        /* H parameter in the algorithm */
+    float slope;    /* value of -sqrt(x * x + y * y) */
+
+    /* Compute the slope */
+    g = (elev_window[5] - elev_window[3]) / (2 * res);
+    h = (elev_window[1] - elev_window[7]) / (2 * res);
+    /* The negative sign from the algorithm has been ignored as it only
+       shows the direction which down-slope is negative */
+    slope = sqrt(g * g +  h * h); 
+
+    return slope;
+}
+
+
+/******************************************************************************
 MODULE:  calc_slope
 
 PURPOSE:  Computes the terrain slope based on the DEM
@@ -72,9 +121,17 @@ Type = None
 
 HISTORY:
 Date        Programmer       Reason
---------    ---------------  -------------------------------------
+--------    ---------------  ---------------------------------------------
 12/31/2012  Gail Schmidt     Original Development
-04/28/2013  Song Guo         Modified to only calculate terrain slope
+04/28/2013  Song Guo         Modified to calculate terrain slope two
+                             above slope algorithms
+
+RETURN VALUE:
+Type = int
+Value           Description
+-----           -----------
+ERROR           Error calculating terrain slope
+SUCCESS         No errors encountered
 
 NOTES:
   1. Input DEM arrays are 1D arrays of size nlines+[1or2] * nsamps.  An extra
@@ -88,33 +145,35 @@ NOTES:
      surrounding each pixel, thus the extra line(s) of data.
   2. Output mask arrays are 1D arrays of size nlines * nsamps.
 ******************************************************************************/
-void calc_slope
+int calc_slope
 (
-    int16 *dem,          /* I: array of DEM values in meters (nlines+[1or2] x
-                               nsamps values - see NOTES);  if processing
-                               at the top of the image, then an extra line
-                               before will not be available;  if processing
-                               at the bottom of the image, then an extra line
-                               at the end will not be available */
-    bool dem_top,        /* I: are we at the top of the dem and therefore no
-                               extra lines at the start of the dem? */
-    bool dem_bottom,     /* I: are we at the bottom of the dem and therefore no
-                               extra lines at the end of the dem? */
-    int nlines,          /* I: number of lines of data to be processed in the
-                               mask array; dem array will have one or two lines
-                               more depending on top, middle, bottom */
-    int nsamps,          /* I: number of samples of data to be processed in the
-                               mask array; dem array will have the same number
-                               of samples therefore the first and last sample
-                               will not be processed as part of the mask since
-                               a 3x3 window won't be available */
-    float ew_res,        /* I: east/west resolution of the elevation data in
-                               meters */
-    float ns_res,        /* I: north/south resolution of the elevation data in
-                               meters */
-    float *percent_slope     /* O: array of percent slope values (multiplied
-                                   by 100 to indicate percent intensity)
-                                   of size nlines * nsamps */
+    int16 *dem,           /* I: array of DEM values in meters (nlines+[1or2] x
+                                nsamps values - see NOTES);  if processing
+                                at the top of the image, then an extra line
+                                before will not be available;  if processing
+                                at the bottom of the image, then an extra line
+                                at the end will not be available */
+    bool dem_top,         /* I: are we at the top of the dem and therefore no
+                                extra lines at the start of the dem? */
+    bool dem_bottom,      /* I: are we at the bottom of the dem and therefore no
+                                extra lines at the end of the dem? */
+    bool use_zeven_thorne,/* I: should we use Zevenbergen&Thorne's slope 
+                                algorithm? */
+    int nlines,           /* I: number of lines of data to be processed in the
+                                mask array; dem array will have one or two lines
+                                more depending on top, middle, bottom */
+    int nsamps,           /* I: number of samples of data to be processed in the
+                                mask array; dem array will have the same number
+                                of samples therefore the first and last sample
+                                will not be processed as part of the mask since
+                                a 3x3 window won't be available */
+    float ew_res,         /* I: east/west resolution of the elevation data in
+                                meters */
+    float ns_res,         /* I: north/south resolution of the elevation data in
+                                meters */
+    float *percent_slope  /* O: array of percent slope values (multiplied
+                                by 100 to indicate percent intensity)
+                                of size nlines * nsamps */
 )
 {
     int line, samp;        /* line and sample being processed */
@@ -128,6 +187,8 @@ void calc_slope
     int16 elev_window[9];  /* 3x3 window of elevation values surrounding the
                               current pixel */
     float slope;           /* percent slope value */
+    char FUNC_NAME[] = "calc_slope"; /* function name */
+    char errmsg[STR_SIZE];     /* error message */
 
     /* Loop through the lines samples in the array to calculate the percent
        slope.  The first line and column in the input array of DEM data is 
@@ -164,11 +225,27 @@ void calc_slope
             elev_window[8] = dem[curr_pix+2];
 
             /* Compute the percent slope for the current pixel */
-            slope = horn_slope(elev_window, ew_res, ns_res);
+            if (use_zeven_thorne)
+            {
+                if (ew_res ==  ns_res)  
+                    slope = zevenbergen_thorne_slope(elev_window, ew_res);
+                else
+                {
+                    sprintf (errmsg, "Error east/west and south/north "
+                             "resolution of the elevation data are not equal, "
+                             "can't use Zevenburgen&Thorne slope algorithm");
+                    error_handler (true, FUNC_NAME, errmsg);
+                    return ERROR;
+                }
+            }
+            else
+                slope = horn_slope(elev_window, ew_res, ns_res);
 
             /* Scale the percent slope values from 0.0 to 1.0 to 0 to 100.0 */
             percent_slope[out_pix] = 100.0 * slope;
         }
     }
+   
+    return SUCCESS;
 }
 

@@ -106,7 +106,8 @@ Input_t *open_input
     char *lndcal_name,     /* I: input TOA reflectance filename */
     char *lndsr_name,      /* I: input TOA reflectance filename */
     bool use_toa,          /* I: flag to indicate if TOA reflectance is used */
-    bool use_fmask         /* I: flag to indicate if cfmask results are used */
+    bool use_ledaps_mask   /* I: flag to indicate if LEDAPS cloud/shadow mask 
+                                 results are used */
 );
 
 void close_input

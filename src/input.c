@@ -60,7 +60,8 @@ Input_t *open_input
     char *lndcal_name,     /* I: input TOA reflectance filename */
     char *lndsr_name,      /* I: input TOA reflectance filename */
     bool use_toa,          /* I: flag to indicate if TOA reflectance is used */
-    bool use_fmask         /* I: flag to indicate if cfmask results are used */
+    bool use_ledaps_mask   /* I: flag to indicate if LEDAPS cloud/shadow mask 
+                                 results are used */
 )
 {
     char FUNC_NAME[] = "open_input";   /* function name */
@@ -168,7 +169,7 @@ Input_t *open_input
         this->qa_buf[ib] = NULL;
     }
 
-    if (use_fmask)
+    if (!use_ledaps_mask)
     {
         this->fmask_sds.name = NULL;
         this->fmask_sds.dim[0].name = NULL;
@@ -381,7 +382,7 @@ Input_t *open_input
     }  /* for ib */
 
     /* For the single fmask band */
-    if (use_fmask)
+    if (!use_ledaps_mask)
     {
         strcpy (sds_name, "fmask_band");
         this->fmask_sds.name = dup_string(sds_name);
@@ -487,7 +488,7 @@ Input_t *open_input
             this->qa_buf[ib] = this->qa_buf[ib-1] +
                 PROC_NLINES * this->nsamps;
     }
-    if (use_fmask)
+    if (!use_ledaps_mask)
     {
         this->fmask_buf = (uint8 *)calloc(PROC_NLINES * this->nsamps,
                                       sizeof(uint8));

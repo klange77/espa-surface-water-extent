@@ -29,13 +29,13 @@ void surface_water_extent
     int nlines,    /* I: number of lines in the data arrays */
     int nsamps,    /* I: number of samples in the data arrays */
     float refl_scale_fact,  /* I: scale factor for the reflectance values */  
-    float mgt,
-    float mlt1,
-    float mlt2,
-    int16 b4t1,
-    int16 b4t2,
-    int16 b5t1,
-    int16 b5t2,
+    float mgt,              /* I: mgt threshold */
+    float mlt1,             /* I: mlt1 threshold */
+    float mlt2,             /* I: mlt2 threshold */
+    int16 b4lt1,            /* I: b4lt1 threshold */
+    int16 b4lt2,            /* I: b4lt2 threshold */
+    int16 b5lt1,            /* I: b5lt1 threshold */
+    int16 b5lt2,            /* I: b5lt2 threshold */
     int16 *raw_swe     /* O: array of surface water extent values (non-zero
                                 values represent water) */
 )
@@ -46,6 +46,10 @@ void surface_water_extent
     float b3_pix;     /* scaled band 3 value for current pixel */
     float b4_pix;     /* scaled band 4 value for current pixel */
     float b5_pix;     /* scaled band 5 value for current pixel */
+    float scale_b4lt1; /* scaled b4lt1 threshold */
+    float scale_b4lt2; /* scaled b4lt2 threshold */
+    float scale_b5lt1; /* scaled b5lt1 threshold */
+    float scale_b5lt2; /* scaled b5lt2 threshold */
     float mndwi;       /* Modified Normalized Difference Wetness Index */
     float vbb;         /* Visible brightness band */
     float sbb;         /* SWIR brightness band */
@@ -59,6 +63,10 @@ void surface_water_extent
         b3_pix = b3[pix] * refl_scale_fact;
         b4_pix = b4[pix] * refl_scale_fact;
         b5_pix = b5[pix] * refl_scale_fact;
+        scale_b4lt1 = b4lt1 * refl_scale_fact;
+        scale_b4lt2 = b4lt2 * refl_scale_fact;
+        scale_b5lt1 = b5lt1 * refl_scale_fact;
+        scale_b5lt2 = b5lt2 * refl_scale_fact;
 
         /* Rule 1 */
         mndwi = (b2_pix - b5_pix) / (b2_pix + b5_pix);
@@ -68,13 +76,13 @@ void surface_water_extent
             mask = 0;
 
         /* Rule 2 */
-        if (((mndwi - mlt1) > MINSIGMA) && ((b4_pix - b4t1) < MINSIGMA) &&
-         ((b5_pix - b5t1) < MINSIGMA))
+        if (((mndwi - mlt1) > MINSIGMA) && ((b4_pix - scale_b4lt1) < MINSIGMA) &&
+         ((b5_pix - scale_b5lt1) < MINSIGMA))
             mask += 10;
 
         /* Rule 3 */
-        if (((mndwi - mlt2) > MINSIGMA) && ((b4_pix - b4t2) < MINSIGMA) &&
-         ((b5_pix - b5t2) < MINSIGMA))
+        if (((mndwi - mlt2) > MINSIGMA) && ((b4_pix - scale_b4lt2) < MINSIGMA) &&
+         ((b5_pix - scale_b5lt2) < MINSIGMA))
             mask += 100;
 
         /* Rule 4 */

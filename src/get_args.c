@@ -32,49 +32,53 @@ short get_args
     char *argv[],         /* I: string of cmd-line args */
     char **reflectance_infile, /* O:address of the input TOA or Surface 
                                     Reflectance filename */
-    char **dem_infile,    /* O: address of input DEM filename */
-    float *mgt,           /* O: */
-    float *mlt1,          /* O: */
-    float *mlt2,          /* O: */
-    int16 *b4t1,          /* O: */
-    int16 *b4t2,          /* O: */
-    int16 *b5t1,          /* O: */
-    int16 *b5t2,          /* O: */
-    float *per_slope,     /* O: percent slope */
-    bool *write_binary,   /* O: write raw binary flag */
-    bool *use_fmask,      /* O: use fmask result flag */
-    bool *verbose         /* O: verbose flag */
+    char **dem_infile,     /* O: address of input DEM filename */
+    float *mgt,            /* O: MNDWI threshold */
+    float *mlt1,           /* O: mlt1 threshold */
+    float *mlt2,           /* O: mlt2 threshold */
+    int16 *b4lt1,          /* O: b4lt1 threshold */
+    int16 *b4lt2,          /* O: b4lt2 threshold */
+    int16 *b5lt1,          /* O: b5lt1 threshold */
+    int16 *b5lt2,          /* O: b5lt2 threshold */
+    float *per_slope,      /* O: percent slope threshold */
+    bool *write_binary,    /* O: write raw binary flag */
+    bool *use_ledaps_mask, /* O: use LEDAPS cloud/shadow mask result flag */
+    bool *use_zeven_thorne,/* O: use Zevenbergen&Thorne's slope algorithm flag */
+    bool *verbose          /* O: verbose flag */
 )
 {
-    int c;                           /* current argument index */
-    int option_index;                /* index for the command-line option */
-    static float default_mgt = 0.123;/* Default MGT value */
-    static float default_mlt1 = -0.5;/* Default MLT1 value */
-    static float default_mlt2 = -0.4;/* Default MLT2 value */
-    static int16 default_b4t1 = 1500;/* Default B4T1 value */
-    static int16 default_b4t2 = 1500;/* Default B4T2 value */
-    static int16 default_b5t1 = 1000;/* Default B5T1 value */
-    static int16 default_b5t2 = 1700;/* Default B5T2 value */
-    static float default_per_s = 3.0;/* Default percent slope value */
-    static int verbose_flag=0;       /* verbose flag */
-    static int binary_flag=0;        /* write binary flag */
-    static int fmask_flag=0;         /* use fmask cloud/shadow flag */
-    char errmsg[STR_SIZE];           /* error message */
-    char FUNC_NAME[] = "get_args";   /* function name */
+    int c;                            /* current argument index */
+    int option_index;                 /* index for the command-line option */
+    static float default_mgt = 0.123; /* Default MGT value */
+    static float default_mlt1 = -0.5; /* Default MLT1 value */
+    static float default_mlt2 = -0.4; /* Default MLT2 value */
+    static int16 default_b4lt1 = 1500;/* Default B4LT1 value */
+    static int16 default_b4lt2 = 1500;/* Default B4LT2 value */
+    static int16 default_b5lt1 = 1000;/* Default B5LT1 value */
+    static int16 default_b5lt2 = 1700;/* Default B5LT2 value */
+    static float default_per_s = 3.0; /* Default percent slope value */
+    static int verbose_flag=0;        /* Default verbose flag */
+    static int binary_flag=0;         /* Default write binary flag */
+    static int ledaps_mask_flag=0;    /* Default use LEDAPS mask cloud/shadow flag */
+    static int zeven_thorne_flag=0;   /* Default use Zevenbergen&Thorne's slope algorithm 
+                                        flag */
+    char errmsg[STR_SIZE];            /* error message */
+    char FUNC_NAME[] = "get_args";    /* function name */
     static struct option long_options[] =
     {
         {"verbose", no_argument, &verbose_flag, 1},
         {"write_binary", no_argument, &binary_flag, 1},
-        {"use_fmask", no_argument, &fmask_flag, 1},
+        {"use_ledaps_mask", no_argument, &ledaps_mask_flag, 1},
+        {"use_zeven_thorne", no_argument, &zeven_thorne_flag, 1},
         {"reflectance", required_argument, 0, 'r'},
         {"dem", required_argument, 0, 'd'},
         {"mgt", required_argument, 0, 'g'},
         {"mlt1", required_argument, 0, '1'},
         {"mlt2", required_argument, 0, '2'},
-        {"b4t1", required_argument, 0, '3'},
-        {"b4t2", required_argument, 0, '4'},
-        {"b5t1", required_argument, 0, '5'},
-        {"b5t2", required_argument, 0, '6'},
+        {"b4lt1", required_argument, 0, '3'},
+        {"b4lt2", required_argument, 0, '4'},
+        {"b5lt1", required_argument, 0, '5'},
+        {"b5lt2", required_argument, 0, '6'},
         {"per_slope", required_argument, 0, 'p'},
         {"help", no_argument, 0, 'h'},
         {0, 0, 0, 0}
@@ -84,10 +88,10 @@ short get_args
     *mgt = default_mgt;
     *mlt1 = default_mlt1;
     *mlt2 = default_mlt2;
-    *b4t1 = default_b4t1;
-    *b4t2 = default_b4t2;
-    *b5t1 = default_b5t1;
-    *b5t2 = default_b5t2;
+    *b4lt1 = default_b4lt1;
+    *b4lt2 = default_b4lt2;
+    *b5lt1 = default_b5lt1;
+    *b5lt2 = default_b5lt2;
     *per_slope = default_per_s;
 
     /* Loop through all the cmd-line options */
@@ -135,19 +139,19 @@ short get_args
                 break;
      
             case '3':  /*  */
-                *b4t1 = atoi(optarg);
+                *b4lt1 = atoi(optarg);
                 break;
      
             case '4':  /*  */
-                *b4t2 = atoi(optarg);
+                *b4lt2 = atoi(optarg);
                 break;
      
             case '5':  /*  */
-                *b5t1 = atoi(optarg);
+                *b5lt1 = atoi(optarg);
                 break;
      
             case '6':  /*  */
-                *b5t2 = atoi(optarg);
+                *b5lt2 = atoi(optarg);
                 break;
      
             case 'p':  /* Percent Slope */
@@ -220,10 +224,16 @@ short get_args
         *write_binary = false;
 
     /* Check the use fmask flag */
-    if (fmask_flag)
-        *use_fmask = true;
+    if (ledaps_mask_flag)
+        *use_ledaps_mask = true;
     else
-        *use_fmask = false;
+        *use_ledaps_mask = false;
+
+    /* Check the use Horn's slope algorithm flag */
+    if (zeven_thorne_flag)
+        *use_zeven_thorne = true;
+    else
+        *use_zeven_thorne = false;
 
     /* Check the verbose flag */
     if (verbose_flag)

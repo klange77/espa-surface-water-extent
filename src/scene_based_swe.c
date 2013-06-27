@@ -10,8 +10,8 @@ char *out_sds_names[NUM_OUT_SDS] = {"raw_swe", "slope_revised_swe",
 /******************************************************************************
 MODULE:  scene_based_swe
 
-PURPOSE:  Calculate the snow water extent, for the current scene, using the TOA
-reflectance, or surface reflectance, and elevation.
+PURPOSE:  Calculate the surface water extent, for the current scene, using the 
+          TOA reflectance, or surface reflectance, and elevation.
 
 RETURN VALUE:
 Type = int
@@ -33,7 +33,9 @@ int main (int argc, char *argv[])
 {
     bool verbose;            /* verbose flag for printing messages */
     bool write_binary;       /* should we write raw binary output? */
-    bool use_fmask;          /* should we use cfmask results? */
+    bool use_ledaps_mask;    /* should we use ledaps cloud/shadow results? */
+    bool use_zeven_thorne;   /* should we use Zevenbergen&Thorne's slope
+                                algorithm? */
     bool dem_top;            /* are we at the top of the dem for shaded
                                 relief processing */
     bool dem_bottom;         /* are we at the bottom of the dem for shaded
@@ -41,10 +43,10 @@ int main (int argc, char *argv[])
     float mgt;
     float mlt1;
     float mlt2;
-    int16 b4t1;
-    int16 b4t2;
-    int16 b5t1;
-    int16 b5t2;
+    int16 b4lt1;
+    int16 b4lt2;
+    int16 b5lt1;
+    int16 b5lt2;
     float per_slope;
     char lndcal_name[STR_SIZE];
     char lndsr_name[STR_SIZE];
@@ -112,8 +114,9 @@ int main (int argc, char *argv[])
     /* Read the command-line arguments, including the name of the input
        Landsat TOA reflectance product and the DEM */
     retval = get_args (argc, argv, &reflectance_infile, &dem_infile,
-                       &mgt, &mlt1, &mlt2, &b4t1, &b4t2, &b5t1, &b5t2, 
-                       &per_slope, &write_binary, &use_fmask, &verbose);
+                       &mgt, &mlt1, &mlt2, &b4lt1, &b4lt2, &b5lt1, &b5lt2, 
+                       &per_slope, &write_binary, &use_ledaps_mask, 
+                       &use_zeven_thorne, &verbose);
     if (retval != SUCCESS)
     {   
         sprintf (errmsg, "Error calling get_args");
@@ -121,10 +124,7 @@ int main (int argc, char *argv[])
         exit (ERROR);
     }
 
-    printf("mgt, mlt1, mlt2, b4t1, b4t2, b5t1, b5t2, per_slope, write_binary,"
-           "use_fmask,verbose=%f,%f,%f,%d,%d,%d,%d,%f,%d,%d,%d\n",mgt, mlt1, mlt2, b4t1, 
-           b4t2, b5t1, b5t2, per_slope, write_binary,use_fmask,verbose);
-
+    printf("write_binary,use_ledpas_mask,use_zeven_thorne,verbose=%d,%d,%d,%d\n",write_binary,use_ledaps_mask,use_zeven_thorne,verbose);
 
     /* Provide user information if verbose is turned on */
     if (verbose)
@@ -134,10 +134,10 @@ int main (int argc, char *argv[])
         printf ("  MGT: %f\n", mgt);
         printf ("  MLT1: %f\n", mlt1);
         printf ("  MLT2: %f\n", mlt2);
-        printf ("  B4T1: %d\n", b4t1);
-        printf ("  B4T2: %d\n", b4t2);
-        printf ("  B5T1: %d\n", b5t1);
-        printf ("  B5T2: %d\n", b5t2);
+        printf ("  B4LT1: %d\n", b4lt1);
+        printf ("  B4LT2: %d\n", b4lt2);
+        printf ("  B5LT1: %d\n", b5lt1);
+        printf ("  B5LT2: %d\n", b5lt2);
         printf ("  Percent_slope: %f\n", per_slope);
         if (write_binary)
             printf ("    -- Also writing raw binary output.\n");
@@ -204,7 +204,7 @@ int main (int argc, char *argv[])
     /* Open the TOA reflectance or surface reflectance products, set up
        the input data structure, allocate memory for the data buffers, and
        read the associated metadata and attributes. */
-    input = open_input (lndcal_name, lndsr_name, use_toa, use_fmask);
+    input = open_input (lndcal_name, lndsr_name, use_toa, use_ledaps_mask);
     if (input == (Input_t *)NULL)
     {
         sprintf (errmsg, "Error opening/reading the reflectance file: %s "
@@ -423,7 +423,7 @@ int main (int argc, char *argv[])
         }
 
         /* Read the current lines for the cfmask band */
-        if (use_fmask)
+        if (!use_ledaps_mask)
         {
             /* Read the current lines for the fmask band */
             if (get_input_fmask_line (input, line, nlines_proc) != SUCCESS)
@@ -441,8 +441,8 @@ int main (int argc, char *argv[])
         surface_water_extent(input->refl_buf[1] /*b2*/, 
             input->refl_buf[2] /*b3*/, input->refl_buf[3] /*b4*/, 
             input->refl_buf[4] /*b5*/, nlines_proc, input->nsamps, 
-            input->refl_scale_fact, mgt, mlt1, mlt2, b4t1, b4t2, b5t1, b5t2, 
-            raw_swe);
+            input->refl_scale_fact, mgt, mlt1, mlt2, b4lt1, b4lt2, b5lt1, 
+            b5lt2, raw_swe);
 
         /* Prepare to read the current lines from the DEM.  We need an extra
            line at the start and end for the slope calculation.  If we are just
@@ -493,13 +493,19 @@ int main (int argc, char *argv[])
             * sizeof (float));
 
         /* Compute the percent slope */
-        calc_slope (dem, dem_top, dem_bottom, nlines_proc, input->nsamps,
-            input->meta.pixsize, input->meta.pixsize,
-            percent_slope);
+        retval = calc_slope(dem, dem_top, dem_bottom, use_zeven_thorne, 
+                     nlines_proc, input->nsamps, input->meta.pixsize, 
+                     input->meta.pixsize, percent_slope);
+        if (retval != SUCCESS)
+        {   
+            sprintf (errmsg, "Error calling calc_slope");
+            error_handler (true, FUNC_NAME, errmsg);
+            exit (ERROR);
+        }
     
         for (pix = 0; pix < nlines_proc * input->nsamps; pix++)
         {
-            if (use_fmask)
+            if (!use_ledaps_mask)
             {
                 /* Cloud screening to get cloud corrected SWE */
                 if (input->fmask_buf[pix] == 2 || input->fmask_buf[pix] == 4)
@@ -747,12 +753,13 @@ void usage()
             "--mgt=mgt_threshold (value between 0.00 and 2.00) "
             "--mlt1=mlt1_threshold (value between -2.00 and 2.00) "
             "--mlt2=mlt2_threshold (value between -2.00 and 2.00) "
-            "--b4t1=b4t1_threshold "
-            "--b4t2=b4t2_threshold "
-            "--b5t1=b5t1_threshold "
-            "--b5t2=b5t2_threshold "
+            "--b4lt1=b4lt1_threshold "
+            "--b4lt2=b4lt2_threshold "
+            "--b5lt1=b5lt1_threshold "
+            "--b5lt2=b5lt2_threshold "
             "--per_slope=percent_slope_threshold (value between 0.00 & 100.00 "
-            "[--write_binary] [--use_fmask] [--verbose]\n");
+            "[--write_binary] [--use_ledaps_mask] [--use_zeven_thorne] "
+            "[--verbose]\n");
 
     printf ("\nwhere the following parameters are required:\n");
     printf ("    -reflectance: name of the input Landsat TOA or surface "
@@ -760,26 +767,30 @@ void usage()
     printf ("    -dem: name of the DEM associated with the Landsat TOA file "
             "(raw binary 16-bit integers)\n");
     printf ("\nwhere the following parameters are optional:\n");
-    printf ("    -mgt: MNDWI_threshold\n");
-    printf ("    -mlt1: mlt1_threshold\n");
-    printf ("    -mlt2: mlt2_threshold\n");
-    printf ("    -b4t1: b4t1_threshold\n");
-    printf ("    -b4t2: b4t2_threshold\n");
-    printf ("    -b5t1: b5t1_threshold\n");
-    printf ("    -b5t2: b5t2_threshold\n");
-    printf ("    -per_slope: percent_slope_threshold\n");
-    printf ("    -write_binary: should raw binary outputs and ENVI header "
+    printf ("    --mgt: MNDWI_threshold\n");
+    printf ("    --mlt1: mlt1_threshold\n");
+    printf ("    --mlt2: mlt2_threshold\n");
+    printf ("    --b4lt1: b4lt1_threshold\n");
+    printf ("    --b4lt2: b4lt2_threshold\n");
+    printf ("    --b5lt1: b5lt1_threshold\n");
+    printf ("    --b5lt2: b5lt2_threshold\n");
+    printf ("    --per_slope: percent_slope_threshold\n");
+    printf ("    --write_binary: should raw binary outputs and ENVI header "
             "files be written in addition to the HDF file? (default is false)"
             "\n");
-    printf ("    -use_fmask: should fmask cloud and shadow mask "
-            "be used? (default is false)\n");
-    printf ("    -verbose: should intermediate messages be printed? (default "
+    printf ("    --use_ledaps_mask: should ledaps cloud/shadow mask "
+            "be used? (default is false, meaning fmask cloud/shadow will "
+            "be used)\n");
+    printf ("    --use_zeven_thorne: should Zevenbergen&Thorne's slope "
+            "algorithm be used? (default is false, meaning Horn's slope "
+            "algorithm will be used)\n");
+    printf ("    --verbose: should intermediate messages be printed? (default "
             "is false)\n");
     printf ("\n./scene_based_swe --help will print the usage statement\n");
     printf ("\nExample: ./scene_based_swe "
             "--reflectance=/data1/sguo/lndsr.LT50450302001272LGS01.hdf "
             "--dem=/data1/sguo/lsrd_scene_based_dem.bin "
-            "--mgt=0.123 --mlt1=-0.5 --mlt2=-0.4 --b4t1=1500 "
-            "--b4t2=1500 --b5t1=1000 --b5t2=1700 --per_slope=3.0 "
-            "--write_binary --use_fmask --verbose\n");
+            "--mgt=0.123 --mlt1=-0.5 --mlt2=-0.4 --b4lt1=1500 "
+            "--b4lt2=1500 --b5lt1=1000 --b5lt2=1700 --per_slope=3.0 "
+            "--write_binary --use_ledaps_mask --use_zeven_thorne --verbose\n");
 }
