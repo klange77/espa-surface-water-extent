@@ -43,7 +43,8 @@ short get_args
     float *per_slope,      /* O: percent slope threshold */
     bool *write_binary,    /* O: write raw binary flag */
     bool *use_ledaps_mask, /* O: use LEDAPS cloud/shadow mask result flag */
-    bool *use_zeven_thorne,/* O: use Zevenbergen&Thorne's slope algorithm flag */
+    bool *use_zeven_thorne,/* O: use Zevenbergen&Thorne's slope algorithm 
+                                 flag */
     bool *verbose          /* O: verbose flag */
 )
 {
@@ -59,9 +60,10 @@ short get_args
     static float default_per_s = 3.0; /* Default percent slope value */
     static int verbose_flag=0;        /* Default verbose flag */
     static int binary_flag=0;         /* Default write binary flag */
-    static int ledaps_mask_flag=0;    /* Default use LEDAPS mask cloud/shadow flag */
-    static int zeven_thorne_flag=0;   /* Default use Zevenbergen&Thorne's slope algorithm 
-                                        flag */
+    static int ledaps_mask_flag=0;    /* Default use LEDAPS mask cloud/shadow 
+                                         flag */
+    static int zeven_thorne_flag=0;   /* Default use Zevenbergen&Thorne's slope
+                                          algorithmflag */
     char errmsg[STR_SIZE];            /* error message */
     char FUNC_NAME[] = "get_args";    /* function name */
     static struct option long_options[] =

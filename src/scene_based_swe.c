@@ -5,7 +5,7 @@
 /* Define the output SDS names to be written to the HDF-EOS file */
 /* #define NUM_OUT_SDS 6 -- defined in output.h */
 char *out_sds_names[NUM_OUT_SDS] = {"raw_swe", "slope_revised_swe",
-    "cloud_corrected_swe", "slope_cloud_swe", "ned_elevation", "slope"};
+    "cloud_corrected_swe", "slope_cloud_swe", "ned_elevation", "scaled_slope"};
 
 /******************************************************************************
 MODULE:  scene_based_swe
@@ -40,14 +40,14 @@ int main (int argc, char *argv[])
                                 relief processing */
     bool dem_bottom;         /* are we at the bottom of the dem for shaded
                                 relief processing */
-    float mgt;
-    float mlt1;
-    float mlt2;
-    int16 b4lt1;
-    int16 b4lt2;
-    int16 b5lt1;
-    int16 b5lt2;
-    float per_slope;
+    float mgt;               /* MNDWI threshold */
+    float mlt1;              /* mlt1 threshold */
+    float mlt2;              /* mlt2 threshold */
+    int16 b4lt1;             /* b4lt1 threshold */
+    int16 b4lt2;             /* b4lt2 threshold */
+    int16 b5lt1;             /* b5lt1 threshold */
+    int16 b5lt2;             /* b5lt2 threshold */
+    float per_slope;         /* percent slope threshold */
     char lndcal_name[STR_SIZE];
     char lndsr_name[STR_SIZE];
     char raw_swe_bin[STR_SIZE];

@@ -41,11 +41,11 @@ void surface_water_extent
 )
 {
     int16 mask;
-    int pix;          /* current pixel being processed */
-    float b2_pix;     /* scaled band 2 value for current pixel */
-    float b3_pix;     /* scaled band 3 value for current pixel */
-    float b4_pix;     /* scaled band 4 value for current pixel */
-    float b5_pix;     /* scaled band 5 value for current pixel */
+    int pix;           /* current pixel being processed */
+    float b2_pix;      /* scaled band 2 value for current pixel */
+    float b3_pix;      /* scaled band 3 value for current pixel */
+    float b4_pix;      /* scaled band 4 value for current pixel */
+    float b5_pix;      /* scaled band 5 value for current pixel */
     float scale_b4lt1; /* scaled b4lt1 threshold */
     float scale_b4lt2; /* scaled b4lt2 threshold */
     float scale_b5lt1; /* scaled b5lt1 threshold */
