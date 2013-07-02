@@ -17,7 +17,7 @@ RETURN VALUE:
 Type = int
 Value           Description
 -----           -----------
-ERROR           An error occurred during processing of the snow cover
+ERROR           An error occurred during processing of the SWE
 SUCCESS         Processing was successful
 
 HISTORY:
@@ -109,7 +109,7 @@ int main (int argc, char *argv[])
     char dem_envi_hdr[STR_SIZE];
     bool use_toa;
 
-    printf ("Starting scene-based snow cover processing ...\n");
+    printf ("Starting scene-based surface water extent processing ...\n");
 
     /* Read the command-line arguments, including the name of the input
        Landsat TOA reflectance product and the DEM */
@@ -370,11 +370,11 @@ int main (int argc, char *argv[])
     if (verbose)
     {
         printf ("  Processing %d lines at a time\n", PROC_NLINES);
-        printf ("  Cloud and snow cover -- %% complete: 0%%\r");
+        printf ("  SWE -- %% complete: 0%%\r");
     }
 
     /* Loop through the lines and samples in the reflectance and
-       QA products, computing the cloud and snow cover */
+       QA products or Famsk prodcuts, computing the surface water extent */
     nlines_proc = PROC_NLINES;
     k = 0;
     for (line = 0; line < input->nlines; line += PROC_NLINES)
@@ -564,7 +564,7 @@ int main (int argc, char *argv[])
             scaled_slope[pix] =  (int)rint(100.0 * percent_slope[pix]);
         } /* end for pix */
 
-        /* write the non snow-related masks to raw binary output */
+        /* write the results to raw binary output */
         if (write_binary)
         {
             fwrite (raw_swe, sizeof(int16), nlines_proc * input->nsamps,
@@ -627,8 +627,8 @@ int main (int argc, char *argv[])
         exit (ERROR);
     }
 
-    /* Close the TOA reflectance and brightness temperature products and the
-       output snow cover product */
+    /* Close the reflectance and fmask products and the output surface water
+       extent product */
     close_input (input);
     close_output (output);
     free_output (output);
@@ -721,7 +721,7 @@ int main (int argc, char *argv[])
         free (dem_infile);
 
     /* Indicate successful completion of processing */
-    printf ("Scene-based snow cover processing complete!\n");
+    printf ("Scene-based surface water processing complete!\n");
     exit (SUCCESS);
 }
 

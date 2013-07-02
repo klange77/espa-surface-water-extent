@@ -9,7 +9,7 @@ RETURN VALUE:
 Type = int
 Value           Description
 -----           -----------
-ERROR           An error occurred during processing of the snow cover
+ERROR           An error occurred during processing of the SWE
 SUCCESS         Processing was successful
 
 HISTORY:
