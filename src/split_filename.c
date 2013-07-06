@@ -5,12 +5,7 @@ PURPOSE:
 Split the specified filename into a directory, a root file name, and an
 extension.  The last character of the directory path will be a '/'.
 
-RETURN VALUE:
-Type = int
-Value           Description
------           -----------
-ERROR           An error occurred during processing of the SWE
-SUCCESS         Processing was successful
+RETURN VALUE: None
 
 HISTORY:
 Date          Programmer       Reason
@@ -25,10 +20,12 @@ Date          Programmer       Reason
 #include "input.h"
 
 #ifndef ERROR
-#define ERROR -1
+#define ERROR 1
 #endif
 
+#ifndef SUCCESS
 #define SUCCESS 0
+#endif
 
 void split_filename 
 (
@@ -85,6 +82,4 @@ void split_filename
         strcpy (root, extension);
         strcpy (extension, "");
     }
-
-    return;
 }

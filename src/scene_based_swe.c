@@ -717,6 +717,8 @@ int main (int argc, char *argv[])
     }
 
     /* Free the filename pointers */
+    if (reflectance_infile != NULL)
+        free (reflectance_infile);
     if (dem_infile != NULL)
         free (dem_infile);
 
