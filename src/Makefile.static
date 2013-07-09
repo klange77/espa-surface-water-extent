@@ -44,6 +44,12 @@ scene_based_swe: $(OBJ) $(INC)
 
 install:
 	cp $(EXE) $(BIN)
+	cp ../scripts/create_dem.py $(BIN)
+	cp ../scripts/do_water_extent.py $(BIN)
+	cp ../scripts/create_dem.py $(BIN)
+	cp ../scripts/retrieve_elevation $(BIN)
+	cp ../scripts/makegeomgrid $(BIN)
+	cp ../scripts/geomresample $(BIN)
 
 clean:
 	$(RM) *.o $(EXE)
