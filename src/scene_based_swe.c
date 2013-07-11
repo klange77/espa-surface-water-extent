@@ -124,8 +124,6 @@ int main (int argc, char *argv[])
         exit (ERROR);
     }
 
-    printf("write_binary,use_ledpas_mask,use_zeven_thorne,verbose=%d,%d,%d,%d\n",write_binary,use_ledaps_mask,use_zeven_thorne,verbose);
-
     /* Provide user information if verbose is turned on */
     if (verbose)
     {
@@ -139,6 +137,9 @@ int main (int argc, char *argv[])
         printf ("  B5LT1: %d\n", b5lt1);
         printf ("  B5LT2: %d\n", b5lt2);
         printf ("  Percent_slope: %f\n", per_slope);
+        printf ("write_binary: %d\n", write_binary);
+        printf ("use_ledaps_mask: %d\n", use_ledaps_mask);
+        printf ("use_zeven_thorne: %d\n", use_zeven_thorne);
         if (write_binary)
             printf ("    -- Also writing raw binary output.\n");
     }

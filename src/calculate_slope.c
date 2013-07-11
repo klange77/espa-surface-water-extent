@@ -52,10 +52,10 @@ float horn_slope
     /* Compute the slope */
     x_slope = ((elev_window[0] + 2.0 * elev_window[3] + elev_window[6]) -
                (elev_window[2] + 2.0 * elev_window[5] + elev_window[8])) /
-               ew_res;
+     (8.0 * ew_res);
     y_slope = ((elev_window[6] + 2.0 * elev_window[7] + elev_window[8]) -
                (elev_window[0] + 2.0 * elev_window[1] + elev_window[2])) /
-               ns_res;
+     (8.0 * ns_res);
     slope = sqrt(x_slope * x_slope + y_slope * y_slope);
 
     return slope;
@@ -93,16 +93,24 @@ NOTES:
 float zevenbergen_thorne_slope
 (
     int16 *elev_window,   /* I: 3x3 array of elevation values in meters */
-    float res             /* I: resolution of the elevation data in meters */
+    float ew_res,         /* I: east/west resolution of the elevation data in
+                                meters */
+    float ns_res          /* I: north/south resolution of the elevation data in
+                                meters */
 )
 {
     float g;        /* G parameter in the algorithm */
     float h;        /* H parameter in the algorithm */
     float slope;    /* value of -sqrt(x * x + y * y) */
 
+    /* Since the data goes from west to east, leave the ew_res as positive.
+       However since the data goes from north to south, we need to negate the
+       ns_res. */
+    ns_res = -ns_res;
+
     /* Compute the slope */
-    g = (elev_window[5] - elev_window[3]) / (2 * res);
-    h = (elev_window[1] - elev_window[7]) / (2 * res);
+    g = (elev_window[5] - elev_window[3]) / (2.0 * ew_res);
+    h = (elev_window[1] - elev_window[7]) / (2.0 * ns_res);
     /* The negative sign from the algorithm has been ignored as it only
        shows the direction which down-slope is negative */
     slope = sqrt(g * g +  h * h); 
@@ -228,7 +236,8 @@ int calc_slope
             if (use_zeven_thorne)
             {
                 if (ew_res ==  ns_res)  
-                    slope = zevenbergen_thorne_slope(elev_window, ew_res);
+                    slope = zevenbergen_thorne_slope(elev_window, ew_res,
+                            ns_res);
                 else
                 {
                     sprintf (errmsg, "Error east/west and south/north "
