@@ -751,7 +751,7 @@ void usage()
             "reflectance, including a cloud cover correction and a terrain "
             "slope revision of the surface water extent\n\n");
     printf ("usage: scene_based_swe "
-            "--toa=input_TOA(or surface)_reflectance_filename_with_full_path "
+            "--reflectance=input_surface(or TOA)_reflectance_filename_with_full_path "
             "--dem=input_DEM_filename_with_full_path "
             "--mgt=mgt_threshold (value between 0.00 and 2.00) "
             "--mlt1=mlt1_threshold (value between -2.00 and 2.00) "
