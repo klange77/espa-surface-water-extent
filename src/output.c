@@ -23,6 +23,8 @@
 #define OUTPUT_EAST_BOUND  ("EastBoundingCoordinate")
 #define OUTPUT_NORTH_BOUND ("NorthBoundingCoordinate")
 #define OUTPUT_SOUTH_BOUND ("SouthBoundingCoordinate")
+#define OUTPUT_UL_LAT_LONG ("UpperLeftCornerLatLong")
+#define OUTPUT_LR_LAT_LONG ("LowerRightCornerLatLong")
 #define OUTPUT_MASK_INDEX       ("mask_index")
 
 #define OUTPUT_LONG_NAME        ("long_name")
@@ -713,6 +715,37 @@ int put_metadata
         sprintf (errmsg, "Error writing attribute (SWE Version)");
         error_handler (true, FUNC_NAME, errmsg);
         return (ERROR);
+    }
+
+    /* output the upper left and lower right corners if they are available */
+    if (!meta->ul_corner.is_fill)
+    {
+        attr.type = DFNT_FLOAT64;
+        attr.nval = 2;
+        attr.name = OUTPUT_UL_LAT_LONG;
+        dval[0] = meta->ul_corner.lat;
+        dval[1] = meta->ul_corner.lon;
+        if (put_attr_double (this->sds_file_id, &attr, dval) != SUCCESS)
+        {
+            sprintf (errmsg, "Error writing attribute (Upper-left lat/lon");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }  
+    }
+
+    if (!meta->lr_corner.is_fill)
+    {
+        attr.type = DFNT_FLOAT64;
+        attr.nval = 2;
+        attr.name = OUTPUT_LR_LAT_LONG;
+        dval[0] = meta->lr_corner.lat;
+        dval[1] = meta->lr_corner.lon;
+        if (put_attr_double (this->sds_file_id, &attr, dval) != SUCCESS)
+        {
+            sprintf (errmsg, "Error writing attribute (Lower-right lat/lon");
+            error_handler (true, FUNC_NAME, errmsg);
+            return (ERROR);
+        }
     }
 
     /* output the geographic bounding coordinates if they are available */
