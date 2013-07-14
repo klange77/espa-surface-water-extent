@@ -61,6 +61,7 @@ int main (int argc, char *argv[])
     char slope_cloud_swe_hdr[STR_SIZE];
     char scaled_percent_slope_hdr[STR_SIZE];
     char swe_hdf_name[STR_SIZE];
+    char swe_hdf_hdr[STR_SIZE];
     char scene_name[STR_SIZE];
     char directory[STR_SIZE];
     char extension[STR_SIZE];
@@ -104,9 +105,11 @@ int main (int argc, char *argv[])
     FILE *cloud_swe_fptr=NULL;       /* cloud corrected SWE file pointer */
     FILE *slope_cloud_swe_fptr=NULL; /* slope revised & cloud corrected SWE 
                                         file pointer */
+    FILE *dem_output_fptr=NULL;      /* DEM output file pointer */
     FILE *scaled_slope_fptr=NULL;    /* slope revised & cloud corrected SWE 
                                         file pointer */
-    char dem_envi_hdr[STR_SIZE];
+    char dem_bin[STR_SIZE];          /* output dem binary file name */
+    char dem_envi_hdr[STR_SIZE];     /* output dem binary file header */
     bool use_toa;
 
     printf ("Starting scene-based surface water extent processing ...\n");
@@ -169,6 +172,8 @@ int main (int argc, char *argv[])
             directory);
         sprintf(slope_cloud_swe_bin, "%sslope_cloud_swe.bin", directory);
         sprintf(slope_cloud_swe_hdr, "%sslope_cloud_swe.bin.hdr", directory);
+        sprintf(dem_bin, "%sdem_output.bin", directory);
+        sprintf(dem_envi_hdr, "%sdem_output.bin.hdr", directory);
         sprintf(scaled_percent_slope_bin, "%sscaled_percent_slope.bin", 
             directory);
         sprintf(scaled_percent_slope_hdr, "%sscaled_percent_slope.bin.hdr", 
@@ -199,6 +204,7 @@ int main (int argc, char *argv[])
         slope_swe_fptr = fopen (slope_revised_swe_bin, "wb");
         cloud_swe_fptr = fopen (cloud_corrected_swe_bin, "wb");
         slope_cloud_swe_fptr = fopen (slope_cloud_swe_bin, "wb");
+        dem_output_fptr = fopen (dem_bin, "wb");
         scaled_slope_fptr = fopen (scaled_percent_slope_bin, "wb");
     }
 
@@ -576,6 +582,8 @@ int main (int argc, char *argv[])
                     input->nsamps, cloud_swe_fptr);
             fwrite (slope_cloud_swe, sizeof(int16), nlines_proc * 
                     input->nsamps, slope_cloud_swe_fptr);
+            fwrite (&dem[input->nsamps], sizeof(int16), nlines_proc * 
+                    input->nsamps, dem_output_fptr);
             fwrite (scaled_slope, sizeof(int16), nlines_proc * input->nsamps, 
                     scaled_slope_fptr);
         }
@@ -614,6 +622,7 @@ int main (int argc, char *argv[])
         fclose (slope_swe_fptr);
         fclose (cloud_swe_fptr);
         fclose (slope_cloud_swe_fptr);
+        fclose (dem_output_fptr);
         fclose (scaled_slope_fptr);
     }
 
@@ -648,28 +657,39 @@ int main (int argc, char *argv[])
         exit (ERROR);
     }
 
+    /* Write SWE HDF header to add in envi map info */
+    sprintf (swe_hdf_hdr, "%s.hdr", swe_hdf_name);
+    if (write_envi_hdr (swe_hdf_hdr, HDF_FILE, input, &space_def) == ERROR)
+    {
+        sprintf (errmsg, "Error writing the ENVI header for the "
+                "SWE HDF file");
+        error_handler (true, FUNC_NAME, errmsg);
+        close_input (input);
+        free_input (input);
+        exit (ERROR);
+    }
+
     /* write the ENVI headers */
     if (write_binary)
     {
         if (verbose)
             printf ("  Creating ENVI headers for each mask.\n");
-        if (write_envi_hdr (raw_swe_hdr, input, &space_def)
+        if (write_envi_hdr (raw_swe_hdr, BINARY_FILE, input, &space_def)
             == ERROR)
             exit (ERROR);
-        if (write_envi_hdr (slope_revised_swe_hdr, input,
+        if (write_envi_hdr (slope_revised_swe_hdr, BINARY_FILE, input,
             &space_def) == ERROR)
             exit (ERROR);
-        if (write_envi_hdr (cloud_corrected_swe_hdr, input, &space_def)
+        if (write_envi_hdr (cloud_corrected_swe_hdr, BINARY_FILE, input, &space_def)
             == ERROR)
             exit (ERROR);
-        if (write_envi_hdr (slope_cloud_swe_hdr, input, &space_def)
+        if (write_envi_hdr (slope_cloud_swe_hdr, BINARY_FILE, input, &space_def)
             == ERROR)
             exit (ERROR);
-        if (write_envi_hdr (scaled_percent_slope_hdr, input, 
+        if (write_envi_hdr (scaled_percent_slope_hdr, BINARY_FILE, input, 
             &space_def) == ERROR)
             exit (ERROR);
-        sprintf(dem_envi_hdr, "%s%s", dem_infile, ".hdr");
-        if (write_envi_hdr (dem_envi_hdr, input, &space_def)
+        if (write_envi_hdr (dem_envi_hdr, BINARY_FILE, input, &space_def)
             == ERROR)
             exit (ERROR);
     }
