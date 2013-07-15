@@ -50,12 +50,12 @@ float horn_slope
     ns_res = -ns_res;
 
     /* Compute the slope */
-    x_slope = ((elev_window[0] + 2.0 * elev_window[3] + elev_window[6]) -
-               (elev_window[2] + 2.0 * elev_window[5] + elev_window[8])) /
-     (8.0 * ew_res);
-    y_slope = ((elev_window[6] + 2.0 * elev_window[7] + elev_window[8]) -
-               (elev_window[0] + 2.0 * elev_window[1] + elev_window[2])) /
-     (8.0 * ns_res);
+    x_slope = ((float)((elev_window[0] + 2.0 * elev_window[3] + elev_window[6])
+               -(elev_window[2] + 2.0 * elev_window[5] + elev_window[8]))) /
+              (8.0 * ew_res);
+    y_slope = ((float)((elev_window[6] + 2.0 * elev_window[7] + elev_window[8])
+               - (elev_window[0] + 2.0 * elev_window[1] + elev_window[2]))) /
+              (8.0 * ns_res);
     slope = sqrt(x_slope * x_slope + y_slope * y_slope);
 
     return slope;
@@ -109,8 +109,8 @@ float zevenbergen_thorne_slope
     ns_res = -ns_res;
 
     /* Compute the slope */
-    g = (elev_window[5] - elev_window[3]) / (2.0 * ew_res);
-    h = (elev_window[1] - elev_window[7]) / (2.0 * ns_res);
+    g = ((float)(elev_window[5] - elev_window[3])) / (2.0 * ew_res);
+    h = ((float)(elev_window[1] - elev_window[7])) / (2.0 * ns_res);
     /* The negative sign from the algorithm has been ignored as it only
        shows the direction which down-slope is negative */
     slope = sqrt(g * g +  h * h); 
