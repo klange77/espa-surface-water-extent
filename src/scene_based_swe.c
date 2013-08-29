@@ -48,25 +48,33 @@ int main (int argc, char *argv[])
     int16 b5lt1;             /* b5lt1 threshold */
     int16 b5lt2;             /* b5lt2 threshold */
     float per_slope;         /* percent slope threshold */
-    char lndcal_name[STR_SIZE];
-    char lndsr_name[STR_SIZE];
-    char raw_swe_bin[STR_SIZE];
-    char slope_revised_swe_bin[STR_SIZE];
-    char cloud_corrected_swe_bin[STR_SIZE];
-    char slope_cloud_swe_bin[STR_SIZE];
-    char scaled_percent_slope_bin[STR_SIZE];
-    char raw_swe_hdr[STR_SIZE];
-    char slope_revised_swe_hdr[STR_SIZE];
-    char cloud_corrected_swe_hdr[STR_SIZE];
-    char slope_cloud_swe_hdr[STR_SIZE];
-    char scaled_percent_slope_hdr[STR_SIZE];
-    char swe_hdf_name[STR_SIZE];
-    char swe_hdf_hdr[STR_SIZE];
-    char scene_name[STR_SIZE];
-    char directory[STR_SIZE];
-    char extension[STR_SIZE];
-    char FUNC_NAME[] = "main"; /* function name */
-    char errmsg[STR_SIZE];     /* error message */
+    char lndcal_name[STR_SIZE]; /* ledaps TOA reflectance filename */
+    char lndsr_name[STR_SIZE];  /* ledpas surface reflectance filename */
+    char raw_swe_bin[STR_SIZE]; /* raw SWE binary filename */
+    char slope_revised_swe_bin[STR_SIZE];  /* slope revised SWE binary filename
+                                              */
+    char cloud_corrected_swe_bin[STR_SIZE];/* cloud corrected SWE binary 
+                                              filename */
+    char slope_cloud_swe_bin[STR_SIZE];    /* slope & cloud corrected SWE
+                                              binary filename */
+    char scaled_percent_slope_bin[STR_SIZE];/* scaled percent slope binary
+                                               filename */
+    char raw_swe_hdr[STR_SIZE];             /* raw SWE header filename */
+    char slope_revised_swe_hdr[STR_SIZE];   /* slope revised SWE header
+                                               filename*/
+    char cloud_corrected_swe_hdr[STR_SIZE]; /* cloud corrected SWE header
+                                               filename */ 
+    char slope_cloud_swe_hdr[STR_SIZE];     /* slope & cloud corrected SWE
+                                               header filename */ 
+    char scaled_percent_slope_hdr[STR_SIZE];/* scaled percent slope header
+                                               filename */
+    char swe_hdf_name[STR_SIZE]; /* output SWE hdf filename */
+    char swe_hdf_hdr[STR_SIZE];  /* output SWE hdf header filename */
+    char scene_name[STR_SIZE];   /* input scene name */
+    char directory[STR_SIZE];    /* directory for input data */
+    char extension[STR_SIZE];    /* input file extension */
+    char FUNC_NAME[] = "main";   /* function name */
+    char errmsg[STR_SIZE];       /* error message */
     char *hdf_grid_name = "Grid";  /* name of the grid for HDF-EOS */
     char *reflectance_infile=NULL; /* input TOA or Surface Reflectance 
                                       filename */

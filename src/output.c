@@ -399,7 +399,7 @@ int free_output
 /******************************************************************************
 MODULE:  put_output_line
 
-PURPOSE:  Writes a line or lines of data to the output file.
+PURPOSE:  Writes nlines of data to the output file.
 
 RETURN VALUE:
 Type = int
