@@ -2,7 +2,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
+
 #include "mystring.h"
+#include "error_handler.h"
 
 /******************************************************************************
 MODULE:  dup_string
@@ -43,8 +45,8 @@ char *dup_string
     char *s = NULL;   /* string pointer to use and then return to caller */
   
     /* Make sure the input string isn't NULL */
-    if (string == (char *) NULL)
-        return ((char *) NULL);
+    if (string == NULL)
+        return NULL;
 
     /* Get the string length */
     len = strlen (string);
@@ -52,16 +54,16 @@ char *dup_string
     {
         strcpy (errmsg, "Invalid string length");
         error_handler (true, FUNC_NAME, errmsg);
-        return (NULL);
+        return NULL;
     }
   
     /* Allocate memory for the length plus one for the string terminator */
-    s = (char *) calloc ((len + 1), sizeof(char));
-    if (s == (char *)NULL) 
+    s = calloc ((len + 1), sizeof(char));
+    if (s == NULL) 
     {
         strcpy (errmsg, "Unable to allocate memory for the string.");
         error_handler (true, FUNC_NAME, errmsg);
-        return (NULL);
+        return NULL;
     }
 
     /* Copy the string */
@@ -70,8 +72,8 @@ char *dup_string
         free (s);
         strcpy (errmsg, "Unable to copy the string.");
         error_handler (true, FUNC_NAME, errmsg);
-        return (NULL);
+        return NULL;
     }
   
-    return (s);
+    return s;
 }

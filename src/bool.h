@@ -2,11 +2,11 @@
 #define _BOOL_H
 
 #ifdef true
-#undef true
+    #undef true
 #endif
 
 #ifdef false
-#undef false
+    #undef false
 #endif
 
 typedef enum {false = 0, true = 1} bool;

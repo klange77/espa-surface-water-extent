@@ -1,3 +1,8 @@
+#include <math.h>
+
+#include "const.h"
+#include "mystring.h"
+#include "error_handler.h"
 #include "input.h"
 
 #define INPUT_PROVIDER ("DataProvider")
@@ -82,14 +87,17 @@ Input_t *open_input
                                  the QA bands */
   
     /* Create the Input data structure */
-    this = (Input_t *) malloc (sizeof (Input_t));
+    this = malloc (sizeof (Input_t));
     if (this == NULL) 
     {
         strcpy (errmsg, "Error allocating memory for Input data structure");
         error_handler (true, FUNC_NAME, errmsg);
-        return (NULL);
+        return NULL;
     }
   
+    this->nrefl_band = 0;
+    this->nqa_band = 0;
+
     /* Populate the filenames in the data structure */
     this->sr_file_name = dup_string (lndsr_name);
     if (this->sr_file_name == NULL)
@@ -97,7 +105,7 @@ Input_t *open_input
         free (this);
         strcpy (errmsg, "Error duplicating the surface reflectance filename");
         error_handler (true, FUNC_NAME, errmsg);
-        return (NULL);
+        return NULL;
     }
  
     /* Open the files for SD access */
@@ -109,7 +117,7 @@ Input_t *open_input
         sprintf (errmsg, "Error opening the input TOA reflectance file: %s",
             lndsr_name);
         error_handler (true, FUNC_NAME, errmsg);
-        return (NULL);
+        return NULL;
     }
     this->sr_open = true;
     
@@ -121,7 +129,7 @@ Input_t *open_input
         sprintf (errmsg, "Error reading the input metadata from file: %s",
             lndsr_name);
         error_handler (true, FUNC_NAME, errmsg);
-        return (NULL);
+        return NULL;
     }
   
     if (use_toa)
@@ -134,7 +142,7 @@ Input_t *open_input
             free (this);
             strcpy (errmsg, "Error duplicating the TOA reflectance filename");
             error_handler (true, FUNC_NAME, errmsg);
-            return (NULL);
+            return NULL;
         }        
 
         /* Open the files for SD access */
@@ -147,9 +155,14 @@ Input_t *open_input
             sprintf (errmsg, "Error opening the input surface reflectance "
                     "file: %s", lndsr_name);
             error_handler (true, FUNC_NAME, errmsg);
-            return (NULL);
+            return NULL;
         }
         this->refl_open = true;
+    }
+    else
+    {
+        this->refl_file_name = NULL;
+        this->refl_open = false;
     }
   
     /* Get SDS information and start SDS access */
@@ -445,12 +458,12 @@ Input_t *open_input
         close_input (this);
         free_input (this);
         error_handler (true, FUNC_NAME, errmsg);
-        return (NULL);
+        return NULL;
     }
 
     /* Allocate input buffers.  Reflectance buffer has multiple bands.
        Allocate PROC_NLINES of data for each band. */
-    buf = (int16 *) calloc (PROC_NLINES * this->nsamps * this->nrefl_band,
+    buf = calloc (PROC_NLINES * this->nsamps * this->nrefl_band,
         sizeof (int16));
     if (buf == NULL)
     {
@@ -459,7 +472,7 @@ Input_t *open_input
         sprintf (errmsg, "Error allocating memory for input reflectance "
             "buffer containing %d lines.", PROC_NLINES);
         error_handler (true, FUNC_NAME, errmsg);
-        return (NULL);
+        return NULL;
     }
     else
     {
@@ -469,8 +482,7 @@ Input_t *open_input
             this->refl_buf[ib] = this->refl_buf[ib-1] +
                 PROC_NLINES * this->nsamps;
     }
-    qa_buf = (uint8 *)calloc(PROC_NLINES * this->nsamps * this->nqa_band,
-                                   sizeof(uint8));
+    qa_buf = calloc(PROC_NLINES * this->nsamps * this->nqa_band, sizeof(uint8));
     if (qa_buf == NULL)
     {
         close_input (this);
@@ -478,20 +490,20 @@ Input_t *open_input
         sprintf (errmsg, "Error allocating memory for input QA cloud band "
             "buffer containing %d lines.", PROC_NLINES);
         error_handler (true, FUNC_NAME, errmsg);
-        return (NULL);    
+        return NULL;    
     }
     else
     {
         /* Set up the memory buffers for each band */
         this->qa_buf[0] = qa_buf;
         for (ib = 1; ib < this->nqa_band; ib++)
-            this->qa_buf[ib] = this->qa_buf[ib-1] +
-                PROC_NLINES * this->nsamps;
+        {
+            this->qa_buf[ib] = this->qa_buf[ib-1] + PROC_NLINES * this->nsamps;
+        }
     }
     if (!use_ledaps_mask)
     {
-        this->fmask_buf = (uint8 *)calloc(PROC_NLINES * this->nsamps,
-                                      sizeof(uint8));
+        this->fmask_buf = calloc(PROC_NLINES * this->nsamps, sizeof(uint8));
         if (this->fmask_buf == NULL)
         {
             close_input (this);
@@ -499,11 +511,11 @@ Input_t *open_input
             sprintf (errmsg, "Error allocating memory for fmask band "
                 "buffer containing %d lines.", PROC_NLINES);
             error_handler (true, FUNC_NAME, errmsg);
-            return (NULL);  
+            return NULL;  
         }  
     }
 
-    return (this);
+    return this;
 }
 
 
@@ -615,11 +627,9 @@ void free_input
         {
             for (ir = 0; ir < this->refl_sds[ib].rank; ir++)
             {
-                if (this->refl_sds[ib].dim[ir].name != NULL) 
-                    free (this->refl_sds[ib].dim[ir].name);
+                free (this->refl_sds[ib].dim[ir].name);
             }
-            if (this->refl_sds[ib].name != NULL) 
-                free (this->refl_sds[ib].name);
+            free (this->refl_sds[ib].name);
         }
     
         /* Free QA band SDSs */
@@ -627,34 +637,25 @@ void free_input
         {
             for (ir = 0; ir < this->qa_sds[ib].rank; ir++) 
             {
-                if (this->qa_sds[ib].dim[ir].name != NULL) 
-                    free(this->qa_sds[ib].dim[ir].name);
+                free(this->qa_sds[ib].dim[ir].name);
             }
-            if (this->qa_sds[ib].name != NULL) 
-                free(this->qa_sds[ib].name);
+            free(this->qa_sds[ib].name);
         }
 
         /* Free the fmask SDS */
         for (ir = 0; ir < this->fmask_sds.rank; ir++) 
         {
-            if (this->fmask_sds.dim[ir].name != NULL) 
-                free(this->fmask_sds.dim[ir].name);
+            free (this->fmask_sds.dim[ir].name);
         }
-        if (this->fmask_sds.name != NULL) 
-            free(this->fmask_sds.name);
+        free (this->fmask_sds.name);
     
         /* Free the data buffers */
-        if (this->refl_buf[0] != NULL)
-            free (this->refl_buf[0]);
-        if (this->qa_buf[0] != NULL)
-            free(this->qa_buf[0]);
-        if (this->fmask_buf != NULL)
-            free(this->fmask_buf);
+        free (this->refl_buf[0]);
+        free (this->qa_buf[0]);
+        free (this->fmask_buf);
   
-        if (this->refl_file_name != NULL)
-            free (this->refl_file_name);
-        if (this->sr_file_name != NULL)
-            free (this->sr_file_name);
+        free (this->refl_file_name);
+        free (this->sr_file_name);
 
         /* Free the data structure */
         free (this);
@@ -707,27 +708,27 @@ int get_input_refl_lines
     {
         strcpy (errmsg, "Input structure has not been opened/initialized");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
 
     if (!this->sr_open && !this->refl_open)
     {
         strcpy (errmsg, "Reflectance file has not been opened");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
 
     if (iband < 0 || iband >= this->nrefl_band)
     {
         strcpy (errmsg, "Invalid band number for the TOA reflectance file");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (iline < 0 || iline >= this->nlines)
     {
         strcpy (errmsg, "Invalid line number for TOA reflectance band");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
   
     /* Read the data */
@@ -743,10 +744,10 @@ int get_input_refl_lines
         sprintf (errmsg, "Error reading %d lines from TOA reflectance band "
             "%d starting at line %d", nlines, iband, iline);
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
   
-    return (SUCCESS);
+    return SUCCESS;
 }
 
 /******************************************************************************
@@ -793,19 +794,19 @@ int get_input_qa_line
     {
         strcpy (errmsg, "Input structure has not been opened/initialized");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (!this->sr_open)
     {
         strcpy (errmsg, "Surface reflectance file has not been opened");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (iline < 0 || iline >= this->nlines)
     {
         strcpy (errmsg, "Invalid line number for TOA reflectance band");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
   
     /* Read the data */
@@ -821,10 +822,10 @@ int get_input_qa_line
         sprintf (errmsg, "Error reading %d lines from TOA QA band 10"
             "starting at line %d", nlines, iline);
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
   
-    return (SUCCESS);
+    return SUCCESS;
 }
 
 /******************************************************************************
@@ -870,19 +871,19 @@ int get_input_fmask_line
     {
         strcpy (errmsg, "Input structure has not been opened/initialized");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (!this->sr_open)
     {
         strcpy (errmsg, "Surface reflectance file has not been opened");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (iline < 0 || iline >= this->nlines)
     {
         strcpy (errmsg, "Invalid line number for TOA reflectance band");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
   
     /* Read the data */
@@ -898,10 +899,10 @@ int get_input_fmask_line
         sprintf (errmsg, "Error reading %d lines from fmask band "
             "starting at line %d", nlines, iline);
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
   
-    return (SUCCESS);
+    return SUCCESS;
 }
 
 /******************************************************************************
@@ -946,7 +947,7 @@ int get_input_meta
     {
         strcpy (errmsg, "Reflectance files are not open");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
 
     /* Set metadata pointer to point to the global metadata for easy access */
@@ -961,7 +962,7 @@ int get_input_meta
     {
         strcpy (errmsg, "Error reading data provider attribute");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
 
     attr.type = DFNT_CHAR8;
@@ -971,7 +972,7 @@ int get_input_meta
     {
         strcpy (errmsg, "Error reading satellite attribute");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
 
     attr.type = DFNT_CHAR8;
@@ -981,7 +982,7 @@ int get_input_meta
     {
         strcpy (errmsg, "Error reading instrument attribute");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
 
     attr.type = DFNT_CHAR8;
@@ -991,13 +992,13 @@ int get_input_meta
     {
         strcpy (errmsg, "Error reading acquisition date attribute");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (date_init (date, DATE_FORMAT_DATEA_TIME, &meta->acq_date) != SUCCESS)
     {
         strcpy (errmsg, "Error converting acquisition date");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
 
     attr.type = DFNT_CHAR8;
@@ -1007,13 +1008,13 @@ int get_input_meta
     {
         strcpy (errmsg, "Error reading production date attribute");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (date_init (date, DATE_FORMAT_DATEA_TIME, &meta->prod_date) != SUCCESS)
     {
         strcpy (errmsg, "Error converting production date");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
 
     /* Get the solar zenith angle, but return the solar elevation angle.
@@ -1025,19 +1026,19 @@ int get_input_meta
     {
         strcpy (errmsg, "Error reading solar zenith attribute");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (attr.nval != 1) 
     {
         strcpy (errmsg, "Invalid number of values for solar zenith attribute");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (dval[0] < -90.0  ||  dval[0] > 90.0)
     {
         strcpy (errmsg, "Solar zenith angle is out of range");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     meta->solar_elev = (float)((90.0 - dval[0]) * RAD);
 
@@ -1048,19 +1049,19 @@ int get_input_meta
     {
         strcpy (errmsg, "Error reading solar azimuth attribute");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (attr.nval != 1) 
     {
         strcpy (errmsg, "Invalid number of values for solar azimuth attribute");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (dval[0] < -360.0  ||  dval[0] > 360.0)
     {
         strcpy (errmsg, "Solar azimuth angle is out of range");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     meta->solar_az = (float)(dval[0] * RAD);
 
@@ -1072,7 +1073,7 @@ int get_input_meta
     {
         strcpy (errmsg, "Error reading WRS system attribute");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
 
     attr.type = DFNT_INT16;
@@ -1082,7 +1083,7 @@ int get_input_meta
     {
         strcpy (errmsg, "Error reading WRS path attribute");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (attr.nval != 1) 
     {
@@ -1095,7 +1096,7 @@ int get_input_meta
     {
         strcpy (errmsg, "WRS path out of range");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
 
     attr.type = DFNT_INT16;
@@ -1105,63 +1106,22 @@ int get_input_meta
     {
         strcpy (errmsg, "Error reading WRS row attribute");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (attr.nval != 1) 
     {
         strcpy (errmsg, "Invalid number of values for WRS row attribute");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
-    meta->row = (int)floor(dval[0] + 0.5);
+    meta->row = (int) floor (dval[0] + 0.5);
     if (meta->row < 1) 
     {
         strcpy (errmsg, "WRS row out of range");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
-    }
-#if 0
-    attr.type = DFNT_INT8;
-    attr.nval = 1;
-    attr.name = INPUT_NBAND;
-    if (get_attr_double (this->refl_sds_file_id, &attr, dval) != SUCCESS)
-    {
-        strcpy (errmsg, "Error reading number of bands attribute");
-        error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
-    }
-    if (attr.nval != 1) 
-    {
-        strcpy (errmsg, "Invalid number of values for number of bands "
-            "attribute");
-        error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
-    }
-    this->nrefl_band = (int) floor (dval[0] + 0.5);
-    if (this->nrefl_band < 1  ||  this->nrefl_band > NBAND_REFL_MAX) 
-    {
-        strcpy (errmsg, "Number of bands value is out of range");
-        error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
 
-    attr.type = DFNT_INT8;
-    attr.nval = this->nrefl_band;
-    attr.name = INPUT_BANDS;
-    if (get_attr_double (this->refl_sds_file_id, &attr, dval) != SUCCESS)
-    {
-        strcpy (errmsg, "Error reading band numbers attribute");
-        error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
-    }
-    if (attr.nval != this->nrefl_band) 
-    {
-        strcpy (errmsg, "Invalid number of values for band numbers "
-            "attribute");
-        error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
-    }
-#endif
     this->nrefl_band = NBAND_REFL_MAX;
     this->nqa_band = NUM_QA_BAND;
     for (ib = 0; ib < this->nrefl_band - 1; ib++)
@@ -1175,13 +1135,13 @@ int get_input_meta
     {
         strcpy (errmsg, "Error reading pixel size attribute");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (attr.nval != 1) 
     {
         strcpy (errmsg, "Invalid number of values for pixel size attribute");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     meta->pixsize = dval[0];
 
@@ -1205,7 +1165,7 @@ int get_input_meta
         strcpy (errmsg, "Invalid number of values for the UL lat/long "
             "coordinate.");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     meta->ul_corner.lat = dval[0];
     meta->ul_corner.lon = dval[1];
@@ -1229,7 +1189,7 @@ int get_input_meta
         strcpy (errmsg, "Invalid number of values for the LR lat/long "
             "coordinate.");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     meta->lr_corner.lat = dval[0];
     meta->lr_corner.lon = dval[1];
@@ -1327,13 +1287,13 @@ int get_input_meta
         {
             strcpy (errmsg, "WRS path number out of range for WRS system 1");
             error_handler (true, FUNC_NAME, errmsg);
-            return (ERROR);
+            return ERROR;
         }
         else if (meta->row > N_LSAT_WRS1_ROWS)
         {
             strcpy (errmsg, "WRS row number out of range for WRS system 1");
             error_handler (true, FUNC_NAME, errmsg);
-            return (ERROR);
+            return ERROR;
         }
     }
     else if (!strcmp (meta->wrs_sys, "2"))
@@ -1342,21 +1302,22 @@ int get_input_meta
         {
             strcpy (errmsg, "WRS path number out of range for WRS system 2");
             error_handler (true, FUNC_NAME, errmsg);
-            return (ERROR);
+            return ERROR;
         }
         else if (meta->row > N_LSAT_WRS2_ROWS)
         {
             strcpy (errmsg, "WRS row number out of range for WRS system 2");
             error_handler (true, FUNC_NAME, errmsg);
-            return (ERROR);
+            return ERROR;
         }
     }
     else
     {
         strcpy (errmsg, "Invalid WRS system");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
 
-    return (SUCCESS);
+    return SUCCESS;
 }
+

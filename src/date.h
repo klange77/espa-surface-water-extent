@@ -2,8 +2,6 @@
 #define _DATE_H
 
 #include "bool.h"
-#include "mystring.h"
-#include "error_handler.h"
 
 /* Date/time type definition */
 #define MAX_DATE_LEN (28)

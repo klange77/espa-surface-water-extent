@@ -3,6 +3,7 @@
 
 #include "hdf.h"
 #include "mfhdf.h"
+
 #include "bool.h"
 
 #define MYHDF_MAX_RANK (4)     /* maximum rank of an SDS expected */

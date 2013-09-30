@@ -1,6 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+
+#include "const.h"
+#include "mystring.h"
+#include "error_handler.h"
 #include "date.h"
 
 /******************************************************************************

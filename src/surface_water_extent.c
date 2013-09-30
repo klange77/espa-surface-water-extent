@@ -1,6 +1,5 @@
 #include "swe.h"
 
-#define MINSIGMA 1e-5
 /******************************************************************************
 
 MODULE:  surface_water_extent
@@ -14,8 +13,10 @@ Type = None
 
 HISTORY:
 Date        Programmer       Reason
---------    ---------------  -------------------------------------
-4/26/2013   Song Guo         Original development
+----------  ---------------  -------------------------------------
+04/26/2013  Song Guo         Original development
+09/23/2013  Ron Dilley       Moved some multiplication outside the looping and
+                             some minor code cleanup
 
 NOTES:
   1. Input and output arrays are 1D arrays of size nlines * nsamps.
@@ -54,43 +55,64 @@ void surface_water_extent
     float vbb;         /* Visible brightness band */
     float sbb;         /* SWIR brightness band */
 
+    /* Compute the scaled values */
+    scale_b4lt1 = b4lt1 * refl_scale_fact;
+    scale_b4lt2 = b4lt2 * refl_scale_fact;
+    scale_b5lt1 = b5lt1 * refl_scale_fact;
+    scale_b5lt2 = b5lt2 * refl_scale_fact;
+
     /* Loop through the pixels in the array to determine the cloud cover
        classification */
     for (pix = 0; pix < nlines*nsamps; pix++)
     {
+        /* If we are in fill data... move on to next pixel */
+        if (b2[pix] == NO_VALUE
+            || b3[pix] == NO_VALUE
+            || b4[pix] == NO_VALUE
+            || b5[pix] == NO_VALUE)
+        {
+            raw_swe[pix] = NO_VALUE;
+            continue;
+        }
+
         /* Scale the current pixel for each band */
         b2_pix = b2[pix] * refl_scale_fact;
         b3_pix = b3[pix] * refl_scale_fact;
         b4_pix = b4[pix] * refl_scale_fact;
         b5_pix = b5[pix] * refl_scale_fact;
-        scale_b4lt1 = b4lt1 * refl_scale_fact;
-        scale_b4lt2 = b4lt2 * refl_scale_fact;
-        scale_b5lt1 = b5lt1 * refl_scale_fact;
-        scale_b5lt2 = b5lt2 * refl_scale_fact;
+
+        /* Generate the derived variables bands */
+        mndwi = (b2_pix - b5_pix) / (b2_pix + b5_pix);
+        vbb = b2_pix + b3_pix;
+        sbb = b4_pix + b5_pix;
 
         /* Rule 1 */
-        mndwi = (b2_pix - b5_pix) / (b2_pix + b5_pix);
         if ((mndwi - mgt) >= MINSIGMA)
             mask = 1;
         else
             mask = 0;
 
         /* Rule 2 */
-        if (((mndwi - mlt1) > MINSIGMA) && ((b4_pix - scale_b4lt1) < MINSIGMA) &&
-         ((b5_pix - scale_b5lt1) < MINSIGMA))
+        if (((mndwi - mlt1) > MINSIGMA)
+            && ((b4_pix - scale_b4lt1) < MINSIGMA)
+            && ((b5_pix - scale_b5lt1) < MINSIGMA))
+        {
             mask += 10;
+        }
 
         /* Rule 3 */
-        if (((mndwi - mlt2) > MINSIGMA) && ((b4_pix - scale_b4lt2) < MINSIGMA) &&
-         ((b5_pix - scale_b5lt2) < MINSIGMA))
+        if (((mndwi - mlt2) > MINSIGMA)
+            && ((b4_pix - scale_b4lt2) < MINSIGMA)
+            && ((b5_pix - scale_b5lt2) < MINSIGMA))
+        {
             mask += 100;
+        }
 
         /* Rule 4 */
-        vbb = b2_pix + b3_pix;
-        sbb = b4_pix + b5_pix;
         if ((vbb - sbb) >= MINSIGMA)
             mask += 1000;
 
         raw_swe[pix] = mask;
     }  /* end for pix */
 }
+

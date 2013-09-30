@@ -2,6 +2,7 @@
 #define SPACE_H
 
 #include <math.h>
+
 #include "bool.h"
 
 /* Constants */

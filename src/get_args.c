@@ -1,7 +1,9 @@
 #include <getopt.h>
+
+#include "const.h"
+#include "error_handler.h"
 #include "swe.h"
 
-#define MINSIGMA 1e-5
 /******************************************************************************
 MODULE:  get_args
 
@@ -40,7 +42,7 @@ short get_args
     int16 *b4lt2,          /* O: b4lt2 threshold */
     int16 *b5lt1,          /* O: b5lt1 threshold */
     int16 *b5lt2,          /* O: b5lt2 threshold */
-    float *per_slope,      /* O: percent slope threshold */
+    float *per_shaded,      /* O: percent shaded threshold */
     bool *write_binary,    /* O: write raw binary flag */
     bool *use_ledaps_mask, /* O: use LEDAPS cloud/shadow mask result flag */
     bool *use_zeven_thorne,/* O: use Zevenbergen&Thorne's slope algorithm 
@@ -57,7 +59,7 @@ short get_args
     static int16 default_b4lt2 = 1500;/* Default B4LT2 value */
     static int16 default_b5lt1 = 1000;/* Default B5LT1 value */
     static int16 default_b5lt2 = 1700;/* Default B5LT2 value */
-    static float default_per_s = 3.0; /* Default percent slope value */
+    static float default_per_s = 3.0; /* Default percent shaded value */
     static int verbose_flag=0;        /* Default verbose flag */
     static int binary_flag=0;         /* Default write binary flag */
     static int ledaps_mask_flag=0;    /* Default use LEDAPS mask cloud/shadow 
@@ -81,7 +83,7 @@ short get_args
         {"b4lt2", required_argument, 0, '4'},
         {"b5lt1", required_argument, 0, '5'},
         {"b5lt2", required_argument, 0, '6'},
-        {"per_slope", required_argument, 0, 'p'},
+        {"per_shaded", required_argument, 0, 'p'},
         {"help", no_argument, 0, 'h'},
         {0, 0, 0, 0}
     };
@@ -94,7 +96,7 @@ short get_args
     *b4lt2 = default_b4lt2;
     *b5lt1 = default_b5lt1;
     *b5lt2 = default_b5lt2;
-    *per_slope = default_per_s;
+    *per_shaded = default_per_s;
 
     /* Loop through all the cmd-line options */
     opterr = 0;   /* turn off getopt_long error msgs as we'll print our own */
@@ -156,8 +158,8 @@ short get_args
                 *b5lt2 = atoi(optarg);
                 break;
      
-            case 'p':  /* Percent Slope */
-                *per_slope = atof(optarg);
+            case 'p':  /* Percent Shaded */
+                *per_shaded = atof(optarg);
                 break;
      
             case '?':
@@ -211,9 +213,9 @@ short get_args
         return (ERROR);
     }
 
-    if (*per_slope < MINSIGMA || (*per_slope - 100.0) > MINSIGMA)
+    if (*per_shaded < MINSIGMA || (*per_shaded - 100.0) > MINSIGMA)
     {
-        sprintf (errmsg, "Percent slope is out of range");
+        sprintf (errmsg, "Percent shaded is out of range");
         error_handler (true, FUNC_NAME, errmsg);
         usage();
         return (ERROR);

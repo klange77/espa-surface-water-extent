@@ -1,11 +1,22 @@
+#include "const.h"
+#include "mystring.h"
+#include "error_handler.h"
+#include "input.h"
+#include "output.h"
+#include "shaded_relief.h"
 #include "swe.h"
 
-#define NO_VALUE -9999
-#define MINSIGMA 1e-5
+/* Specify the cloud values to exclude from the final SWE data band */
+#define FMASK_CLOUD_SHADOW 2
+#define FMASK_CLOUD 4
+#define CLOUD_QA 255
+#define CLOUD_SHADOW_QA 255
+
 /* Define the output SDS names to be written to the HDF-EOS file */
 /* #define NUM_OUT_SDS 6 -- defined in output.h */
-char *out_sds_names[NUM_OUT_SDS] = {"raw_swe", "slope_revised_swe",
-    "cloud_corrected_swe", "slope_cloud_swe", "ned_elevation", "scaled_slope"};
+char *out_sds_names[NUM_OUT_SDS] = {"raw_swe", "shaded_revised_swe",
+    "cloud_corrected_swe", "shaded_cloud_swe", "ned_elevation",
+    "scaled_slope", "scaled_shaded"};
 
 /******************************************************************************
 MODULE:  scene_based_swe
@@ -16,14 +27,14 @@ PURPOSE:  Calculate the surface water extent, for the current scene, using the
 RETURN VALUE:
 Type = int
 Value           Description
------           -----------
+-------         -----------
 ERROR           An error occurred during processing of the SWE
 SUCCESS         Processing was successful
 
 HISTORY:
 Date          Programmer       Reason
 ----------    ---------------  -------------------------------------
-04/22/2013    Song Guo         
+04/22/2013    Song Guo         Original implementation
                            
 NOTES:
   1. The scene-based surface water extent is based on an algorithm developed by
@@ -47,27 +58,31 @@ int main (int argc, char *argv[])
     int16 b4lt2;             /* b4lt2 threshold */
     int16 b5lt1;             /* b5lt1 threshold */
     int16 b5lt2;             /* b5lt2 threshold */
-    float per_slope;         /* percent slope threshold */
+    float per_shaded;         /* percent shaded threshold */
     char lndcal_name[STR_SIZE]; /* ledaps TOA reflectance filename */
     char lndsr_name[STR_SIZE];  /* ledpas surface reflectance filename */
     char raw_swe_bin[STR_SIZE]; /* raw SWE binary filename */
-    char slope_revised_swe_bin[STR_SIZE];  /* slope revised SWE binary filename
-                                              */
+    char shaded_revised_swe_bin[STR_SIZE]; /* shaded revised SWE binary
+                                              filename */
     char cloud_corrected_swe_bin[STR_SIZE];/* cloud corrected SWE binary 
                                               filename */
-    char slope_cloud_swe_bin[STR_SIZE];    /* slope & cloud corrected SWE
+    char shaded_cloud_swe_bin[STR_SIZE];   /* shaded & cloud corrected SWE
                                               binary filename */
-    char scaled_percent_slope_bin[STR_SIZE];/* scaled percent slope binary
-                                               filename */
-    char raw_swe_hdr[STR_SIZE];             /* raw SWE header filename */
-    char slope_revised_swe_hdr[STR_SIZE];   /* slope revised SWE header
-                                               filename*/
-    char cloud_corrected_swe_hdr[STR_SIZE]; /* cloud corrected SWE header
-                                               filename */ 
-    char slope_cloud_swe_hdr[STR_SIZE];     /* slope & cloud corrected SWE
-                                               header filename */ 
-    char scaled_percent_slope_hdr[STR_SIZE];/* scaled percent slope header
-                                               filename */
+    char scaledslope_bin[STR_SIZE];        /* scaled percent slope binary
+                                              filename */
+    char scaledshaded_bin[STR_SIZE];       /* scaled percent shaded binary
+                                              filename */
+    char raw_swe_hdr[STR_SIZE];            /* raw SWE header filename */
+    char shaded_revised_swe_hdr[STR_SIZE]; /* shaded revised SWE header
+                                              filename*/
+    char cloud_corrected_swe_hdr[STR_SIZE];/* cloud corrected SWE header
+                                              filename */ 
+    char shaded_cloud_swe_hdr[STR_SIZE];   /* shaded & cloud corrected SWE
+                                              header filename */ 
+    char scaledslope_hdr[STR_SIZE];        /* scaled percent slope header
+                                              filename */
+    char scaledshaded_hdr[STR_SIZE];       /* scaled percent shaded header
+                                              filename */
     char swe_hdf_name[STR_SIZE]; /* output SWE hdf filename */
     char swe_hdf_hdr[STR_SIZE];  /* output SWE hdf header filename */
     char scene_name[STR_SIZE];   /* input scene name */
@@ -75,10 +90,9 @@ int main (int argc, char *argv[])
     char extension[STR_SIZE];    /* input file extension */
     char FUNC_NAME[] = "main";   /* function name */
     char errmsg[STR_SIZE];       /* error message */
-    char *hdf_grid_name = "Grid";  /* name of the grid for HDF-EOS */
-    char *reflectance_infile=NULL; /* input TOA or Surface Reflectance 
-                                      filename */
-    char *dem_infile=NULL;   /* input DEM filename */
+    char *hdf_grid_name = "Grid";/* name of the grid for HDF-EOS */
+    char *reflectance_infile;    /* input TOA or Surface Reflectance filename */
+    char *dem_infile;        /* input DEM filename */
     int retval;              /* return status */
     int k;                   /* variable to keep track of the % complete */
     int band;                /* current band to be processed */
@@ -94,30 +108,35 @@ int main (int argc, char *argv[])
                                 to include padding for the 3x3 */
     int offset;              /* offset in the raw binary DEM file to seek to
                                 to begin reading the window in the DEM */
-    int out_sds_types[NUM_OUT_SDS];  /* array of image SDS types */
-    int16 *raw_swe=NULL;       /* Raw surface water extent */
-    int16 *slope_revised_swe=NULL;    /* Slope revised SWE */
-    int16 *cloud_corrected_swe=NULL;  /* Cloud corrected SWE */
-    int16 *slope_cloud_swe=NULL;      /* Slope revised & cloud corrected SWE */
-    float *percent_slope=NULL; /* percent slope values between 0.0 and 100.0 */
-    int16 *scaled_slope=NULL;  /* percent slope values between 0 and 10000 */
-    int16 *dem=NULL;           /* input DEM data (meters) */
-    Input_t *input=NULL;       /* input structure for both the TOA reflectance
-                                  and brightness temperature products */
-    Space_def_t space_def;     /* spatial definition information */
-    Output_t *output = NULL;   /* output structure and metadata */
+    int out_sds_types[NUM_OUT_SDS];    /* array of image SDS types */
+    int16 *raw_swe;                    /* Raw surface water extent */
+    int16 *shaded_revised_swe;  /* Shaded revised SWE */
+    int16 *cloud_corrected_swe; /* Cloud corrected SWE */
+    int16 *shaded_cloud_swe;    /* Shaded revised & cloud corrected SWE */
+    float *percent_slope;     /* percent slope values between 0.0 and 100.0 */
+    float *percent_shaded;    /* percent shaded values between 0.0 and 100.0 */
+    uint8 *deep_shadow_mask;  /* deep shadow mask */
+    int16 *scaled_slope;  /* percent slope values between 0 and 10000 */
+    int16 *scaled_shaded; /* percent shaded values between 0 and 10000 */
+    int16 *dem;           /* input DEM data (meters) */
+    Input_t *input;       /* input structure for both the TOA reflectance
+                                    and brightness temperature products */
+    Space_def_t space_def;       /* spatial definition information */
+    Output_t *output;     /* output structure and metadata */
 
-    FILE *dem_fptr=NULL;             /* input scene-based DEM file pointer */
-    FILE *raw_swe_fptr=NULL;         /* raw SWE file pointer */
-    FILE *slope_swe_fptr=NULL;       /* slope revised SWE file pointer */
-    FILE *cloud_swe_fptr=NULL;       /* cloud corrected SWE file pointer */
-    FILE *slope_cloud_swe_fptr=NULL; /* slope revised & cloud corrected SWE 
-                                        file pointer */
-    FILE *dem_output_fptr=NULL;      /* DEM output file pointer */
-    FILE *scaled_slope_fptr=NULL;    /* slope revised & cloud corrected SWE 
-                                        file pointer */
-    char dem_bin[STR_SIZE];          /* output dem binary file name */
-    char dem_envi_hdr[STR_SIZE];     /* output dem binary file header */
+    FILE *dem_fptr;              /* input scene-based DEM file pointer */
+    FILE *raw_swe_fptr;          /* raw SWE file pointer */
+    FILE *shaded_swe_fptr;       /* shaded revised SWE file pointer */
+    FILE *cloud_swe_fptr;        /* cloud corrected SWE file pointer */
+    FILE *shaded_cloud_swe_fptr; /* shaded revised & cloud corrected SWE 
+                                    file pointer */
+    FILE *dem_output_fptr;       /* DEM output file pointer */
+    FILE *scaled_slope_fptr;     /* slope revised & cloud corrected SWE 
+                                    file pointer */
+    FILE *scaled_shaded_fptr;    /* shaded revised & cloud corrected SWE 
+                                    file pointer */
+    char dem_bin[STR_SIZE];             /* output dem binary file name */
+    char dem_envi_hdr[STR_SIZE];        /* output dem binary file header */
     bool use_toa;
 
     printf ("Starting scene-based surface water extent processing ...\n");
@@ -126,13 +145,13 @@ int main (int argc, char *argv[])
        Landsat TOA reflectance product and the DEM */
     retval = get_args (argc, argv, &reflectance_infile, &dem_infile,
                        &mgt, &mlt1, &mlt2, &b4lt1, &b4lt2, &b5lt1, &b5lt2, 
-                       &per_slope, &write_binary, &use_ledaps_mask, 
+                       &per_shaded, &write_binary, &use_ledaps_mask, 
                        &use_zeven_thorne, &verbose);
     if (retval != SUCCESS)
     {   
         sprintf (errmsg, "Error calling get_args");
         error_handler (true, FUNC_NAME, errmsg);
-        exit (ERROR);
+        return EXIT_FAILURE;
     }
 
     /* Provide user information if verbose is turned on */
@@ -147,45 +166,59 @@ int main (int argc, char *argv[])
         printf ("  B4LT2: %d\n", b4lt2);
         printf ("  B5LT1: %d\n", b5lt1);
         printf ("  B5LT2: %d\n", b5lt2);
-        printf ("  Percent_slope: %f\n", per_slope);
+        printf ("  Percent_shaded: %f\n", per_shaded);
         printf ("write_binary: %d\n", write_binary);
         printf ("use_ledaps_mask: %d\n", use_ledaps_mask);
         printf ("use_zeven_thorne: %d\n", use_zeven_thorne);
         if (write_binary)
+        {
             printf ("    -- Also writing raw binary output.\n");
+        }
     }
 
     split_filename(reflectance_infile, directory, scene_name, extension);
 
     if (verbose)
+    {
         printf("directory, scene_name, extension=%s,%s,%s\n", 
             directory, scene_name, extension);
+    }
     sprintf(lndsr_name, "%slndsr.%s.hdf", directory, scene_name);
     sprintf(lndcal_name, "%slndcal.%s.hdf", directory, scene_name);
     if (strstr(reflectance_infile, "lndcal") != NULL)
+    {
         use_toa = true;
+    }
     else
+    {
         use_toa = false;
+    }
     sprintf(swe_hdf_name, "%sswe.%s.hdf", directory, scene_name);
     if (write_binary)
     {
         sprintf(raw_swe_bin, "%sraw_swe.bin", directory);
         sprintf(raw_swe_hdr, "%sraw_swe.bin.hdr", directory);
-        sprintf(slope_revised_swe_bin, "%sslope_revised_swe.bin", directory);
-        sprintf(slope_revised_swe_hdr, "%sslope_revised_swe.bin.hdr", 
+
+        sprintf(shaded_revised_swe_bin, "%sshaded_revised_swe.bin", directory);
+        sprintf(shaded_revised_swe_hdr, "%sshaded_revised_swe.bin.hdr", 
             directory);
+
         sprintf(cloud_corrected_swe_bin, "%scloud_corrected_swe.bin", 
             directory);
         sprintf(cloud_corrected_swe_hdr, "%scloud_corrected_swe.bin.hdr", 
             directory);
-        sprintf(slope_cloud_swe_bin, "%sslope_cloud_swe.bin", directory);
-        sprintf(slope_cloud_swe_hdr, "%sslope_cloud_swe.bin.hdr", directory);
+
+        sprintf(shaded_cloud_swe_bin, "%sshaded_cloud_swe.bin", directory);
+        sprintf(shaded_cloud_swe_hdr, "%sshaded_cloud_swe.bin.hdr", directory);
+
         sprintf(dem_bin, "%sdem_output.bin", directory);
         sprintf(dem_envi_hdr, "%sdem_output.bin.hdr", directory);
-        sprintf(scaled_percent_slope_bin, "%sscaled_percent_slope.bin", 
-            directory);
-        sprintf(scaled_percent_slope_hdr, "%sscaled_percent_slope.bin.hdr", 
-            directory);
+
+        sprintf(scaledslope_bin, "%sscaledslope.bin", directory);
+        sprintf(scaledslope_hdr, "%sscaledslope.bin.hdr", directory);
+
+        sprintf(scaledshaded_bin, "%sscaledshaded.bin", directory);
+        sprintf(scaledshaded_hdr, "%sscaledshaded.bin.hdr", directory);
     }
     if (verbose)
     {
@@ -194,14 +227,14 @@ int main (int argc, char *argv[])
         if (write_binary)
         {
             printf("raw_swe_binary_name = %s\n", raw_swe_bin); 
-            printf("slope_revised_swe_binary_name = %s\n", 
-                slope_revised_swe_bin); 
+            printf("shaded_revised_swe_binary_name = %s\n", 
+                shaded_revised_swe_bin); 
             printf("cloud_corrected_swe_binary_name = %s\n", 
                 cloud_corrected_swe_bin); 
-            printf("slope_revised_cloud_corrected_swe_binary_name = %s\n", 
-                slope_cloud_swe_bin); 
-            printf("scaled_percent_slope_binary_name = %s\n", 
-                scaled_percent_slope_bin); 
+            printf("shaded_revised_cloud_corrected_swe_binary_name = %s\n", 
+                shaded_cloud_swe_bin); 
+            printf("scaledslope_binary_name = %s\n", scaledslope_bin); 
+            printf("scaledshaded_binary_name = %s\n", scaledshaded_bin); 
         }
     }
 
@@ -209,11 +242,12 @@ int main (int argc, char *argv[])
     if (write_binary)
     {
         raw_swe_fptr = fopen (raw_swe_bin, "wb");
-        slope_swe_fptr = fopen (slope_revised_swe_bin, "wb");
+        shaded_swe_fptr = fopen (shaded_revised_swe_bin, "wb");
         cloud_swe_fptr = fopen (cloud_corrected_swe_bin, "wb");
-        slope_cloud_swe_fptr = fopen (slope_cloud_swe_bin, "wb");
+        shaded_cloud_swe_fptr = fopen (shaded_cloud_swe_bin, "wb");
         dem_output_fptr = fopen (dem_bin, "wb");
-        scaled_slope_fptr = fopen (scaled_percent_slope_bin, "wb");
+        scaled_slope_fptr = fopen (scaledslope_bin, "wb");
+        scaled_shaded_fptr = fopen (scaledshaded_bin, "wb");
     }
 
     /* Open the TOA reflectance or surface reflectance products, set up
@@ -225,7 +259,7 @@ int main (int argc, char *argv[])
         sprintf (errmsg, "Error opening/reading the reflectance file: %s "
             "and %s", lndcal_name, lndsr_name);
         error_handler (true, FUNC_NAME, errmsg);
-        exit (ERROR);
+        return EXIT_FAILURE;
     }
     input->use_toa = use_toa;
 
@@ -243,59 +277,54 @@ int main (int argc, char *argv[])
         printf ("  Solar azimuth angle: %f radians (%f degrees)\n",
             input->meta.solar_az, input->meta.solar_az * DEG);
         printf ("  Fill value (refl): %d\n", input->refl_fill);
-        printf ("  Scale factor (refl): %f\n",
-            input->refl_scale_fact);
+        printf ("  Scale factor (refl): %f\n", input->refl_scale_fact);
         printf ("  Saturation value (refl, btemp): %d\n",
             input->refl_saturate_val);
     }
 
     /* Allocate memory for the raw Surface Water Extent (SWE) */
-    raw_swe = (int16 *) calloc (PROC_NLINES * input->nsamps,
-        sizeof (int16));
+    raw_swe = calloc (PROC_NLINES * input->nsamps, sizeof (int16));
     if (raw_swe == NULL)
     {
         sprintf (errmsg, "Error allocating memory for the raw SWE");
         error_handler (true, FUNC_NAME, errmsg);
         close_input (input);
         free_input (input);
-        exit (ERROR);
+        return EXIT_FAILURE;
     }
 
-    /* Allocate memory for the slope revised Surface Water Extent (SWE) */
-    slope_revised_swe = (int16 *) calloc (PROC_NLINES * input->nsamps,
-        sizeof (int16));
-    if (slope_revised_swe == NULL)
+    /* Allocate memory for the shaded revised Surface Water Extent (SWE) */
+    shaded_revised_swe = calloc (PROC_NLINES * input->nsamps, sizeof (int16));
+    if (shaded_revised_swe == NULL)
     {
-        sprintf (errmsg, "Error allocating memory for the slope revised SWE");
+        sprintf (errmsg, "Error allocating memory for the shaded revised SWE");
         error_handler (true, FUNC_NAME, errmsg);
         close_input (input);
         free_input (input);
-        exit (ERROR);
+        return EXIT_FAILURE;
     }
 
     /* Allocate memory for the cloud corrected Surface Water Extent (SWE) */
-    cloud_corrected_swe = (int16 *) calloc (PROC_NLINES * input->nsamps,
-        sizeof (int16));
+    cloud_corrected_swe = calloc (PROC_NLINES * input->nsamps, sizeof (int16));
     if (cloud_corrected_swe == NULL)
     {
         sprintf (errmsg, "Error allocating memory for the cloud corrected SWE");
         error_handler (true, FUNC_NAME, errmsg);
         close_input (input);
         free_input (input);
-        exit (ERROR);
+        return EXIT_FAILURE;
     }
 
-    /* Allocate memory for the slope revised & cloud corrected SWE */
-    slope_cloud_swe = (int16 *) calloc (PROC_NLINES * input->nsamps,
-        sizeof (int16));
-    if (slope_cloud_swe == NULL)
+    /* Allocate memory for the shaded revised & cloud corrected SWE */
+    shaded_cloud_swe = calloc (PROC_NLINES * input->nsamps, sizeof (int16));
+    if (shaded_cloud_swe == NULL)
     {
-        sprintf (errmsg, "Error allocating memory for the slope revised & "
+        sprintf (errmsg, "Error allocating memory for the shaded revised & "
             "cloud corrected SWE");
         error_handler (true, FUNC_NAME, errmsg);
         close_input (input);
         free_input (input);
-        exit (ERROR);
+        return EXIT_FAILURE;
     }
 
     /* Get the projection and spatial information from the input TOA
@@ -308,7 +337,7 @@ int main (int argc, char *argv[])
         error_handler (true, FUNC_NAME, errmsg);
         close_input (input);
         free_input (input);
-        exit (ERROR);
+        return EXIT_FAILURE;
     }
 
     /* Create and open the output HDF-EOS file */
@@ -318,7 +347,7 @@ int main (int argc, char *argv[])
         error_handler (true, FUNC_NAME, errmsg);
         close_input (input);
         free_input (input);
-        exit (ERROR);
+        return EXIT_FAILURE;
     }
 
     output = open_output (swe_hdf_name, NUM_OUT_SDS, out_sds_names,
@@ -329,7 +358,7 @@ int main (int argc, char *argv[])
         error_handler (true, FUNC_NAME, errmsg);
         close_input (input);
         free_input (input);
-        exit (ERROR);
+        return EXIT_FAILURE;
     }
 
     /* Open the DEM for reading raw binary */
@@ -340,46 +369,86 @@ int main (int argc, char *argv[])
         error_handler (true, FUNC_NAME, errmsg);
         close_input (input);
         free_input (input);
-        exit (ERROR);
+        return EXIT_FAILURE;
     }
 
     /* Allocate memory for the DEM, which will hold PROC_NLINES of data.  The
        DEM should be the same size as the input scene, since the scene was
        used to resample the DEM.  To process the shaded relieve we need to
        read an extra two lines to process a 3x3 window. */
-    dem = (int16 *) calloc ((PROC_NLINES+2) * input->nsamps, sizeof(int16));
+    dem = calloc ((PROC_NLINES+2) * input->nsamps, sizeof(int16));
     if (dem == NULL)
     {
         sprintf (errmsg, "Error allocating memory for the DEM data");
         error_handler (true, FUNC_NAME, errmsg);
         close_input (input);
         free_input (input);
-        exit (ERROR);
+        return EXIT_FAILURE;
     }
 
     /* Allocate memory for the percent_slope */
-    percent_slope = (float *) calloc (PROC_NLINES * input->nsamps,
-        sizeof (float));
+    percent_slope = calloc (PROC_NLINES * input->nsamps, sizeof(float));
     if (percent_slope == NULL)
     {
-        sprintf (errmsg, "Error allocating memory for the percent slope");
+        sprintf (errmsg, "Error allocating memory for the percent shaded");
         error_handler (true, FUNC_NAME, errmsg);
         close_input (input);
         free_input (input);
-        exit (ERROR);
+        return EXIT_FAILURE;
+    }
+
+    /* Allocate memory for the percent_shaded */
+    percent_shaded = calloc (PROC_NLINES * input->nsamps, sizeof(float));
+    if (percent_shaded == NULL)
+    {
+        sprintf (errmsg, "Error allocating memory for the percent shaded");
+        error_handler (true, FUNC_NAME, errmsg);
+        close_input (input);
+        free_input (input);
+        return EXIT_FAILURE;
+    }
+
+    /* Allocate memory for the deep_shadow_mask */
+    deep_shadow_mask = calloc (PROC_NLINES * input->nsamps, sizeof(uint8));
+    if (deep_shadow_mask == NULL)
+    {
+        sprintf (errmsg, "Error allocating memory for the percent shaded");
+        error_handler (true, FUNC_NAME, errmsg);
+        close_input (input);
+        free_input (input);
+        return EXIT_FAILURE;
     }
 
     /* Allocate memory for the scaled_slope */
-    scaled_slope = (int16 *) calloc (PROC_NLINES * input->nsamps,
-        sizeof (int16));
+    scaled_slope = calloc (PROC_NLINES * input->nsamps, sizeof (int16));
     if (scaled_slope == NULL)
     {
         sprintf (errmsg, "Error allocating memory for the scaled");
         error_handler (true, FUNC_NAME, errmsg);
         close_input (input);
         free_input (input);
-        exit (ERROR);
+        return EXIT_FAILURE;
     }
+
+    /* Allocate memory for the scaled_shaded */
+    scaled_shaded = calloc (PROC_NLINES * input->nsamps, sizeof (int16));
+    if (scaled_shaded == NULL)
+    {
+        sprintf (errmsg, "Error allocating memory for the scaled");
+        error_handler (true, FUNC_NAME, errmsg);
+        close_input (input);
+        free_input (input);
+        return EXIT_FAILURE;
+    }
+
+    /* Set the output pointers the allocated memory */
+    output->buf[0] = raw_swe;
+    output->buf[1] = shaded_revised_swe;
+    output->buf[2] = cloud_corrected_swe;
+    output->buf[3] = shaded_cloud_swe;
+    output->buf[4] = &dem[input->nsamps];
+    output->buf[5] = scaled_slope;
+    output->buf[6] = scaled_shaded;
 
     /* Print the processing status if verbose */
     if (verbose)
@@ -389,14 +458,16 @@ int main (int argc, char *argv[])
     }
 
     /* Loop through the lines and samples in the reflectance and
-       QA products or Famsk prodcuts, computing the surface water extent */
+       QA products or Famsk products, computing the surface water extent */
     nlines_proc = PROC_NLINES;
     k = 0;
     for (line = 0; line < input->nlines; line += PROC_NLINES)
     {
         /* Do we have nlines_proc left to process? */
         if (line + nlines_proc >= input->nlines)
+        {
             nlines_proc = input->nlines - line;
+        }
 
         /* Update processing status? */
         if (verbose && (100 * line / input->nlines > k))
@@ -413,8 +484,8 @@ int main (int argc, char *argv[])
            reflectance bands */
         for (band = 0; band < input->nrefl_band; band++)
         {
-            if (get_input_refl_lines (input, band, line, nlines_proc) !=
-                SUCCESS)
+            if (get_input_refl_lines (input, band, line, nlines_proc)
+                != SUCCESS)
             {
                 sprintf (errmsg, "Error reading %d lines from band %d of the "
                     "TOA reflectance file starting at line %d", nlines_proc,
@@ -422,7 +493,7 @@ int main (int argc, char *argv[])
                 error_handler (true, FUNC_NAME, errmsg);
                 close_input (input);
                 free_input (input);
-                exit (ERROR);
+                return EXIT_FAILURE;
             }
 
             /* Read the current lines for the qa cloud band */
@@ -433,7 +504,7 @@ int main (int argc, char *argv[])
                 error_handler (true, FUNC_NAME, errmsg);
                 close_input (input);
                 free_input (input);
-                exit (ERROR);
+                return EXIT_FAILURE;
             }
         }
 
@@ -448,19 +519,22 @@ int main (int argc, char *argv[])
                 error_handler (true, FUNC_NAME, errmsg);
                 close_input (input);
                 free_input (input);
-                exit (ERROR);
+                return EXIT_FAILURE;
             }
         } 
 
         /* Set up mask for the TOA reflectance values */
-        surface_water_extent(input->refl_buf[1] /*b2*/, 
-            input->refl_buf[2] /*b3*/, input->refl_buf[3] /*b4*/, 
-            input->refl_buf[4] /*b5*/, nlines_proc, input->nsamps, 
+        surface_water_extent(
+            input->refl_buf[1] /*b2*/, 
+            input->refl_buf[2] /*b3*/,
+            input->refl_buf[3] /*b4*/, 
+            input->refl_buf[4] /*b5*/,
+            nlines_proc, input->nsamps, 
             input->refl_scale_fact, mgt, mlt1, mlt2, b4lt1, b4lt2, b5lt1, 
             b5lt2, raw_swe);
 
         /* Prepare to read the current lines from the DEM.  We need an extra
-           line at the start and end for the slope calculation.  If we are just
+           line at the start and end for the shaded calculation.  If we are just
            starting at line 0, then read an extra line from the end of the
            image window.  If we aren't at line 0, then read an extra line at
            the start and end of the image window.  If we are at the end of the
@@ -477,7 +551,9 @@ int main (int argc, char *argv[])
             dem_top = true;
         }
         if (line + nlines_proc < input->nlines)
+        {
             extra_lines_end = 1;
+        }
         else
         {
             extra_lines_end = 0;
@@ -486,8 +562,8 @@ int main (int argc, char *argv[])
 
         /* Start reading from the start_line and read
            nlines_proc + extra_lines_start + extra_lines_end lines */
-        nvals_to_read = (nlines_proc+extra_lines_start+extra_lines_end) *
-            input->nsamps;
+        nvals_to_read =
+            (nlines_proc + extra_lines_start + extra_lines_end) * input->nsamps;
         offset = sizeof (int16) * start_line * input->nsamps;
         fseek (dem_fptr, offset, SEEK_SET);
         if (fread (dem, sizeof (int16), nvals_to_read, dem_fptr)
@@ -499,139 +575,150 @@ int main (int argc, char *argv[])
             close_input (input);
             free_input (input);
             fclose (dem_fptr);
-            exit (ERROR);
+            return EXIT_FAILURE;
         }
 
-        /* Reset the percent slope to 0s for the current window.  The first
+        /* Reset the percent shaded to 0s for the current window.  The first
            and last pixel will not get processed.  */
-        memset ((void *) percent_slope, 0, PROC_NLINES * input->nsamps
-            * sizeof (float));
+        memset (percent_slope, 0, PROC_NLINES * input->nsamps * sizeof(float));
+        memset (percent_shaded, 0, PROC_NLINES * input->nsamps * sizeof(float));
 
         /* Compute the percent slope */
         retval = calc_slope(dem, dem_top, dem_bottom, use_zeven_thorne, 
-                     nlines_proc, input->nsamps, input->meta.pixsize, 
-                     input->meta.pixsize, percent_slope);
+            nlines_proc, input->nsamps, input->meta.pixsize, 
+            input->meta.pixsize, percent_slope);
         if (retval != SUCCESS)
         {   
             sprintf (errmsg, "Error calling calc_slope");
             error_handler (true, FUNC_NAME, errmsg);
-            exit (ERROR);
+            return EXIT_FAILURE;
         }
-    
+
+        /* Compute the shaded relief and associated terrain-derived deep
+           shadow mask */
+        deep_shadow (dem, dem_top, dem_bottom, nlines_proc, 
+            input->nsamps, input->meta.pixsize, input->meta.pixsize,
+            input->meta.solar_elev, input->meta.solar_az,
+            percent_shaded, deep_shadow_mask);
+   
         for (pix = 0; pix < nlines_proc * input->nsamps; pix++)
         {
+            /* Set SWE mask values to NO_VALUE if either band data is -9999 */
+            if (input->refl_buf[1][pix] == NO_VALUE ||
+                input->refl_buf[2][pix] == NO_VALUE ||
+                input->refl_buf[3][pix] == NO_VALUE ||
+                input->refl_buf[4][pix] == NO_VALUE)
+            {
+                raw_swe[pix] = NO_VALUE;
+                cloud_corrected_swe[pix] = NO_VALUE;
+                shaded_revised_swe[pix] = NO_VALUE;
+                shaded_cloud_swe[pix] = NO_VALUE;
+                scaled_slope[pix] = NO_VALUE;
+                scaled_shaded[pix] = NO_VALUE;
+                continue;
+            }
+
             if (!use_ledaps_mask)
             {
                 /* Cloud screening to get cloud corrected SWE */
-                if (input->fmask_buf[pix] == 2 || input->fmask_buf[pix] == 4)
+                if (input->fmask_buf[pix] == FMASK_CLOUD_SHADOW
+                    || input->fmask_buf[pix] == FMASK_CLOUD)
+                {
                     cloud_corrected_swe[pix] = NO_VALUE;
+                }
                 else
+                {
                     cloud_corrected_swe[pix] = raw_swe[pix];
-
-                /* Use percent slope to get slope revised SWE */
-                if ((percent_slope[pix] - per_slope) <= MINSIGMA)
-                    slope_revised_swe[pix] = raw_swe[pix];
-                else
-                    slope_revised_swe[pix] = 0;
-
-                /* Cloud screening to get slope revised cloud corrected SWE */
-                if (input->fmask_buf[pix] == 2 || input->fmask_buf[pix] == 4)
-                    slope_cloud_swe[pix] = NO_VALUE;
-                else
-                    slope_cloud_swe[pix] = slope_revised_swe[pix];
+                }
             }
             else
             {
                 /* Cloud screening to get cloud corrected SWE */
-                if (input->qa_buf[2][pix] == 255 || input->qa_buf[3][pix] == 
-                    255)
+                if (input->qa_buf[2][pix] == CLOUD_QA
+                    || input->qa_buf[3][pix] == CLOUD_SHADOW_QA)
+                {
                     cloud_corrected_swe[pix] = NO_VALUE;
+                }
                 else
+                {
                     cloud_corrected_swe[pix] = raw_swe[pix];
-
-                /* Use percent slope to get slope revised SWE */
-                if ((percent_slope[pix] - per_slope) <= MINSIGMA)
-                    slope_revised_swe[pix] = raw_swe[pix];
-                else
-                    slope_revised_swe[pix] = 0;
-
-                /* Cloud screening to get slope revised cloud corrected SWE */
-                if (input->qa_buf[2][pix] == 255 || input->qa_buf[3][pix] == 
-                    255)
-                    slope_cloud_swe[pix] = NO_VALUE;
-                else
-                    slope_cloud_swe[pix] = slope_revised_swe[pix];
+                }
             }
 
-            /* Set SWE mask values to NO_VALUE if either band data is -9999 */
-            if (input->refl_buf[1][pix] == -9999 ||
-                input->refl_buf[2][pix] == -9999 ||
-                input->refl_buf[3][pix] == -9999 ||
-                input->refl_buf[4][pix] == -9999)
+            /* Use percent shaded to get shaded revised SWE */
+            if ((percent_shaded[pix] - per_shaded) <= MINSIGMA)
             {
-                raw_swe[pix] = NO_VALUE;
-                cloud_corrected_swe[pix] = NO_VALUE;
-                slope_revised_swe[pix] = NO_VALUE;
-                slope_cloud_swe[pix] = NO_VALUE;
+                shaded_revised_swe[pix] = NO_VALUE;
+            }
+            else
+            {
+                shaded_revised_swe[pix] = raw_swe[pix];
             }
 
-            /* Convert percent slope to int16 with values between 0 & 10000 */
-            scaled_slope[pix] =  (int)rint(100.0 * percent_slope[pix]);
+            /* Cloud screening to get shaded revised cloud corrected SWE */
+            if (cloud_corrected_swe[pix] == NO_VALUE)
+            {
+                shaded_cloud_swe[pix] = NO_VALUE;
+            }
+            else
+            {
+                shaded_cloud_swe[pix] = shaded_revised_swe[pix];
+            }
+
+            /* Convert percent shaded to int16 with values between 0 & 10000 */
+            scaled_slope[pix] = (int) (100.0 * percent_slope[pix]);
+            scaled_shaded[pix] = (int) (100.0 * percent_shaded[pix]);
         } /* end for pix */
 
         /* write the results to raw binary output */
         if (write_binary)
         {
-            fwrite (raw_swe, sizeof(int16), nlines_proc * input->nsamps,
-                raw_swe_fptr);
-            fwrite (slope_revised_swe, sizeof(int16), nlines_proc * 
-                    input->nsamps, slope_swe_fptr);
-            fwrite (cloud_corrected_swe, sizeof(int16), nlines_proc * 
-                    input->nsamps, cloud_swe_fptr);
-            fwrite (slope_cloud_swe, sizeof(int16), nlines_proc * 
-                    input->nsamps, slope_cloud_swe_fptr);
-            fwrite (&dem[input->nsamps], sizeof(int16), nlines_proc * 
-                    input->nsamps, dem_output_fptr);
-            fwrite (scaled_slope, sizeof(int16), nlines_proc * input->nsamps, 
-                    scaled_slope_fptr);
+            int number_of_values = nlines_proc * input->nsamps;
+            fwrite (raw_swe, sizeof(int16), number_of_values, raw_swe_fptr);
+            fwrite (shaded_revised_swe, sizeof(int16),
+                number_of_values, shaded_swe_fptr);
+            fwrite (cloud_corrected_swe, sizeof(int16),
+                number_of_values, cloud_swe_fptr);
+            fwrite (shaded_cloud_swe, sizeof(int16),
+                number_of_values, shaded_cloud_swe_fptr);
+            fwrite (&dem[input->nsamps], sizeof(int16),
+                number_of_values, dem_output_fptr);
+            fwrite (scaled_slope, sizeof(int16),
+                number_of_values, scaled_slope_fptr);
+            fwrite (scaled_shaded, sizeof(int16),
+                number_of_values, scaled_shaded_fptr);
         }
-
-        /* Write the data to the HDF file */
-        output->buf[0] = raw_swe;
-        output->buf[1] = slope_revised_swe;
-        output->buf[2] = cloud_corrected_swe;
-        output->buf[3] = slope_cloud_swe;
-        output->buf[4] = &dem[input->nsamps];
-        output->buf[5] = scaled_slope;
 
         for (band = 0; band < NUM_OUT_SDS; band++)
         {
             if (put_output_line (output, band, line, nlines_proc) != SUCCESS)
             {
                 sprintf (errmsg, "Writing output data to HDF for band %d", 
-                         band);
+                    band);
                 error_handler (true, FUNC_NAME, errmsg);
                 close_input (input);
                 free_input (input);
-                exit (ERROR);
+                return EXIT_FAILURE;
             }
         }
     }  /* end for line */
 
-
     /* Print the processing status if verbose */
     if (verbose)
+    {
         printf ("  Surface Water Extent -- %% complete: 100%%\n");
+    }
 
     /* Temporary -- close the mask output files */
     if (write_binary)
     {
         fclose (raw_swe_fptr);
-        fclose (slope_swe_fptr);
+        fclose (shaded_swe_fptr);
         fclose (cloud_swe_fptr);
-        fclose (slope_cloud_swe_fptr);
+        fclose (shaded_cloud_swe_fptr);
         fclose (dem_output_fptr);
         fclose (scaled_slope_fptr);
+        fclose (scaled_shaded_fptr);
     }
 
     /* Write the output metadata */
@@ -642,7 +729,7 @@ int main (int argc, char *argv[])
         error_handler (true, FUNC_NAME, errmsg);
         close_input (input);
         free_input (input);
-        exit (ERROR);
+        return EXIT_FAILURE;
     }
 
     /* Close the reflectance and fmask products and the output surface water
@@ -653,107 +740,97 @@ int main (int argc, char *argv[])
 
     /* Write the spatial information, after the file has been closed */
     for (band = 0; band < NUM_OUT_SDS; band++)
+    {
         out_sds_types[band] = DFNT_INT16;
+    }
     if (put_space_def_hdf (&space_def, swe_hdf_name, NUM_OUT_SDS, out_sds_names,
         out_sds_types, hdf_grid_name) != SUCCESS)
     {
-        sprintf (errmsg, "Error writing spatial metadata to the output HDF "
-            "file");
+        sprintf (errmsg,
+            "Error writing spatial metadata to the output HDF file");
         error_handler (true, FUNC_NAME, errmsg);
         close_input (input);
         free_input (input);
-        exit (ERROR);
+        return EXIT_FAILURE;
     }
 
     /* Write SWE HDF header to add in envi map info */
     sprintf (swe_hdf_hdr, "%s.hdr", swe_hdf_name);
     if (write_envi_hdr (swe_hdf_hdr, HDF_FILE, input, &space_def) == ERROR)
     {
-        sprintf (errmsg, "Error writing the ENVI header for the "
-                "SWE HDF file");
+        sprintf (errmsg,
+            "Error writing the ENVI header for the SWE HDF file");
         error_handler (true, FUNC_NAME, errmsg);
         close_input (input);
         free_input (input);
-        exit (ERROR);
+        return EXIT_FAILURE;
     }
 
     /* write the ENVI headers */
     if (write_binary)
     {
         if (verbose)
+        {
             printf ("  Creating ENVI headers for each mask.\n");
+        }
         if (write_envi_hdr (raw_swe_hdr, BINARY_FILE, input, &space_def)
             == ERROR)
-            exit (ERROR);
-        if (write_envi_hdr (slope_revised_swe_hdr, BINARY_FILE, input,
+        {
+            return EXIT_FAILURE;
+        }
+        if (write_envi_hdr (shaded_revised_swe_hdr, BINARY_FILE, input,
             &space_def) == ERROR)
-            exit (ERROR);
-        if (write_envi_hdr (cloud_corrected_swe_hdr, BINARY_FILE, input, &space_def)
-            == ERROR)
-            exit (ERROR);
-        if (write_envi_hdr (slope_cloud_swe_hdr, BINARY_FILE, input, &space_def)
-            == ERROR)
-            exit (ERROR);
-        if (write_envi_hdr (scaled_percent_slope_hdr, BINARY_FILE, input, 
+        {
+            return EXIT_FAILURE;
+        }
+        if (write_envi_hdr (cloud_corrected_swe_hdr, BINARY_FILE, input,
             &space_def) == ERROR)
-            exit (ERROR);
+        {
+            return EXIT_FAILURE;
+        }
+        if (write_envi_hdr (shaded_cloud_swe_hdr, BINARY_FILE, input,
+            &space_def) == ERROR)
+        {
+            return EXIT_FAILURE;
+        }
+        if (write_envi_hdr (scaledshaded_hdr, BINARY_FILE, input, 
+            &space_def) == ERROR)
+        {
+            return EXIT_FAILURE;
+        }
         if (write_envi_hdr (dem_envi_hdr, BINARY_FILE, input, &space_def)
             == ERROR)
-            exit (ERROR);
+        {
+            return EXIT_FAILURE;
+        }
     }
 
     /* Free the TOA reflectance and brightness temperature pointers */
     free_input (input);
 
     /* Free the mask pointers */
-    if (raw_swe != NULL)
-    {
-        free (raw_swe);
-        raw_swe = NULL;
-    }
-    if (slope_revised_swe != NULL)
-    {
-        free (slope_revised_swe);
-        slope_revised_swe = NULL;
-    }
-    if (cloud_corrected_swe != NULL)
-    {
-        free (cloud_corrected_swe);
-        cloud_corrected_swe = NULL;
-    }
-    if (slope_cloud_swe != NULL)
-    {
-        free (slope_cloud_swe);
-        slope_cloud_swe = NULL;
-    }
-    if (percent_slope != NULL)
-    {
-        free (percent_slope);
-        percent_slope = NULL;
-    }
-    if (scaled_slope != NULL)
-    {
-        free (scaled_slope);
-        scaled_slope = NULL;
-    }
+    free (raw_swe);
+    free (shaded_revised_swe);
+    free (cloud_corrected_swe);
+    free (shaded_cloud_swe);
+    free (percent_slope);
+    free (percent_shaded);
+    free (deep_shadow_mask);
+    free (scaled_slope);
+    free (scaled_shaded);
 
     /* close and free the dem pointers */
     fclose (dem_fptr);
-    if (dem != NULL)
-    {
-        free (dem);
-        dem = NULL;
-    }
+    free (dem);
 
     /* Free the filename pointers */
-    if (reflectance_infile != NULL)
-        free (reflectance_infile);
-    if (dem_infile != NULL)
-        free (dem_infile);
+    free (reflectance_infile);
+    free (dem_infile);
 
     /* Indicate successful completion of processing */
     printf ("Scene-based surface water processing complete!\n");
-    exit (SUCCESS);
+
+    return EXIT_SUCCESS;
 }
 
 
@@ -768,7 +845,7 @@ Type = None
 HISTORY:
 Date        Programmer       Reason
 --------    ---------------  -------------------------------------
-1/2/2013    Song Guo     
+1/2/2013    Song Guo         Original implementation
 
 NOTES:
 ******************************************************************************/
@@ -777,9 +854,10 @@ void usage()
     printf ("scene_based_swe handles the surface water extent classification "
             "for the input Landsat scene using either TOA or surface "
             "reflectance, including a cloud cover correction and a terrain "
-            "slope revision of the surface water extent\n\n");
+            "shaded revision of the surface water extent\n\n");
     printf ("usage: scene_based_swe "
-            "--reflectance=input_surface(or TOA)_reflectance_filename_with_full_path "
+            "--reflectance=input_surface(or TOA)_reflectance_filename_"
+                "with_full_path "
             "--dem=input_DEM_filename_with_full_path "
             "--mgt=mgt_threshold (value between 0.00 and 2.00) "
             "--mlt1=mlt1_threshold (value between -2.00 and 2.00) "
@@ -788,7 +866,8 @@ void usage()
             "--b4lt2=b4lt2_threshold "
             "--b5lt1=b5lt1_threshold "
             "--b5lt2=b5lt2_threshold "
-            "--per_slope=percent_slope_threshold (value between 0.00 & 100.00 "
+            "--per_shaded=percent_shaded_threshold"
+                " (value between 0.00 & 100.00 "
             "[--write_binary] [--use_ledaps_mask] [--use_zeven_thorne] "
             "[--verbose]\n");
 
@@ -805,15 +884,15 @@ void usage()
     printf ("    --b4lt2: b4lt2_threshold\n");
     printf ("    --b5lt1: b5lt1_threshold\n");
     printf ("    --b5lt2: b5lt2_threshold\n");
-    printf ("    --per_slope: percent_slope_threshold\n");
+    printf ("    --per_shaded: percent_shaded_relief_threshold\n");
     printf ("    --write_binary: should raw binary outputs and ENVI header "
             "files be written in addition to the HDF file? (default is false)"
             "\n");
     printf ("    --use_ledaps_mask: should ledaps cloud/shadow mask "
             "be used? (default is false, meaning fmask cloud/shadow will "
             "be used)\n");
-    printf ("    --use_zeven_thorne: should Zevenbergen&Thorne's slope "
-            "algorithm be used? (default is false, meaning Horn's slope "
+    printf ("    --use_zeven_thorne: should Zevenbergen&Thorne's shaded "
+            "algorithm be used? (default is false, meaning Horn's shaded "
             "algorithm will be used)\n");
     printf ("    --verbose: should intermediate messages be printed? (default "
             "is false)\n");
@@ -822,6 +901,7 @@ void usage()
             "--reflectance=/data1/sguo/lndsr.LT50450302001272LGS01.hdf "
             "--dem=/data1/sguo/lsrd_scene_based_dem.bin "
             "--mgt=0.123 --mlt1=-0.5 --mlt2=-0.4 --b4lt1=1500 "
-            "--b4lt2=1500 --b5lt1=1000 --b5lt2=1700 --per_slope=3.0 "
+            "--b4lt2=1500 --b5lt1=1000 --b5lt2=1700 --per_shaded=3.0 "
             "--write_binary --use_ledaps_mask --use_zeven_thorne --verbose\n");
 }
+

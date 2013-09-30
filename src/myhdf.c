@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "const.h"
 #include "myhdf.h"
 #include "error_handler.h"
 #include "hdf.h"

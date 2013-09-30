@@ -5,12 +5,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+
 #include "bool.h"
+#include "myhdf.h"
 #include "mystring.h"
-#include "error_handler.h"
 #include "input.h"
-#include "output.h"
 #include "space.h"
+
+#define NO_VALUE -9999
+#define MINSIGMA 1e-5
 
 typedef enum
 {
@@ -25,8 +28,8 @@ short get_args
 (
     int argc,             /* I: number of cmd-line args */
     char *argv[],         /* I: string of cmd-line args */
-    char **reflectance_infile, /* O:address of the input TOA or Surface 
-                                    Reflectance filename */
+    char **reflectance_infile, /* O: address of the input TOA or Surface 
+                                     Reflectance filename */
     char **dem_infile,     /* O: address of input DEM filename */
     float *mgt,            /* O: MNDWI threshold */
     float *mlt1,           /* O: mlt1 threshold */
@@ -38,7 +41,7 @@ short get_args
     float *per_slope,      /* O: percent slope threshold */
     bool *write_binary,    /* O: write raw binary flag */
     bool *use_ledaps_mask, /* O: use LEDAPS cloud/shadow mask result flag */
-    bool *use_zeven_thorne,/* O: use Zevenbergen&Thorne's slope algorithm flag */
+    bool *use_zeven_thorne,/* O: use Zevenbergen&Thorne's slope algorithm flag*/
     bool *verbose          /* O: verbose flag */
 );
 

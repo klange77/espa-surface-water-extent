@@ -15,17 +15,7 @@ Date          Programmer       Reason
 
 ******************************************************************************/
 #include <string.h>
-#include <limits.h>         /* For PATH_MAX */
-#include "error.h"
-#include "input.h"
-
-#ifndef ERROR
-#define ERROR 1
-#endif
-
-#ifndef SUCCESS
-#define SUCCESS 0
-#endif
+#include <limits.h>
 
 void split_filename 
 (

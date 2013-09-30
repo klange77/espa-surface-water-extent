@@ -1,5 +1,9 @@
 #include <time.h>
+
+#include "const.h"
+#include "mystring.h"
 #include "output.h"
+#include "error_handler.h"
 
 #define SDS_PREFIX ("band")
 
@@ -39,9 +43,11 @@
 #define OUTPUT_CALIBRATED_NT    ("calibrated_nt")
 #define OUTPUT_QAMAP_INDEX      ("qa_bitmap_index")
 
+#define MASK_INDEX "0 - 1111 (each digit value can be 0 or 1, value 0/1 " \
+    "means non-water/water pixel from one rule, total four rules applied)"
+
 #define SWE_VERSION "1.0.0"
-#define MASK_INDEX "0 - 1111 (each digit value can be 0 or 1, value 0/1 means \
-non-water/water pixel from one rule, total four rules applied)"
+
 /******************************************************************************
 MODULE:  create_output
 
@@ -81,13 +87,13 @@ int create_output
     {
         sprintf (errmsg, "Error creating the HDF file: %s", file_name);
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
   
     /* Close the file */
     Hclose (hdf_file_id);
   
-    return (SUCCESS);
+    return SUCCESS;
 }
 
 
@@ -142,30 +148,30 @@ Output_t *open_output
     {
         sprintf (errmsg, "Invalid number of input lines (< 1)");
         error_handler (true, FUNC_NAME, errmsg);
-        return (NULL);
+        return NULL;
     }
   
     if (nsamps < 1)
     {
         sprintf (errmsg, "Invalid number of input samples (< 1)");
         error_handler (true, FUNC_NAME, errmsg);
-        return (NULL);
+        return NULL;
     }
   
     if (nband < 1 || nband > NUM_OUT_SDS)
     {
         sprintf (errmsg, "Invalid number of image bands");
         error_handler (true, FUNC_NAME, errmsg);
-        return (NULL);
+        return NULL;
     }
   
     /* Create the Output data structure */
-    this = (Output_t *) malloc (sizeof(Output_t));
+    this = malloc (sizeof(Output_t));
     if (this == NULL) 
     {
         sprintf (errmsg, "Error allocating Output data structure");
         error_handler (true, FUNC_NAME, errmsg);
-        return (NULL);
+        return NULL;
     }
   
     /* Populate the data structure */
@@ -175,7 +181,7 @@ Output_t *open_output
         free (this);
         sprintf (errmsg, "Error duplicating file name");
         error_handler (true, FUNC_NAME, errmsg);
-        return (NULL);
+        return NULL;
     }
   
     this->open = false;
@@ -198,7 +204,7 @@ Output_t *open_output
         free (this);  
         sprintf (errmsg, "Error opening output file for SD access");
         error_handler (true, FUNC_NAME, errmsg);
-        return (NULL);
+        return NULL;
     }
     this->open = true;
   
@@ -215,7 +221,7 @@ Output_t *open_output
             close_output (this);
             sprintf (errmsg, "Error duplicating SDS name");
             error_handler (true, FUNC_NAME, errmsg);
-            return (NULL);
+            return NULL;
         }
     
         dim[0] = &sds->dim[0];
@@ -233,7 +239,7 @@ Output_t *open_output
             close_output (this);
             sprintf (errmsg, "Error duplicating y dim name");
             error_handler (true, FUNC_NAME, errmsg);
-            return (NULL);
+            return NULL;
         }
 
         dim[1]->name = dup_string("XDim_Grid");
@@ -243,7 +249,7 @@ Output_t *open_output
             close_output (this);
             sprintf (errmsg, "Error duplicating x dim name");
             error_handler (true, FUNC_NAME, errmsg);
-            return (NULL);
+            return NULL;
         }
     
         if (put_sds_info (this->sds_file_id, sds) != SUCCESS)
@@ -252,7 +258,7 @@ Output_t *open_output
             close_output (this);
             sprintf (errmsg, "Error setting up the SDS");
             error_handler (true, FUNC_NAME, errmsg);
-            return (NULL);
+            return NULL;
         }
     
         for (ir = 0; ir < sds->rank; ir++)
@@ -263,7 +269,7 @@ Output_t *open_output
                 close_output (this);
                 sprintf (errmsg, "Error setting up the dimension");
                 error_handler (true, FUNC_NAME, errmsg);
-                return (NULL);
+                return NULL;
             }
         }
     }  /* end for image bands */
@@ -309,7 +315,7 @@ int close_output
     {
         sprintf (errmsg, "File is not open, so it cannot be closed.");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
 
     /* Close image SDSs */
@@ -319,7 +325,7 @@ int close_output
         {
             sprintf (errmsg, "Error ending SDS access for band %d.", ib);
             error_handler (true, FUNC_NAME, errmsg);
-            return (ERROR);
+            return ERROR;
         }
     }
 
@@ -327,7 +333,7 @@ int close_output
     SDend (this->sds_file_id);
     this->open = false;
 
-    return (SUCCESS);
+    return SUCCESS;
 }
 
 
@@ -369,7 +375,7 @@ int free_output
     {
         sprintf (errmsg, "File is still open, so cannot free memory.");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
   
     if (this != NULL)
@@ -392,7 +398,7 @@ int free_output
         free (this);
     }
   
-    return (SUCCESS);
+    return SUCCESS;
 }
 
 
@@ -440,32 +446,32 @@ int put_output_line
     {
         sprintf (errmsg, "Invalid input structure");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (!this->open)
     {
         sprintf (errmsg, "File is not open.  Cannot write data.");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (iband < 0 || iband >= this->nband)
     {
         sprintf (errmsg, "Invalid band number.");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (iline < 0 || iline >= this->size.l)
     {
         sprintf (errmsg, "Invalid line number.");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     if (nlines < 0 || iline+nlines > this->size.l)
     {
         sprintf (errmsg, "Line plus number of lines to be written exceeds "
             "the predefined size of the image.");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
   
     /* Write the data */
@@ -478,10 +484,10 @@ int put_output_line
     {
         sprintf (errmsg, "Error writing the output line(s) to HDF.");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
     
-    return (SUCCESS);
+    return SUCCESS;
 }
 
 
@@ -528,7 +534,7 @@ int put_metadata
     char process_ver[100];        /* SCA processing version */
 
     int ib;                       /* looping variable for bands */
-    char* units_b=NULL;           /* units string for current band */
+    char* units_b = NULL;         /* units string for current band */
     time_t tp;                    /* structure for obtaining current time */
     struct tm *tm = NULL;         /* structure for obtaining current time
                                      in UTC format */
@@ -538,14 +544,14 @@ int put_metadata
     {
         sprintf (errmsg, "File not open therefore cannot write metadata.");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
   
     if (nband < 1 || nband > NUM_OUT_SDS)
     {
         sprintf (errmsg, "Invalid number of bands.");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
   
     /* Write the metadata */
@@ -559,7 +565,7 @@ int put_metadata
     {
         sprintf (errmsg, "Error writing attribute (data provider)");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
   
     sprintf (string, "%s", meta->sat);
@@ -570,7 +576,7 @@ int put_metadata
     {
         sprintf (errmsg, "Error writing attribute (satellite)");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
  
     attr.type = DFNT_CHAR8;
@@ -580,14 +586,14 @@ int put_metadata
     {
         sprintf (errmsg, "Error writing attribute (instrument)");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
 
     if (format_date (&meta->acq_date, DATE_FORMAT_DATEA_TIME, date) != SUCCESS)
     {
         sprintf (errmsg, "Error formatting acquisition date");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
 
     attr.type = DFNT_CHAR8;
@@ -597,7 +603,7 @@ int put_metadata
     {
         sprintf (errmsg, "Error writing attribute (acquisition date)");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
   
     if (format_date (&meta->prod_date, DATE_FORMAT_DATEA_TIME, date) != SUCCESS)
@@ -614,7 +620,7 @@ int put_metadata
     {
         sprintf (errmsg, "Error writing attribute (production date)");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
   
     attr.type = DFNT_FLOAT32;
@@ -625,7 +631,7 @@ int put_metadata
     {
         sprintf (errmsg, "Error writing attribute (solar zenith)");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
   
     attr.type = DFNT_FLOAT32;
@@ -636,7 +642,7 @@ int put_metadata
     {
         sprintf (errmsg, "Error writing attribute (solar azimuth)");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
   
     sprintf (string, "%s", meta->wrs_sys);
@@ -647,7 +653,7 @@ int put_metadata
     {
         sprintf (errmsg, "Error writing attribute (WRS system)");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
 
     attr.type = DFNT_INT16;
@@ -658,7 +664,7 @@ int put_metadata
     {
         sprintf (errmsg, "Error writing attribute (WRS path)");
         error_handler (true, FUNC_NAME, errmsg);
-        return (ERROR);
+        return ERROR;
     }
 
     attr.type = DFNT_INT16;
@@ -812,11 +818,11 @@ int put_metadata
 
         attr.type = DFNT_CHAR8;
         if (ib < 4)
-            units_b=dup_string("quality/feature classification");
+            units_b = dup_string("quality/feature classification");
         else if (ib == 4)
-            units_b=dup_string("meter");
+            units_b = dup_string("meter");
         else
-            units_b=dup_string("percent (0.00 - 100.00)");            
+            units_b = dup_string("percent (0.00 - 100.00)");            
         attr.nval = strlen(units_b);
         attr.name = OUTPUT_UNITS;
         if (put_attr_string (this->sds[ib].id, &attr, units_b) != SUCCESS)
@@ -825,6 +831,8 @@ int put_metadata
             error_handler (true, FUNC_NAME, errmsg);
             return (ERROR);
         }
+        free (units_b);
+        units_b = NULL;
      
         attr.type = DFNT_INT16;
         attr.nval = 2;

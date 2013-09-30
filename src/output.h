@@ -1,13 +1,13 @@
 #ifndef OUTPUT_H
 #define OUTPUT_H
 
-#include "mystring.h"
 #include "input.h"
+#include "myhdf.h"
 #include "space.h"
 
 /* Define the number of SDS that will be output to the HDF-EOS file.  The
    actual SDS names are defined at the top of scene_based_swe.c. */
-#define NUM_OUT_SDS 6
+#define NUM_OUT_SDS 7
 
 /* Structure for the 'output' data type */
 typedef struct {
@@ -58,10 +58,10 @@ int put_output_line
 
 int put_metadata
 (
-    Output_t *this,      /* I: Output data structure */
-    int nband,           /* I: number of bands to write */
-    char *band_names[NUM_OUT_SDS],  /* I: band names to write */
-    Input_meta_t *meta         /* I: metadata to be written */
+    Output_t *this,                /* I: Output data structure */
+    int nband,                     /* I: number of bands to write */
+    char *band_names[NUM_OUT_SDS], /* I: band names to write */
+    Input_meta_t *meta             /* I: metadata to be written */
 );
 
 #endif
