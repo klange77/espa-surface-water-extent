@@ -45,7 +45,8 @@ scene_based_swe: $(OBJ) $(INC)
 	$(CC) $(EXTRA) -o $(EXE) $(OBJ) $(EOSLIB) $(LIB)
 
 install:
-	cp $(EXE) $(BIN)
+	install -d $(PREFIX)/bin
+	install -m 755 $(EXE) $(PREFIX)/bin
 
 clean:
 	$(RM) *.o $(EXE)

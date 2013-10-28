@@ -1,9 +1,18 @@
 #! /usr/bin/env python
 
-"""
-All relavent header block information for this file is contained within the
-header blocks for each routine.
-"""
+'''
+Created on January 29, 2013 by Song Guo, USGS/EROS
+
+License:
+  "NASA Open Source Agreement 1.3"
+
+Description:
+  Run the scene-based DEM and scene-based surface water algorithms in one shot,
+  including checking processing status.
+
+Usage:
+  do_surface_water_extent.py --help prints the help message
+'''
 
 import sys
 import os
@@ -11,61 +20,37 @@ import re
 import subprocess
 import datetime
 from optparse import OptionParser
-from create_dem import SceneDEM
 
-ERROR = 1
-SUCCESS = 0
-
-def logIt (msg, log_handler):
-    """
-    Description: logIt logs the information to the logfile (if valid) or to
-                 stdout if the logfile is None.
-
-    Inputs:
-      msg - message to be printed/logged
-      log_handler - log file handler; if None then print to stdout
-
-    Returns: nothing
-
-    Notes:
-    """
-
-    if log_handler == None:
-        print msg
-    else:
-        log_handler.write (msg + '\n')
-
+from espa_constants import *
+from espa_logging import log
 
 class Swe():
-    """
-    Created on January 29, 2013 by Song Guo, USGS/EROS
-    Created Python script to run the scene-based DEM and scene-based surface
-    water algorithms in one shot, including checking processing status.
-
-    Usage: do_water_extent.py --help prints the help message
-    """
+    '''
+    Defines the class object for performing surface water extent processing
+    '''
 
     def __init__(self):
         pass
 
-    def runSwe (self, metafile=None, reflectance=None, mgt=None, mlt1=None,
-                mlt2=None, b4lt1=None, b4lt2=None, b5lt1=None, b5lt2=None,
-                per_shade=None, write_binary=None, use_ledaps_mask=None,
-                use_zeven_thorne=None, verbose=None, logfile=None,
-                usebin=None):
+    def runSwe (self, metafile=None, reflectance=None, dem=None,
+                mgt=None, mlt1=None, mlt2=None, b4lt1=None, b4lt2=None,
+                b5lt1=None, b5lt2=None, per_shade=None, write_binary=None,
+                use_ledaps_mask=None, use_zeven_thorne=None, verbose=None,
+                logfile=None, usebin=None):
         """
-        Description: runSwe will use the parameters passed for the input/output
-                     files, logfile, and usebin.  If input/output files are
-                     None (i.e. not specified) then the command-line parameters
-                     will be parsed for this information.  The scene-based DEM
-                     and SWE applications are then executed on the specified
-                     input files.  If a log file was specified, then the output
-                     from each application will be logged to that file.
+        Description:
+          runSwe will use the parameters passed for the input/output files,
+          logfile, and usebin.  If input/output files are None (i.e. not
+          specified) then the command-line parameters will be parsed for this
+          information.  The scene-based DEM and SWE applications are then
+          executed on the specified input files.  If a log file was specified,
+          then the output from each application will be logged to that file.
 
         Inputs:
           metafile - name of the Landsat metadata file to be processed
           reflectance - name of the input TOA reflectance HDF file to be
               processed
+          dem - name of an ENVI formatted DEM file
           mgt, mlt1, mlt2, b4lt1, b4lt2, b5lt1, b5lt2, per_shade -
               these are threashold values used in the SWE algorithm
           logfile - name of the logfile for logging information; if None then
@@ -103,6 +88,10 @@ class Swe():
         parser.add_option ('-r', '--reflectance', type='string',
             dest='reflectance',
             help="name of SR or TOA reflectance HDF file", metavar='FILE')
+
+        parser.add_option ('--dem', type='string',
+            dest='dem',
+            help="name of an ENVI formatted DEM file", metavar='FILE')
 
         parser.add_option('--mgt', dest='mgt',
             action='store', default=0.123, help="mgt value")
@@ -216,14 +205,17 @@ class Swe():
                     " argument");
                 return ERROR
                        
-        # open the log file if it exists; use line buffering for the output
-        log_handler = None
-        if logfile != None:
-            log_handler = open (logfile, 'w', buffering=1)
-
+        # ENVI DEM file
+        if dem == None:
+            dem = options.dem
+            if dem == None:
+                parser.error ("missing input dem file command-line" \
+                    " argument");
+                return ERROR
+                       
         # let the world know what we are processing
         msg = "SWE processing of LEDAPS reflectance file: %s" % reflectance
-        logIt (msg, log_handler)
+        log (msg)
         
         # should we expect the DEM and SWE applications to be in the PATH or
         # in the BIN directory?
@@ -231,24 +223,24 @@ class Swe():
             # get the BIN dir environment variable
             bin_dir = os.environ.get('BIN') + '/'
             msg = "BIN environment variable: %s" % bin_dir
-            logIt (msg, log_handler)
+            log (msg)
         else:
             # don't use a path to the DEM/SWE applications
             bin_dir = ''
             msg = "DEM and SWE executables expected to be in the PATH"
-            logIt (msg, log_handler)
+            log (msg)
         
         # make sure the metadata file exists
         if not os.path.isfile(metafile):
             msg = "Error: metadata file does not exist or is not" \
                 " accessible: " + metafile
-            logIt (msg, log_handler)
+            log (msg)
             return ERROR
 
         # use the base metadata filename and not the full path.
         base_metafile = os.path.basename (metafile)
         msg = "Processing metadata file: %s" % base_metafile
-        logIt (msg, log_handler)
+        log (msg)
         
         # get the path of the MTL file and change directory to that location
         # for running this script.  save the current working directory for
@@ -261,28 +253,18 @@ class Swe():
         if not os.access(metadir, os.W_OK):
             msg = "Path of metadata file is not writable: %s.  Script needs" \
                 " write access to the metadata directory." % metadir
-            logIt (msg, log_handler)
+            log (msg)
             return ERROR
 
         msg = "Changing directories for SWE processing: %s" % metadir
-        logIt (msg, log_handler)
+        log (msg)
         os.chdir (metadir)
-
-        # instantiate the SceneDEM class for use and create the scene-based
-        # DEM for use with the surface water extent
-        dem = SceneDEM ()
-        status = dem.createDEM (base_metafile, logfile, log_handler, usebin)
-        if status != SUCCESS:
-            msg = "Error creating scene-based DEM.  Processing will terminate."
-            logIt (msg, log_handler)
-            os.chdir (mydir)
-            return ERROR
 
         # run SWE algorithm, checking the return status of each module.
         # exit if any errors occur.
         cmd = ['%sscene_based_swe' % bin_dir,
                '--reflectance=%s' % reflectance,
-               '--dem=%s' % dem.scene_dem_envi,
+               '--dem=%s' % dem,
                '--mgt=%f' % mgt,
                '--mlt1=%f' % mlt1,
                '--mlt2=%f' % mlt2,
@@ -291,7 +273,6 @@ class Swe():
                '--b5lt1=%d' % b5lt1,
                '--b5lt2=%d' % b5lt2,
                "--per_shade=%f" % per_shade,
-               "--write_binary",
                "--verbose"]
 
         print "Executing: scene_based_swe command: %s" % ' '.join(cmd)
@@ -299,24 +280,27 @@ class Swe():
             (output) = subprocess.check_output (cmd)
         except subprocess.CalledProcessError, e:
             msg = "Error running scene_based_swe.  Processing will terminate."
-            logIt (msg, log_handler)
+            log (msg)
             os.chdir (mydir)
             return ERROR
 
-        logIt (output, log_handler)
+        log (output)
             
         # successful completion.  return to the original directory.
         os.chdir (mydir)
-        msg = "Completion of scene based water extent."
-        logIt (msg, log_handler)
-
-        if logfile != None:
-            log_handler.close()
+        msg = "Completion of scene based surface water extent."
+        log (msg)
 
         return SUCCESS
     #### End of runSwe ####
 #### End of Swe class ####
 
+
 if __name__ == '__main__':
-    sys.exit (Swe().runSwe())
+    return_value = Swe().runSwe()
+
+    if (return_value != SUCCESS):
+        sys.exit (EXIT_FAILURE)
+    else:
+        sys.exit (EXIT_SUCCESS)
 

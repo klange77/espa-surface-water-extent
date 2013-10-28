@@ -8,6 +8,8 @@
 all:
 
 install:
-	cp ../scripts/create_dem.py $(BIN)
-	cp ../scripts/do_surface_water_extent.py $(BIN)
+	install -d $(PREFIX)/bin
+	install -m 755 do_surface_water_extent.py $(PREFIX)/bin
+
+clean:
 
