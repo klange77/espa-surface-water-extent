@@ -7,8 +7,8 @@ License:
   "NASA Open Source Agreement 1.3"
 
 Description:
-  Run the scene-based DEM and scene-based surface water algorithms in one shot,
-  including checking processing status.
+  Run the scene-based surface water algorithm, including checking processing
+  status.
 
 Usage:
   do_surface_water_extent.py --help prints the help message
@@ -274,6 +274,9 @@ class Swe():
                '--b5lt2=%d' % b5lt2,
                "--per_shade=%f" % per_shade,
                "--verbose"]
+
+        if write_binary:
+            cmd = cmd + ['--write_binary']
 
         print "Executing: scene_based_swe command: %s" % ' '.join(cmd)
         try:
