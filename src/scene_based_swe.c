@@ -148,7 +148,7 @@ int main (int argc, char *argv[])
                        &per_shaded, &write_binary, &use_ledaps_mask, 
                        &use_zeven_thorne, &verbose);
     if (retval != SUCCESS)
-    {   
+    {
         sprintf (errmsg, "Error calling get_args");
         error_handler (true, FUNC_NAME, errmsg);
         return EXIT_FAILURE;
