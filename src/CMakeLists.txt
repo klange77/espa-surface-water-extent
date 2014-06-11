@@ -17,5 +17,3 @@ target_link_libraries ( dswe ${LibESPA_LIBRARIES} ${LibXML2_LIBRARIES} ${Z_Libra
 
 install_programs ( /bin FILES dswe )
 
-#add_custom_target ( distclean COMMAND rm -rf CMakeCache.txt cmake_install.cmake install_manifest.txt CMakeFiles )
-

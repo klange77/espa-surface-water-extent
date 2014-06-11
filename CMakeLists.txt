@@ -22,6 +22,6 @@ add_subdirectory ( src )
 add_custom_target ( uninstall COMMAND xargs rm < install_manifest.txt )
 
 # Add a distclean target to the Makefile
-add_custom_target (distclean COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/distclean.cmake
+add_custom_target ( distclean COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/distclean.cmake
 )
 
