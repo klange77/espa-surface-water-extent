@@ -11,7 +11,7 @@ find_library ( Math_Library m )
 
 include_directories ( ${LibESPA_INCLUDES} ${LibXML2_INCLUDE_DIRS} )
 
-add_executable ( dswe dswe.c utilities.c get_args.c dswe_input.c )
+add_executable ( dswe dswe.c utilities.c get_args.c dswe_input.c dswe_output.c )
 
 target_link_libraries ( dswe ${LibESPA_LIBRARIES} ${LibXML2_LIBRARIES} ${Z_Library} ${Pthread_Library} ${Rt_Library} ${Math_Library} )
 

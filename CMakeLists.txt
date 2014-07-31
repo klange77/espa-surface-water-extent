@@ -7,7 +7,7 @@ cmake_minimum_required ( VERSION 2.8 )
 
 set ( ESPA_COMPILE_FLAGS "-Wall -m64 -O2 -g" )
 set ( CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} ${ESPA_COMPILE_FLAGS}" )
-#SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}" )
+SET ( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}" )
 
 add_subdirectory ( scripts )
 add_subdirectory ( src )
