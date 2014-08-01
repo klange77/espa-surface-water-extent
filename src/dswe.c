@@ -19,11 +19,11 @@
 #include "espa_geoloc.h"
 #include "raw_binary_io.h"
 
-#include "dswe_const.h"
+#include "const.h"
 #include "utilities.h"
 #include "get_args.h"
-#include "dswe_input.h"
-#include "dswe_output.h"
+#include "input.h"
+#include "output.h"
 
 
 /*****************************************************************************

@@ -1,6 +1,6 @@
 
-#ifndef DSWE_CONST_H
-#define DSWE_CONST_H
+#ifndef CONST_H
+#define CONST_H
 
 #ifndef SUCCESS
 #define SUCCESS  0
@@ -38,4 +38,4 @@ typedef enum
 
 #define MAX_DATE_LEN 28
 
-#endif /* DSWE_CONST_H */
+#endif /* CONST_H */

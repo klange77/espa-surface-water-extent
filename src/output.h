@@ -1,10 +1,10 @@
 
-#ifndef DSWE_OUTPUT_H
-#define DSWE_OUTPUT_H
+#ifndef OUTPUT_H
+#define OUTPUT_H
 
 #include "espa_metadata.h"
 
-#include "dswe_const.h"
+#include "const.h"
 
 
 bool add_dswe_band_product (char *xml_filename,
@@ -12,4 +12,4 @@ bool add_dswe_band_product (char *xml_filename,
     );
 
 
-#endif /* DSWE_OUTPUT_H */
+#endif /* OUTPUT_H */

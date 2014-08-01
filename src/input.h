@@ -1,10 +1,10 @@
 
-#ifndef DSWE_INPUT_H
-#define DSWE_INPUT_H
+#ifndef INPUT_H
+#define INPUT_H
 
 #include "espa_metadata.h"
 
-#include "dswe_const.h"
+#include "const.h"
 
 
 /* Structure for the 'input' data */
@@ -30,4 +30,4 @@ bool close_input (Input_Data_t * input_data
     );
 
 
-#endif /* DSWE_INPUT_H */
+#endif /* INPUT_H */

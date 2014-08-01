@@ -8,7 +8,7 @@
 #include <string.h>
 #include <limits.h>
 
-#include "dswe_const.h"
+#include "const.h"
 #include "utilities.h"
 #include "get_args.h"
 

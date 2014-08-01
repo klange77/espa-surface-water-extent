@@ -11,7 +11,7 @@
 #include "envi_header.h"
 #include "raw_binary_io.h"
 
-#include "dswe_const.h"
+#include "const.h"
 #include "utilities.h"
 
 
