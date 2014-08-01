@@ -219,7 +219,6 @@ main (int argc, char *argv[])
 {
     /* Command line parameters */
     char *xml_filename = NULL;  /* filename for the XML input */
-    char *dem_filename = NULL;  /* filename for the DEM input */
     Espa_internal_meta_t xml_metadata;  /* XML metadata structure */
     bool use_ledaps_mask_flag;
     bool use_zeven_thorne_flag;
@@ -276,7 +275,6 @@ main (int argc, char *argv[])
     /* Get the command line arguments */
     status = get_args (argc, argv,
                        &xml_filename,
-                       &dem_filename,
                        &use_ledaps_mask_flag,
                        &use_zeven_thorne_flag,
                        &use_toa_flag,
@@ -301,7 +299,6 @@ main (int argc, char *argv[])
     if (verbose_flag)
     {
         printf ("   XML Input File: %s\n", xml_filename);
-        printf ("   DEM Input File: %s\n", dem_filename);
         printf ("             WIGT: %0.3f\n", wigt);
         printf ("             AWGT: %0.3f\n", awgt);
         printf ("             PSWT: %0.3f\n", pswt);
@@ -347,7 +344,7 @@ main (int argc, char *argv[])
 
     /* -------------------------------------------------------------------- */
     /* Open the input files */
-    input_data = open_input (&xml_metadata, use_toa_flag, dem_filename);
+    input_data = open_input (&xml_metadata, use_toa_flag);
     if (input_data == NULL)
     {
         ERROR_MESSAGE ("Failed opening input files", MODULE_NAME);
@@ -401,7 +398,6 @@ main (int argc, char *argv[])
                                      band_nir, band_swir1, band_bt);
         free (band_dswe);
         free (xml_filename);
-        free (dem_filename);
         free (input_data);
 
         return EXIT_FAILURE;
@@ -523,7 +519,6 @@ main (int argc, char *argv[])
         /* Cleanup memory */
         free (band_dswe);
         free (xml_filename);
-        free (dem_filename);
         free (input_data);
 
         return EXIT_FAILURE;
@@ -536,7 +531,6 @@ main (int argc, char *argv[])
 
     /* Free remaining allocated memory */
     free (xml_filename);
-    free (dem_filename);
     free (input_data);
 
     LOG_MESSAGE ("Processing complete.", MODULE_NAME);

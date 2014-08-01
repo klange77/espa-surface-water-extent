@@ -7,7 +7,6 @@
 int get_args (int argc,           /* I: number of cmd-line args */
               char *argv[],       /* I: string of cmd-line args */
               char **xml_infile,  /* O: address of input XML filename */
-              char **dem_infile,  /* O: address of input DEM filename */
               bool * use_ledaps_mask_flag,
               bool * use_zeven_thorne_flag,
               bool * use_toa_flag,

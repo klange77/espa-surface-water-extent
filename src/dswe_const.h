@@ -15,7 +15,7 @@
 
 #define PRODUCT_NAME "dswe"
 #define BAND_NAME "dswe"
-#define SHORT_NAME "SR_DSWE"
+#define SHORT_NAME "DSWE"
 #define LONG_NAME "dynamic surface water extent"
 
 /* These are use in arrays, so they are position dependent */
@@ -28,7 +28,6 @@ typedef enum
     I_BAND_SWIR1,
     I_BAND_BT,
     I_BAND_FMASK,
-    I_BAND_DEM,      /* This one always needs to be last in the list */
     MAX_INPUT_BANDS
 } Input_Bands_e;
 

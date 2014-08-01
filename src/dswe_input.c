@@ -11,7 +11,7 @@
 *****************************************************************************/
 void
 open_band (char *filename,
-           /* I: input DEM filename */
+           /* I: input filename */
            Input_Data_t * input_data,
            /* IO: updated with information from XML */
            Input_Bands_e band_index
@@ -20,10 +20,10 @@ open_band (char *filename,
 {
     char msg[256];
 
-    /* Grab the DEM name from the input */
+    /* Grab the name from the input */
     input_data->band_name[band_index] = strdup (filename);
 
-    /* Open a file descriptor for the DEM */
+    /* Open a file descriptor for the band */
     input_data->band_fd[band_index] =
         fopen (input_data->band_name[band_index], "rb");
 
@@ -276,8 +276,7 @@ GetXMLInput (Espa_internal_meta_t * metadata,
     }
 
     /* Verify all the bands have something (all are required for dswe) */
-    /* Minus 1 is so that the DEM is skipped, it is checked later */
-    for (index = 0; index < MAX_INPUT_BANDS - 1; index++)
+    for (index = 0; index < MAX_INPUT_BANDS; index++)
     {
         if (input_data->band_fd[index] == NULL ||
             input_data->band_name[index] == NULL)
@@ -301,10 +300,8 @@ GetXMLInput (Espa_internal_meta_t * metadata,
 Input_Data_t *
 open_input (Espa_internal_meta_t * metadata,
             /* I: input metadata */
-            bool use_toa_flag,
+            bool use_toa_flag
             /* I: use TOA or SR data */
-            char *dem_filename
-            /* I: input DEM filename */
     )
 {
     int index;
@@ -332,17 +329,6 @@ open_input (Espa_internal_meta_t * metadata,
     if (!GetXMLInput (metadata, use_toa_flag, input_data))
     {
         /* error messages provided by GetXMLInput */
-        close_input (input_data);
-        return NULL;
-    }
-
-    /* DEM band is done separate because it is not part of the XML */
-    open_band (dem_filename, input_data, I_BAND_DEM);
-    if (input_data->band_fd[I_BAND_DEM] == NULL ||
-        input_data->band_name[I_BAND_DEM] == NULL)
-    {
-        ERROR_MESSAGE ("Error opening required input data", MODULE_NAME);
-
         close_input (input_data);
         return NULL;
     }
