@@ -1,4 +1,7 @@
 
+set (_XML2INC $ENV{XML2INC})
+set (_XML2LIB $ENV{XML2LIB})
+
 if (LibXML2_LIBRARIES AND LibXML2_INCLUDE_DIRS)
   # in cache already
   set(LibXML2_FOUND TRUE)
@@ -14,11 +17,12 @@ else (LibXML2_LIBRARIES AND LibXML2_INCLUDE_DIRS)
       pkg_check_modules(_LIBXML2 libxml-2.0)
     endif (PKG_CONFIG_FOUND)
   endif (${CMAKE_MAJOR_VERSION} EQUAL 2 AND ${CMAKE_MINOR_VERSION} EQUAL 4)
+
   find_path(LibXML2_INCLUDE_DIR
     NAMES
       libxml/xpath.h
     PATHS
-      ${XML2INC}
+      ${_XML2INC}
       ${_LibXML2_INCLUDEDIR}
       /usr/include
       /usr/local/include
@@ -28,11 +32,13 @@ else (LibXML2_LIBRARIES AND LibXML2_INCLUDE_DIRS)
       libxml2
   )
 
+  # Swap the names if you want to force static for the library
   find_library(LibXML2_LIBRARY
     NAMES
       xml2
+      libxml2.a
     PATHS
-      ${XML2LIB}
+      ${_XML2LIB}
       ${_LibXML2_LIBDIR}
       /usr/lib
       /usr/local/lib

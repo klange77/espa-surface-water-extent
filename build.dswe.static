@@ -1,0 +1,4 @@
+make distclean
+cmake -DBUILD_STATIC:BOOL=TRUE CMakeLists.txt
+make clean
+make

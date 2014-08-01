@@ -1,5 +1,5 @@
 
-cmake_minimum_required ( VERSION 2.8 )
+cmake_minimum_required ( VERSION 2.6.4 )
 
 #-----------------------------------------------------------------------------
 # To install where you want do the following
@@ -7,7 +7,12 @@ cmake_minimum_required ( VERSION 2.8 )
 
 set ( ESPA_COMPILE_FLAGS "-Wall -m64 -O2 -g" )
 set ( CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} ${ESPA_COMPILE_FLAGS}" )
-SET ( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}" )
+
+if (BUILD_STATIC)
+    set ( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static" )
+else (BUILD_STATIC)
+    set ( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}" )
+endif (BUILD_STATIC)
 
 add_subdirectory ( scripts )
 add_subdirectory ( src )
