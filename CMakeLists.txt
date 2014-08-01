@@ -18,11 +18,7 @@ add_subdirectory ( scripts )
 add_subdirectory ( src )
 
 ########################### Un-Installing software ###########################
-# Do this for a complex uninstall
-#add_custom_target (
-#    uninstall
-#    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
-#)
+# For a complex uninstall do something like the distclean target
 # Do this for a simple uninstall everything
 add_custom_target ( uninstall COMMAND xargs rm < install_manifest.txt )
 
