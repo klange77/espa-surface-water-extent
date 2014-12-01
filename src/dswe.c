@@ -324,7 +324,7 @@ main (int argc, char *argv[])
 
     /* -------------------------------------------------------------------- */
     /* Validate the input XML metadata file */
-    if (validate_xml_file (xml_filename, ESPA_SCHEMA) != SUCCESS)
+    if (validate_xml_file (xml_filename) != SUCCESS)
     {
         /* Error messages already written */
         return EXIT_FAILURE;
