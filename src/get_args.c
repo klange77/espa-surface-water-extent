@@ -41,7 +41,8 @@ usage ()
     printf ("    --wigt: Modified Normalized Difference Wetness Index"
             " Threshold between 0.00 and 2.00 (default value is %0.3f)\n",
             default_wigt);
-    printf ("    --awgt: Threshold between -2.00 and 2.00"
+    printf ("    --awgt: Automated Water Extent Shadow"
+            " Threshold between -2.00 and 2.00"
             " (default value is %0.2f)\n", default_awgt);
     printf ("    --pswt: Partial Surface Water Threshold between -2.00 and"
             " 2.00 (default value is %0.2f)\n", default_pswt);
