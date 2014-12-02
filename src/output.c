@@ -192,8 +192,7 @@ add_dswe_band_product
     strcat (bmeta[0].short_name, SHORT_NAME);
     snprintf (bmeta[0].product, sizeof (bmeta[0].product), PRODUCT_NAME);
     snprintf (bmeta[0].source, sizeof (bmeta[0].source), "sr_refl");
-    snprintf (bmeta[0].category, sizeof (bmeta[0].category), "image");
-        /* TODO TODO TODO - maybe qa not image ???? */
+    snprintf (bmeta[0].category, sizeof (bmeta[0].category), "qa");
     bmeta[0].nlines = in_meta.band[src_index].nlines;
     bmeta[0].nsamps = in_meta.band[src_index].nsamps;
     bmeta[0].pixel_size[0] = in_meta.band[src_index].pixel_size[0];
@@ -204,9 +203,9 @@ add_dswe_band_product
     snprintf (bmeta[0].production_date, sizeof (bmeta[0].production_date),
               production_date);
     bmeta[0].data_type = ESPA_INT16;
-    bmeta[0].fill_value = NO_DATA_VALUE;
+    bmeta[0].fill_value = DSWE_NO_DATA_VALUE;
     bmeta[0].valid_range[0] = 0;
-    bmeta[0].valid_range[1] = 1111; /* TODO TODO TODO - Change to final */
+    bmeta[0].valid_range[1] = 1111;
     snprintf (bmeta[0].name, sizeof (bmeta[0].name), BAND_NAME);
     snprintf (bmeta[0].long_name, sizeof (bmeta[0].long_name), LONG_NAME);
     snprintf (bmeta[0].data_units, sizeof (bmeta[0].data_units),

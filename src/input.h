@@ -15,6 +15,7 @@ typedef struct
     char *band_name[MAX_INPUT_BANDS];    /* Name of the input image files */
     FILE *band_fd[MAX_INPUT_BANDS];      /* Open fd's for the image */
     float scale_factor[MAX_INPUT_BANDS]; /* Scale factors from the metadata */
+    int fill_value[MAX_INPUT_BANDS];     /* Fill value from the metadata */
 } Input_Data_t;
 
 

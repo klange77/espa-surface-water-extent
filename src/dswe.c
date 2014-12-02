@@ -278,16 +278,28 @@ main (int argc, char *argv[])
 
     float band_blue_scaled;
     float blue_scale_factor;
+    float blue_fill_value;
+
     float band_green_scaled;
     float green_scale_factor;
+    float green_fill_value;
+
     float band_red_scaled;
     float red_scale_factor;
+    float red_fill_value;
+
     float band_nir_scaled;
     float nir_scale_factor;
+    float nir_fill_value;
+
     float band_swir1_scaled;
     float swir1_scale_factor;
+    float swir1_fill_value;
+
     float band_bt_scaled;
     float bt_scale_factor;
+    float bt_fill_value;
+
     int16_t band_dswe_value;
     float pswnt_scaled;
     float pswst_scaled;
@@ -438,11 +450,22 @@ main (int argc, char *argv[])
     /* Place the scale factor values into local variables mostly for code
        clarity */
     blue_scale_factor = input_data->scale_factor[I_BAND_BLUE];
+    blue_fill_value = input_data->fill_value[I_BAND_BLUE];
+
     green_scale_factor = input_data->scale_factor[I_BAND_GREEN];
+    green_fill_value = input_data->fill_value[I_BAND_GREEN];
+
     red_scale_factor = input_data->scale_factor[I_BAND_RED];
+    red_fill_value = input_data->fill_value[I_BAND_RED];
+
     nir_scale_factor = input_data->scale_factor[I_BAND_NIR];
+    nir_fill_value = input_data->fill_value[I_BAND_NIR];
+
     swir1_scale_factor = input_data->scale_factor[I_BAND_SWIR1];
+    swir1_fill_value = input_data->fill_value[I_BAND_SWIR1];
+
     bt_scale_factor = input_data->scale_factor[I_BAND_BT];
+    bt_fill_value = input_data->fill_value[I_BAND_BT];
 
     /* Scale the nir and swir1 tolerances */
     pswnt_scaled = pswnt * nir_scale_factor;
@@ -468,14 +491,14 @@ main (int argc, char *argv[])
         }
 
         /* If any of the input is fill, make the output fill */
-        if (band_blue[index] == NO_DATA_VALUE ||
-            band_green[index] == NO_DATA_VALUE ||
-            band_red[index] == NO_DATA_VALUE ||
-            band_nir[index] == NO_DATA_VALUE ||
-            band_swir1[index] == NO_DATA_VALUE ||
-            band_bt[index] == BT_NO_DATA_VALUE)
+        if (band_blue[index] == blue_fill_value ||
+            band_green[index] == green_fill_value ||
+            band_red[index] == red_fill_value ||
+            band_nir[index] == nir_fill_value ||
+            band_swir1[index] == swir1_fill_value ||
+            band_bt[index] == bt_fill_value)
         {
-            band_dswe[index] = NO_DATA_VALUE;
+            band_dswe[index] = DSWE_NO_DATA_VALUE;
             continue;
         }
 

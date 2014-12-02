@@ -33,8 +33,7 @@ typedef enum
 
 #define MINSIGMA 1e-5
 
-#define NO_DATA_VALUE -9999
-#define BT_NO_DATA_VALUE 255 /* TODO TODO TODO - Get this from the metadata instead */
+#define DSWE_NO_DATA_VALUE -9999
 
 #define MAX_DATE_LEN 28
 

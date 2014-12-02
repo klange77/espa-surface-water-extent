@@ -85,6 +85,10 @@ GetXMLInput
                     /* Grab the scale factor for this band */
                     input_data->scale_factor[I_BAND_BLUE] =
                         metadata->band[index].scale_factor;
+
+                    /* Grab the fill value for this band */
+                    input_data->fill_value[I_BAND_BLUE] =
+                        metadata->band[index].fill_value;
                 }
                 else if (!strcmp (metadata->band[index].name, "toa_band2"))
                 {
@@ -100,6 +104,10 @@ GetXMLInput
                     /* Grab the scale factor for this band */
                     input_data->scale_factor[I_BAND_GREEN] =
                         metadata->band[index].scale_factor;
+
+                    /* Grab the fill value for this band */
+                    input_data->fill_value[I_BAND_GREEN] =
+                        metadata->band[index].fill_value;
                 }
                 else if (!strcmp (metadata->band[index].name, "toa_band3"))
                 {
@@ -115,6 +123,10 @@ GetXMLInput
                     /* Grab the scale factor for this band */
                     input_data->scale_factor[I_BAND_RED] =
                         metadata->band[index].scale_factor;
+
+                    /* Grab the fill value for this band */
+                    input_data->fill_value[I_BAND_RED] =
+                        metadata->band[index].fill_value;
                 }
                 else if (!strcmp (metadata->band[index].name, "toa_band4"))
                 {
@@ -130,6 +142,10 @@ GetXMLInput
                     /* Grab the scale factor for this band */
                     input_data->scale_factor[I_BAND_NIR] =
                         metadata->band[index].scale_factor;
+
+                    /* Grab the fill value for this band */
+                    input_data->fill_value[I_BAND_NIR] =
+                        metadata->band[index].fill_value;
                 }
                 else if (!strcmp (metadata->band[index].name, "toa_band5"))
                 {
@@ -145,6 +161,10 @@ GetXMLInput
                     /* Grab the scale factor for this band */
                     input_data->scale_factor[I_BAND_SWIR1] =
                         metadata->band[index].scale_factor;
+
+                    /* Grab the fill value for this band */
+                    input_data->fill_value[I_BAND_SWIR1] =
+                        metadata->band[index].fill_value;
                 }
             }
         }
@@ -171,6 +191,10 @@ GetXMLInput
                     /* Grab the scale factor for this band */
                     input_data->scale_factor[I_BAND_BLUE] =
                         metadata->band[index].scale_factor;
+
+                    /* Grab the fill value for this band */
+                    input_data->fill_value[I_BAND_BLUE] =
+                        metadata->band[index].fill_value;
                 }
                 else if (!strcmp (metadata->band[index].name, "sr_band2"))
                 {
@@ -186,6 +210,10 @@ GetXMLInput
                     /* Grab the scale factor for this band */
                     input_data->scale_factor[I_BAND_GREEN] =
                         metadata->band[index].scale_factor;
+
+                    /* Grab the fill value for this band */
+                    input_data->fill_value[I_BAND_GREEN] =
+                        metadata->band[index].fill_value;
                 }
                 else if (!strcmp (metadata->band[index].name, "sr_band3"))
                 {
@@ -201,6 +229,10 @@ GetXMLInput
                     /* Grab the scale factor for this band */
                     input_data->scale_factor[I_BAND_RED] =
                         metadata->band[index].scale_factor;
+
+                    /* Grab the fill value for this band */
+                    input_data->fill_value[I_BAND_RED] =
+                        metadata->band[index].fill_value;
                 }
                 else if (!strcmp (metadata->band[index].name, "sr_band4"))
                 {
@@ -216,6 +248,10 @@ GetXMLInput
                     /* Grab the scale factor for this band */
                     input_data->scale_factor[I_BAND_NIR] =
                         metadata->band[index].scale_factor;
+
+                    /* Grab the fill value for this band */
+                    input_data->fill_value[I_BAND_NIR] =
+                        metadata->band[index].fill_value;
                 }
                 else if (!strcmp (metadata->band[index].name, "sr_band5"))
                 {
@@ -231,6 +267,10 @@ GetXMLInput
                     /* Grab the scale factor for this band */
                     input_data->scale_factor[I_BAND_SWIR1] =
                         metadata->band[index].scale_factor;
+
+                    /* Grab the fill value for this band */
+                    input_data->fill_value[I_BAND_SWIR1] =
+                        metadata->band[index].fill_value;
                 }
             }
         }
@@ -252,6 +292,10 @@ GetXMLInput
                 /* Grab the scale factor for this band */
                 input_data->scale_factor[I_BAND_BT] =
                     metadata->band[index].scale_factor;
+
+                /* Grab the fill value for this band */
+                input_data->fill_value[I_BAND_BT] =
+                    metadata->band[index].fill_value;
             }
         }
 
