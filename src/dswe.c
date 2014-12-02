@@ -1,8 +1,4 @@
 
-/*****************************************************************************
- TODO TODO TODO
-*****************************************************************************/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -27,19 +23,30 @@
 
 
 /*****************************************************************************
- TODO TODO TODO
+  NAME: read_bands_into_memory
+
+  PURPOSE: To read the specified input band data into memory for later
+           processing.
+
+  RETURN VALUE:  Type = bool
+      Value    Description
+      -------  ---------------------------------------------------------------
+      true     Success with reading all of the bands into memory.
+      false    Failed to read a band into memory.
 *****************************************************************************/
 bool
-read_bands_into_memory (Input_Data_t *input_data,
-                        int16_t *band_blue,
-                        int16_t *band_green,
-                        int16_t *band_red,
-                        int16_t *band_nir,
-                        int16_t *band_swir1,
-                        char *band_bt,
-                        char *band_fmask,
-                        int element_count
-    )
+read_bands_into_memory
+(
+    Input_Data_t *input_data,
+    int16_t *band_blue,
+    int16_t *band_green,
+    int16_t *band_red,
+    int16_t *band_nir,
+    int16_t *band_swir1,
+    char *band_bt,
+    char *band_fmask,
+    int element_count
+)
 {
     int count;
 
@@ -102,8 +109,11 @@ read_bands_into_memory (Input_Data_t *input_data,
 
 
 /*****************************************************************************
-  Description:
-    Free the memory allocated by allocate_input_memory.
+  NAME:  free_allocated_input_memory
+
+  PURPOSE:  Free the memory allocated by allocate_input_memory.
+
+  RETURN VALUE:  None
 *****************************************************************************/
 void
 free_allocated_input_memory
@@ -126,8 +136,16 @@ free_allocated_input_memory
 
 
 /*****************************************************************************
-  Description:
-    Allocate memory for all the input bands.
+  NAME:  allocate_input_memory
+
+  PURPOSE:  Allocate memory for all the input bands.
+
+  RETURN VALUE:  Type = bool
+      Value    Description
+      -------  ---------------------------------------------------------------
+      true     Success with allocating all of the memory needed for the input
+               bands.
+      false    Failed to allocate memory for an input band.
 *****************************************************************************/
 bool
 allocate_input_memory
@@ -211,8 +229,15 @@ allocate_input_memory
 
 
 /*****************************************************************************
-  Description:
-    TODO TODO TODO
+  NAME:  main
+
+  PURPOSE:  Implements the core algorithm for DSWE.
+
+  RETURN VALUE:  Type = int
+      Value           Description
+      --------------  --------------------------------------------------------
+      EXIT_FAILURE    An unrecoverable error occured during processing.
+      EXIT_SUCCESS    No errors encountered processing succesfull.
 *****************************************************************************/
 int
 main (int argc, char *argv[])
@@ -249,7 +274,7 @@ main (int argc, char *argv[])
                                    + (2.5 * green)
                                    - (1.5 * MBSRN)
                                    - (0.25 * bt)) */
-    int16_t *band_dswe = NULL;  /* DSWE */
+    int16_t *band_dswe = NULL;  /* Output DSWE band data */
 
     float band_blue_scaled;
     float blue_scale_factor;
@@ -473,19 +498,22 @@ main (int argc, char *argv[])
         mbsrn = band_nir_scaled + band_swir1_scaled;
 
         /* Automated Water Extent shadow (AWEsh) */
-        awesh = (band_blue_scaled + (2.5 * band_green_scaled) - (1.5 * mbsrn)
+        awesh = (band_blue_scaled
+                 + (2.5 * band_green_scaled)
+                 - (1.5 * mbsrn)
                  - (0.25 * band_bt_scaled));
 
+        /* Initialize to 0 or 1 on the first test */
         if (mndwi < wigt)
             band_dswe_value = 0;
         else
-            band_dswe_value = 1; /* >= wigt */
+            band_dswe_value = 1; /* >= wigt */  /* Set the ones digit */
 
         if (mbsrv > mbsrn)
-            band_dswe_value += 10;
+            band_dswe_value += 10; /* Set the tens digit */
 
         if (awesh > awgt)
-            band_dswe_value += 100;
+            band_dswe_value += 100; /* Set the hundreds digit */
 
         /* Partial Surface Water (PSW)
            The logic in the if results in a true/false called PSW */
@@ -493,7 +521,7 @@ main (int argc, char *argv[])
             band_swir1_scaled < pswst_scaled &&
             band_nir_scaled < pswnt_scaled)
         {
-            band_dswe_value += 1000;
+            band_dswe_value += 1000; /* Set the thousands digit */
         }
 
         band_dswe[index] = band_dswe_value;

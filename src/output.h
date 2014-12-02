@@ -7,9 +7,11 @@
 #include "const.h"
 
 
-bool add_dswe_band_product (char *xml_filename,
-                            int16_t *data
-    );
-
+bool
+add_dswe_band_product
+(
+    char *xml_filename,
+    int16_t *data
+);
 
 #endif /* OUTPUT_H */

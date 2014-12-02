@@ -16,13 +16,23 @@
 
 
 /******************************************************************************
-MODULE:  write_espa_product
+  NAME:  write_espa_product
 
-PURPOSE:  Create the *.img file and the associated ENVI header.
+  PURPOSE:  Create the *.img file and the associated ENVI header.
 
+  RETURN VALUE:  Type = bool
+      Value    Description
+      -------  ---------------------------------------------------------------
+      false    An error was encountered.
+      true     No errors encountered.
 ******************************************************************************/
 bool
-write_dswe_product (char *output_filename, int element_count, int16_t *data)
+write_dswe_product
+(
+    char *output_filename,
+    int element_count,
+    int16_t *data
+)
 {
     FILE *fd = NULL;
     char msg[512];
@@ -54,15 +64,23 @@ write_dswe_product (char *output_filename, int element_count, int16_t *data)
 
 
 /******************************************************************************
-MODULE:  add_espa_image_product
+  NAME:  add_espa_image_product
 
-PURPOSE:  Create a new envi output file including envi header and add the
-          associated information to the XML metadata file.
+  PURPOSE:  Create a new envi output file including envi header and add the
+            associated information to the XML metadata file.
 
+  RETURN VALUE:  Type = bool
+      Value    Description
+      -------  ---------------------------------------------------------------
+      false    An error was encountered.
+      true     No errors encountered.
 ******************************************************************************/
 bool
-add_dswe_band_product (char *xml_filename,
-                       int16_t *data)
+add_dswe_band_product
+(
+    char *xml_filename,
+    int16_t *data
+)
 {
     int count;
     int band_index = -1;

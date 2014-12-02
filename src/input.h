@@ -18,16 +18,18 @@ typedef struct
 } Input_Data_t;
 
 
-Input_Data_t *open_input (Espa_internal_meta_t * metadata,
-                          /* I: input metadata */
-                          bool use_toa_flag
-                          /* I: use TOA or SR data */
-    );
+Input_Data_t *
+open_input
+(
+    Espa_internal_meta_t * metadata, /* I: input metadata */
+    bool use_toa_flag                /* I: use TOA or SR data */
+);
 
 
-bool close_input (Input_Data_t * input_data
-                  /* I: updated with information from XML */
-    );
-
+bool
+close_input
+(
+    Input_Data_t * input_data /* I: updated with information from XML */
+);
 
 #endif /* INPUT_H */

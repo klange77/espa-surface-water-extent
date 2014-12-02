@@ -6,17 +6,19 @@
 
 
 /*****************************************************************************
-  Description:
-    Open the specified file and allocate the memory for the filename.
+  NAME:  open_band
+
+  PURPOSE:  Open the specified file and allocate the memory for the filename.
+
+  RETURN VALUE:  None
 *****************************************************************************/
 void
-open_band (char *filename,
-           /* I: input filename */
-           Input_Data_t * input_data,
-           /* IO: updated with information from XML */
-           Input_Bands_e band_index
-           /* I: index to place the band into */
-    )
+open_band
+(
+    char *filename,           /* I: input filename */
+    Input_Data_t *input_data, /* IO: updated with information from XML */
+    Input_Bands_e band_index  /* I: index to place the band into */
+)
 {
     char msg[256];
 
@@ -37,17 +39,24 @@ open_band (char *filename,
 
 
 /*****************************************************************************
-  Description:
-    Find the files needed by this application in the XML file and open them.
+  NAME:  GetXMLInput
+
+  PURPOSE:  Find the files needed by this application in the XML file and open
+            them.
+
+  RETURN VALUE:  Type = bool
+      Value    Description
+      -------  ---------------------------------------------------------------
+      false    Missing or incompatible bands.
+      true     No errors encountered.
 *****************************************************************************/
 bool
-GetXMLInput (Espa_internal_meta_t * metadata,
-             /* I: input metadata */
-             bool use_toa_flag,
-             /* I: use TOA or SR data */
-             Input_Data_t * input_data
-             /* O: updated with information from XML */
-    )
+GetXMLInput
+(
+    Espa_internal_meta_t *metadata, /* I: input metadata */
+    bool use_toa_flag,              /* I: use TOA or SR data */
+    Input_Data_t *input_data        /* O: updated with information from XML */
+)
 {
     int index;
 
@@ -64,9 +73,8 @@ GetXMLInput (Espa_internal_meta_t * metadata,
 
                     if (metadata->band[index].data_type != 2)
                     {
-                        ERROR_MESSAGE
-                            ("Error toa_band1 incompatable data type"
-                             " expecting INT16", MODULE_NAME);
+                        WARNING_MESSAGE("toa_band1 incompatable data type"
+                                        " expecting INT16", MODULE_NAME);
                     }
 
                     /* Always use this one for the lines and samples since
@@ -85,9 +93,8 @@ GetXMLInput (Espa_internal_meta_t * metadata,
 
                     if (metadata->band[index].data_type != 2)
                     {
-                        ERROR_MESSAGE
-                            ("Error toa_band2 incompatable data type"
-                             " expecting INT16", MODULE_NAME);
+                        WARNING_MESSAGE("toa_band2 incompatable data type"
+                                        " expecting INT16", MODULE_NAME);
                     }
 
                     /* Grab the scale factor for this band */
@@ -101,9 +108,8 @@ GetXMLInput (Espa_internal_meta_t * metadata,
 
                     if (metadata->band[index].data_type != 2)
                     {
-                        ERROR_MESSAGE
-                            ("Error toa_band3 incompatable data type"
-                             " expecting INT16", MODULE_NAME);
+                        WARNING_MESSAGE("toa_band3 incompatable data type"
+                                        " expecting INT16", MODULE_NAME);
                     }
 
                     /* Grab the scale factor for this band */
@@ -117,9 +123,8 @@ GetXMLInput (Espa_internal_meta_t * metadata,
 
                     if (metadata->band[index].data_type != 2)
                     {
-                        ERROR_MESSAGE
-                            ("Error toa_band4 incompatable data type"
-                             " expecting INT16", MODULE_NAME);
+                        WARNING_MESSAGE("toa_band4 incompatable data type"
+                                        " expecting INT16", MODULE_NAME);
                     }
 
                     /* Grab the scale factor for this band */
@@ -133,9 +138,8 @@ GetXMLInput (Espa_internal_meta_t * metadata,
 
                     if (metadata->band[index].data_type != 2)
                     {
-                        ERROR_MESSAGE
-                            ("Error toa_band5 incompatable data type"
-                             " expecting INT16", MODULE_NAME);
+                        WARNING_MESSAGE("toa_band5 incompatable data type"
+                                        " expecting INT16", MODULE_NAME);
                     }
 
                     /* Grab the scale factor for this band */
@@ -160,9 +164,8 @@ GetXMLInput (Espa_internal_meta_t * metadata,
 
                     if (metadata->band[index].data_type != 2)
                     {
-                        ERROR_MESSAGE
-                            ("Error sr_band1 incompatable data type"
-                             " expecting INT16", MODULE_NAME);
+                        WARNING_MESSAGE("sr_band1 incompatable data type"
+                                        " expecting INT16", MODULE_NAME);
                     }
 
                     /* Grab the scale factor for this band */
@@ -176,9 +179,8 @@ GetXMLInput (Espa_internal_meta_t * metadata,
 
                     if (metadata->band[index].data_type != 2)
                     {
-                        ERROR_MESSAGE
-                            ("Error sr_band2 incompatable data type"
-                             " expecting INT16", MODULE_NAME);
+                        WARNING_MESSAGE("sr_band2 incompatable data type"
+                                        " expecting INT16", MODULE_NAME);
                     }
 
                     /* Grab the scale factor for this band */
@@ -192,9 +194,8 @@ GetXMLInput (Espa_internal_meta_t * metadata,
 
                     if (metadata->band[index].data_type != 2)
                     {
-                        ERROR_MESSAGE
-                            ("Error sr_band3 incompatable data type"
-                             " expecting INT16", MODULE_NAME);
+                        WARNING_MESSAGE("sr_band3 incompatable data type"
+                                        " expecting INT16", MODULE_NAME);
                     }
 
                     /* Grab the scale factor for this band */
@@ -208,9 +209,8 @@ GetXMLInput (Espa_internal_meta_t * metadata,
 
                     if (metadata->band[index].data_type != 2)
                     {
-                        ERROR_MESSAGE
-                            ("Error sr_band4 incompatable data type"
-                             " expecting INT16", MODULE_NAME);
+                        WARNING_MESSAGE("sr_band4 incompatable data type"
+                                        " expecting INT16", MODULE_NAME);
                     }
 
                     /* Grab the scale factor for this band */
@@ -224,9 +224,8 @@ GetXMLInput (Espa_internal_meta_t * metadata,
 
                     if (metadata->band[index].data_type != 2)
                     {
-                        ERROR_MESSAGE
-                            ("Error sr_band5 incompatable data type"
-                             " expecting INT16", MODULE_NAME);
+                        WARNING_MESSAGE("sr_band5 incompatable data type"
+                                        " expecting INT16", MODULE_NAME);
                     }
 
                     /* Grab the scale factor for this band */
@@ -246,9 +245,8 @@ GetXMLInput (Espa_internal_meta_t * metadata,
 
                 if (metadata->band[index].data_type != 2)
                 {
-                    ERROR_MESSAGE
-                        ("Error toa_band6 incompatable data type"
-                         " expecting INT16", MODULE_NAME);
+                    WARNING_MESSAGE("toa_band6 incompatable data type"
+                                    " expecting INT16", MODULE_NAME);
                 }
 
                 /* Grab the scale factor for this band */
@@ -267,9 +265,8 @@ GetXMLInput (Espa_internal_meta_t * metadata,
 
                 if (metadata->band[index].data_type != 1)
                 {
-                    ERROR_MESSAGE
-                        ("Error fmask incompatable data type"
-                         " expecting UINT8", MODULE_NAME);
+                    WARNING_MESSAGE("fmask incompatable data type"
+                                    " expecting UINT8", MODULE_NAME);
                 }
             }
         }
@@ -293,16 +290,23 @@ GetXMLInput (Espa_internal_meta_t * metadata,
 
 
 /*****************************************************************************
-  Description:
-    Open all the input files and allocate associated memory for the filenames
-    that reside in the data structure.
+  NAME: open_input
+
+  PURPOSE:  Open all the input files and allocate associated memory for the
+            filenames that reside in the data structure.
+
+  RETURN VALUE:  Type = Input_Data_t *
+      Value    Description
+      -------  ---------------------------------------------------------------
+      NULL     An error was encountered.
+      *        A pointer to the populated Input_Data_t structure.
 *****************************************************************************/
 Input_Data_t *
-open_input (Espa_internal_meta_t * metadata,
-            /* I: input metadata */
-            bool use_toa_flag
-            /* I: use TOA or SR data */
-    )
+open_input
+(
+    Espa_internal_meta_t *metadata, /* I: input metadata */
+    bool use_toa_flag               /* I: use TOA or SR data */
+)
 {
     int index;
     Input_Data_t *input_data = NULL;
@@ -338,14 +342,22 @@ open_input (Espa_internal_meta_t * metadata,
 
 
 /*****************************************************************************
-  Description:
-    Close all the input files and free associated memory that resides in the
-    data structure.
+  NAME:  close_input
+
+  PURPOSE:  Close all the input files and free associated memory that resides
+            in the data structure.
+
+  RETURN VALUE:  Type = bool
+      Value    Description
+      -------  ---------------------------------------------------------------
+      false    An error was encountered.
+      true     No errors encountered.
 *****************************************************************************/
 bool
-close_input (Input_Data_t * input_data
-             /* I: the opened filenames and file descriptors */
-    )
+close_input
+(
+    Input_Data_t *input_data /* I: the opened filenames and file descriptors */
+)
 {
     int index;
     int status;

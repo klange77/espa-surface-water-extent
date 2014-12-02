@@ -22,7 +22,11 @@ static int default_pswst = 1000;
 
 
 /*****************************************************************************
- TODO TODO TODO
+  NAME:  usage
+
+  PURPOSE:  Displays the help/usage to the terminal.
+
+  RETURN VALUE:  None
 *****************************************************************************/
 void
 usage ()
@@ -72,34 +76,45 @@ usage ()
 }
 
 /*****************************************************************************
- TODO TODO TODO
+  NAME:  get_args
+
+  PURPOSE:  Gets the command line arguments and validates that the required
+            arguments were specified.
+
+  RETURN VALUE:  Type = int
+      Value    Description
+      -------  ---------------------------------------------------------------
+      ERROR    Error getting the command line arguments or a command line
+               argument and associated value were not specified.
+      SUCCESS  No errors encountered.
 *****************************************************************************/
 int
-get_args (int argc,             /* I: number of cmd-line args */
-          char *argv[],         /* I: string of cmd-line args */
-          char **xml_infile,    /* O: address of input XML filename */
-          bool *use_ledaps_mask_flag,
-          bool *use_zeven_thorne_flag,
-          bool *use_toa_flag,
-          float *wigt,
-          float *awgt,
-          float *pswt,
-          float *percent_slope,
-          int *pswnt,
-          int *pswst,
-          bool * verbose_flag)
+get_args
+(
+    int argc,                    /* I: number of cmd-line args */
+    char *argv[],                /* I: string of cmd-line args */
+    char **xml_infile,           /* O: address of input XML filename */
+    bool *use_ledaps_mask_flag,  /* O: use ledaps mask */
+    bool *use_zeven_thorne_flag, /* O: use zeven thorne */
+    bool *use_toa_flag,          /* O: process using TOA */
+    float *wigt,                 /* O: tolerance value */
+    float *awgt,                 /* O: tolerance value */
+    float *pswt,                 /* O: tolerance value */
+    float *percent_slope,        /* O: slope tolerance */
+    int *pswnt,                  /* O: tolerance value */
+    int *pswst,                  /* O: tolerance value */
+    bool * verbose_flag          /* O: verbose messaging */
+)
 {
     int c;
     int option_index;
     char msg[256];
+    int tmp_ledaps_mask_flag;
+    int tmp_zeven_thorne_flag;
+    int tmp_toa_flag;
+    int tmp_verbose_flag;
 
-    /* Make these method parameters????? */
-    static int tmp_ledaps_mask_flag;
-    static int tmp_zeven_thorne_flag;
-    static int tmp_toa_flag;
-    static int tmp_verbose_flag;
-
-    static struct option long_options[] = {
+    struct option long_options[] = {
         /* These options set a flag */
         {"use-ledaps-mask", no_argument, &tmp_ledaps_mask_flag, true},
         {"use-zeven-thorne", no_argument, &tmp_zeven_thorne_flag, true},
@@ -142,7 +157,7 @@ get_args (int argc,             /* I: number of cmd-line args */
     *pswst = default_pswst;
 
     /* loop through all the cmd-line options */
-    opterr = 0;                 /* turn off getopt_long error msgs as we'll print our own */
+    opterr = 0; /* turn off getopt_long error msgs as we'll print our own */
     while (1)
     {
         c = getopt_long (argc, argv, "", long_options, &option_index);
@@ -250,8 +265,7 @@ get_args (int argc,             /* I: number of cmd-line args */
         return ERROR;
     }
 
-    /* Only checking the low side here check the high side outside of this
-       routine TODO TODO TODO */
+    /* Only checking the low side here */
     if (*pswnt < 0)
     {
         ERROR_MESSAGE ("PSWB4T is out of range\n\n", MODULE_NAME);
@@ -260,8 +274,7 @@ get_args (int argc,             /* I: number of cmd-line args */
         return ERROR;
     }
 
-    /* Only checking the low side here check the high side outside of this
-       routine TODO TODO TODO */
+    /* Only checking the low side here */
     if (*pswst < 0)
     {
         ERROR_MESSAGE ("PSWB4T is out of range\n\n", MODULE_NAME);
