@@ -277,27 +277,27 @@ main (int argc, char *argv[])
     int16_t *band_dswe = NULL;  /* Output DSWE band data */
 
     float band_blue_scaled;
-    float blue_scale_factor;
-    float blue_fill_value;
-
     float band_green_scaled;
-    float green_scale_factor;
-    float green_fill_value;
-
     float band_red_scaled;
-    float red_scale_factor;
-    float red_fill_value;
-
     float band_nir_scaled;
-    float nir_scale_factor;
-    float nir_fill_value;
-
     float band_swir1_scaled;
-    float swir1_scale_factor;
-    float swir1_fill_value;
-
     float band_bt_scaled;
+
+/* TODO TODO TODO - The algorithm breaks using scaled values */
+#if 0
+    float blue_scale_factor;
+    float green_scale_factor;
+    float red_scale_factor;
+    float nir_scale_factor;
+    float swir1_scale_factor;
     float bt_scale_factor;
+#endif
+
+    float blue_fill_value;
+    float green_fill_value;
+    float red_fill_value;
+    float nir_fill_value;
+    float swir1_fill_value;
     float bt_fill_value;
 
     int16_t band_dswe_value;
@@ -449,27 +449,32 @@ main (int argc, char *argv[])
 
     /* Place the scale factor values into local variables mostly for code
        clarity */
+/* TODO TODO TODO - The algorithm breaks using scaled values */
+#if 0
     blue_scale_factor = input_data->scale_factor[I_BAND_BLUE];
-    blue_fill_value = input_data->fill_value[I_BAND_BLUE];
-
     green_scale_factor = input_data->scale_factor[I_BAND_GREEN];
-    green_fill_value = input_data->fill_value[I_BAND_GREEN];
-
     red_scale_factor = input_data->scale_factor[I_BAND_RED];
-    red_fill_value = input_data->fill_value[I_BAND_RED];
-
     nir_scale_factor = input_data->scale_factor[I_BAND_NIR];
-    nir_fill_value = input_data->fill_value[I_BAND_NIR];
-
     swir1_scale_factor = input_data->scale_factor[I_BAND_SWIR1];
-    swir1_fill_value = input_data->fill_value[I_BAND_SWIR1];
-
     bt_scale_factor = input_data->scale_factor[I_BAND_BT];
+#endif
+
+    blue_fill_value = input_data->fill_value[I_BAND_BLUE];
+    green_fill_value = input_data->fill_value[I_BAND_GREEN];
+    red_fill_value = input_data->fill_value[I_BAND_RED];
+    nir_fill_value = input_data->fill_value[I_BAND_NIR];
+    swir1_fill_value = input_data->fill_value[I_BAND_SWIR1];
     bt_fill_value = input_data->fill_value[I_BAND_BT];
 
     /* Scale the nir and swir1 tolerances */
+/* TODO TODO TODO - The algorithm breaks using scaled values */
+#if 0
     pswnt_scaled = pswnt * nir_scale_factor;
     pswst_scaled = pswst * swir1_scale_factor;
+#endif
+/* TODO TODO TODO - So just convert to float for now */
+    pswnt_scaled = pswnt;
+    pswst_scaled = pswst;
 
     /* -------------------------------------------------------------------- */
     /* Provide user information if verbose is turned on */
@@ -484,12 +489,6 @@ main (int argc, char *argv[])
     printf ("Element Count = %d\n", element_count);
     for (index = 0; index < element_count; index++)
     {
-        if (index%99999 == 0)
-        {
-            printf ("\r");
-            printf ("Processing data element %d", index);
-        }
-
         /* If any of the input is fill, make the output fill */
         if (band_blue[index] == blue_fill_value ||
             band_green[index] == green_fill_value ||
@@ -503,7 +502,7 @@ main (int argc, char *argv[])
         }
 
         /* Apply the scaling to the band data accordingly */
-        /* TODO TODO TODO - The algorithm breaks using scaled values */
+/* TODO TODO TODO - The algorithm breaks using scaled values */
 #if 0
         band_blue_scaled = band_blue[index] * blue_scale_factor;
         band_green_scaled = band_green[index] * green_scale_factor;
@@ -512,7 +511,7 @@ main (int argc, char *argv[])
         band_swir1_scaled = band_swir1[index] * swir1_scale_factor;
         band_bt_scaled = band_bt[index] * bt_scale_factor;
 #endif
-        /* TODO TODO TODO - So just convert to float for now */
+/* TODO TODO TODO - So just convert to float for now */
         band_blue_scaled = band_blue[index];
         band_green_scaled = band_green[index];
         band_red_scaled = band_red[index];
@@ -558,7 +557,15 @@ main (int argc, char *argv[])
         }
 
         band_dswe[index] = band_dswe_value;
+
+        if (index%99999 == 0)
+        {
+            printf ("\r");
+            printf ("Processed data element %d", index);
+        }
     }
+    printf ("\r");
+    printf ("Processed data element %d", index);
     printf ("\n");
 
     /* Cleanup all the input band memory */
