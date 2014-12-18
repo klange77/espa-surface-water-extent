@@ -302,10 +302,10 @@ GetXMLInput
         /* Search for the fmask band */
         if (!strcmp (metadata->band[index].product, "cfmask"))
         {
-            if (!strcmp (metadata->band[index].name, "fmask"))
+            if (!strcmp (metadata->band[index].name, "cfmask"))
             {
                 open_band (metadata->band[index].file_name, input_data,
-                           I_BAND_FMASK);
+                           I_BAND_CFMASK);
 
                 if (metadata->band[index].data_type != 1)
                 {
