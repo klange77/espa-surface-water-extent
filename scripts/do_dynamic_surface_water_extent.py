@@ -18,6 +18,7 @@
 '''
 
 import os
+import sys
 import commands
 import logging
 from argparse import ArgumentParser
@@ -154,6 +155,8 @@ if __name__ == '__main__':
         execute_cmd(cmd)
     except Exception, e:
         logger.fatal(str(e))
-        return EXIT_FAILURE
+        logger.fatal("Error running DSWE.  Processing will terminate.")
+        sys.exit(EXIT_FAILURE)
 
-    return EXIT_SUCCESS
+    logger.info("Completion of DSWE")
+    sys.exit(EXIT_SUCCESS)
