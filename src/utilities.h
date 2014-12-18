@@ -32,4 +32,3 @@ void write_message
 
 
 #endif /* UTILITIES_H */
-
