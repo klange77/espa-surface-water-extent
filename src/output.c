@@ -154,7 +154,7 @@ add_dswe_band_product
 
     /* Figure out the output filename */
     count = snprintf (image_filename, sizeof (image_filename),
-                      "%s_%s.img", scene_name, "sr_dswe");
+                      "%s_%s.img", scene_name, "dswe");
     if (count < 0 || count >= sizeof (image_filename))
     {
         ERROR_MESSAGE ("Failed creating output filename", MODULE_NAME);
