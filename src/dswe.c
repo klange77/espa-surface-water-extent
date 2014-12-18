@@ -503,12 +503,22 @@ main (int argc, char *argv[])
         }
 
         /* Apply the scaling to the band data accordingly */
+        /* TODO TODO TODO - The algorithm breaks using scaled values */
+#if 0
         band_blue_scaled = band_blue[index] * blue_scale_factor;
         band_green_scaled = band_green[index] * green_scale_factor;
         band_red_scaled = band_red[index] * red_scale_factor;
         band_nir_scaled = band_nir[index] * nir_scale_factor;
         band_swir1_scaled = band_swir1[index] * swir1_scale_factor;
         band_bt_scaled = band_bt[index] * bt_scale_factor;
+#endif
+        /* TODO TODO TODO - So just convert to float for now */
+        band_blue_scaled = band_blue[index];
+        band_green_scaled = band_green[index];
+        band_red_scaled = band_red[index];
+        band_nir_scaled = band_nir[index];
+        band_swir1_scaled = band_swir1[index];
+        band_bt_scaled = band_bt[index];
 
         /* Modified Normalized Difference Wetness Index (MNDWI) */
         mndwi = (band_blue_scaled - band_swir1_scaled) /
