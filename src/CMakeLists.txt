@@ -13,7 +13,11 @@ include_directories ( ${LibESPA_INCLUDES} ${LIBXML2_INCLUDE_DIR} )
 
 add_executable ( dswe dswe.c utilities.c get_args.c input.c output.c )
 
-target_link_libraries ( dswe ${LibESPA_LIBRARIES} ${LIBXML2_LIBRARIES} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${Math_Library} )
+target_link_libraries ( dswe ${LibESPA_LIBRARIES}
+                             ${LIBXML2_LIBRARIES}
+                             ${ZLIB_LIBRARIES}
+                             ${LIBLZMA_LIBRARIES}
+                             ${Math_Library} )
 
 install ( PROGRAMS dswe
           DESTINATION ${CMAKE_INSTALL_PREFIX}/bin )
