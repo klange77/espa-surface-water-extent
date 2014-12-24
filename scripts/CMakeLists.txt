@@ -1,8 +1,9 @@
 
-cmake_minimum_required ( VERSION 2.8.12 )
+cmake_minimum_required ( VERSION 2.6.0 )
 
 find_package ( PythonInterp 2.7.0 REQUIRED )
 find_package ( PythonLibs 2.7.0 REQUIRED )
 
-install_programs ( /bin FILES do_dynamic_surface_water_extent.py )
+install ( PROGRAMS do_dynamic_surface_water_extent.py
+          DESTINATION ${CMAKE_INSTALL_PREFIX}/bin )
 

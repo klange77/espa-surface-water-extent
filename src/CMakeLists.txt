@@ -1,5 +1,5 @@
 
-cmake_minimum_required ( VERSION 2.8.12 )
+cmake_minimum_required ( VERSION 2.6.0 )
 
 include ( FindESPALibCommon.cmake )
 
@@ -15,5 +15,6 @@ add_executable ( dswe dswe.c utilities.c get_args.c input.c output.c )
 
 target_link_libraries ( dswe ${LibESPA_LIBRARIES} ${LIBXML2_LIBRARIES} ${ZLIB_LIBRARIES} ${LIBLZMA_LIBRARIES} ${Math_Library} )
 
-install_programs ( /bin FILES dswe )
+install ( PROGRAMS dswe
+          DESTINATION ${CMAKE_INSTALL_PREFIX}/bin )
 
