@@ -26,7 +26,7 @@ typedef enum
     I_BAND_RED,
     I_BAND_NIR,
     I_BAND_SWIR1,
-    I_BAND_BT,
+    I_BAND_SWIR2,
     I_BAND_CFMASK,
     MAX_INPUT_BANDS
 } Input_Bands_e;

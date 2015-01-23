@@ -166,6 +166,25 @@ GetXMLInput
                     input_data->fill_value[I_BAND_SWIR1] =
                         metadata->band[index].fill_value;
                 }
+                else if (!strcmp (metadata->band[index].name, "toa_band7"))
+                {
+                    open_band (metadata->band[index].file_name, input_data,
+                               I_BAND_SWIR2);
+
+                    if (metadata->band[index].data_type != 2)
+                    {
+                        WARNING_MESSAGE("toa_band7 incompatable data type"
+                                        " expecting INT16", MODULE_NAME);
+                    }
+
+                    /* Grab the scale factor for this band */
+                    input_data->scale_factor[I_BAND_SWIR2] =
+                        metadata->band[index].scale_factor;
+
+                    /* Grab the fill value for this band */
+                    input_data->fill_value[I_BAND_SWIR2] =
+                        metadata->band[index].fill_value;
+                }
             }
         }
         else
@@ -272,30 +291,25 @@ GetXMLInput
                     input_data->fill_value[I_BAND_SWIR1] =
                         metadata->band[index].fill_value;
                 }
-            }
-        }
-
-        /* Search for the brightness temperature band */
-        if (!strcmp (metadata->band[index].product, "toa_bt"))
-        {
-            if (!strcmp (metadata->band[index].name, "toa_band6"))
-            {
-                open_band (metadata->band[index].file_name, input_data,
-                           I_BAND_BT);
-
-                if (metadata->band[index].data_type != 2)
+                else if (!strcmp (metadata->band[index].name, "sr_band7"))
                 {
-                    WARNING_MESSAGE("toa_band6 incompatable data type"
-                                    " expecting INT16", MODULE_NAME);
+                    open_band (metadata->band[index].file_name, input_data,
+                               I_BAND_SWIR2);
+
+                    if (metadata->band[index].data_type != 2)
+                    {
+                        WARNING_MESSAGE("sr_band7 incompatable data type"
+                                        " expecting INT16", MODULE_NAME);
+                    }
+
+                    /* Grab the scale factor for this band */
+                    input_data->scale_factor[I_BAND_SWIR2] =
+                        metadata->band[index].scale_factor;
+
+                    /* Grab the fill value for this band */
+                    input_data->fill_value[I_BAND_SWIR2] =
+                        metadata->band[index].fill_value;
                 }
-
-                /* Grab the scale factor for this band */
-                input_data->scale_factor[I_BAND_BT] =
-                    metadata->band[index].scale_factor;
-
-                /* Grab the fill value for this band */
-                input_data->fill_value[I_BAND_BT] =
-                    metadata->band[index].fill_value;
             }
         }
 
