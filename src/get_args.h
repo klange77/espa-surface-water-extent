@@ -7,7 +7,8 @@
 int
 get_args (int argc,                    /* I: number of cmd-line args */
           char *argv[],                /* I: string of cmd-line args */
-          char **xml_infile,           /* O: address of input XML filename */
+          char **xml_infile,           /* O: input XML filename */
+          char **dem_infile,           /* O: input DEM filename */
           bool *use_zeven_thorne_flag, /* O: use zeven thorne */
           bool *use_toa_flag,          /* O: process using TOA */
           float *wigt,                 /* O: tolerance value */

@@ -48,6 +48,9 @@ usage ()
             " reflectance,\n"
             "           and top of atmos files output from LEDAPS in raw binary"
             "\n           (envi) format\n");
+    printf ("    --dem: name of the input DEM file which will is expected to"
+            " be the same\n"
+            "           size and area as the source data\n");
     printf ("where the following parameters are optional:\n");
     printf ("    --wigt: Modified Normalized Difference Wetness Index"
             " Threshold between 0.00 and 2.00 (default value is %0.3f)\n",
@@ -110,7 +113,8 @@ get_args
 (
     int argc,                    /* I: number of cmd-line args */
     char *argv[],                /* I: string of cmd-line args */
-    char **xml_infile,           /* O: address of input XML filename */
+    char **xml_infile,           /* O: input XML filename */
+    char **dem_infile,           /* O: input DEM filename */
     bool *use_zeven_thorne_flag, /* O: use zeven thorne */
     bool *use_toa_flag,          /* O: process using TOA */
     float *wigt,                 /* O: tolerance value */
@@ -139,6 +143,8 @@ get_args
 
         /* These options provide values */
         {"xml", required_argument, 0, 'x'},
+        {"dem", required_argument, 0, 'd'},
+
         {"wigt", required_argument, 0, 'w'},
         {"awgt", required_argument, 0, 'a'},
 
@@ -204,9 +210,15 @@ get_args
             usage ();
             return ERROR;
             break;
+
         case 'x':
             *xml_infile = strdup (optarg);
             break;
+
+        case 'd':
+            *dem_infile = strdup (optarg);
+            break;
+
         case 'w':
             *wigt = atof (optarg);
             break;
@@ -270,6 +282,16 @@ get_args
     if (*xml_infile == NULL)
     {
         ERROR_MESSAGE ("XML input file is a required command line"
+                       " argument\n\n", MODULE_NAME);
+
+        usage ();
+        return ERROR;
+    }
+
+    /* Make sure the DEM was specified */
+    if (*dem_infile == NULL)
+    {
+        ERROR_MESSAGE ("DEM input file is a required command line"
                        " argument\n\n", MODULE_NAME);
 
         usage ();
