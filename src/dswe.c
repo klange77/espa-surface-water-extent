@@ -43,7 +43,7 @@ read_bands_into_memory
     int16_t *band_red,
     int16_t *band_nir,
     int16_t *band_swir1,
-    char *band_bt,
+    int16_t *band_swir2,
     char *band_fmask,
     int element_count
 )
@@ -95,7 +95,7 @@ read_bands_into_memory
         return false;
     }
 
-    count = fread (band_bt, sizeof (char), element_count,
+    count = fread (band_swir2, sizeof (int16_t), element_count,
                    input_data->band_fd[I_BAND_SWIR2]);
     if (count != element_count)
     {
@@ -123,7 +123,7 @@ free_allocated_input_memory
     int16_t *band_red,
     int16_t *band_nir,
     int16_t *band_swir1,
-    char *band_bt
+    int16_t *band_swir2
 )
 {
     free (band_blue);
@@ -131,7 +131,7 @@ free_allocated_input_memory
     free (band_red);
     free (band_nir);
     free (band_swir1);
-    free (band_bt);
+    free (band_swir2);
 }
 
 
@@ -155,7 +155,7 @@ allocate_input_memory
     int16_t **band_red,
     int16_t **band_nir,
     int16_t **band_swir1,
-    char **band_bt,
+    int16_t **band_swir2,
     int element_count
 )
 {
@@ -175,7 +175,7 @@ allocate_input_memory
 
         /* Free allocated memory */
         free_allocated_input_memory (*band_blue, *band_green, *band_red,
-                                     *band_nir, *band_swir1, *band_bt);
+                                     *band_nir, *band_swir1, *band_swir2);
         return false;
     }
 
@@ -186,7 +186,7 @@ allocate_input_memory
 
         /* Free allocated memory */
         free_allocated_input_memory (*band_blue, *band_green, *band_red,
-                                     *band_nir, *band_swir1, *band_bt);
+                                     *band_nir, *band_swir1, *band_swir2);
         return false;
     }
 
@@ -197,7 +197,7 @@ allocate_input_memory
 
         /* Free allocated memory */
         free_allocated_input_memory (*band_blue, *band_green, *band_red,
-                                     *band_nir, *band_swir1, *band_bt);
+                                     *band_nir, *band_swir1, *band_swir2);
         return false;
     }
 
@@ -208,19 +208,19 @@ allocate_input_memory
 
         /* Free allocated memory */
         free_allocated_input_memory (*band_blue, *band_green, *band_red,
-                                     *band_nir, *band_swir1, *band_bt);
+                                     *band_nir, *band_swir1, *band_swir2);
         return false;
     }
 
-    *band_bt = (char *) malloc (element_count * sizeof (char));
-    if (*band_bt == NULL)
+    *band_swir2 = (int16_t *) malloc (element_count * sizeof (int16_t));
+    if (*band_swir2 == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for brightness temp band",
                        MODULE_NAME);
 
         /* Free allocated memory */
         free_allocated_input_memory (*band_blue, *band_green, *band_red,
-                                     *band_nir, *band_swir1, *band_bt);
+                                     *band_nir, *band_swir1, *band_swir2);
         return false;
     }
 
@@ -244,6 +244,7 @@ main (int argc, char *argv[])
 {
     /* Command line parameters */
     char *xml_filename = NULL;  /* filename for the XML input */
+    char *dem_filename = NULL;  /* filename for the DEM input */
     Espa_internal_meta_t xml_metadata;  /* XML metadata structure */
     bool use_zeven_thorne_flag;
     bool use_toa_flag;
@@ -265,12 +266,12 @@ main (int argc, char *argv[])
     int16_t *band_red = NULL;   /* TM SR_Band3,  OLI SR_Band4 */
     int16_t *band_nir = NULL;   /* TM SR_Band4,  OLI SR_Band5 */
     int16_t *band_swir1 = NULL; /* TM SR_Band5,  OLI SR_Band6 */
-    char *band_bt = NULL;       /* TM TOA_Band6, OLI XXXXXXXX */
+    int16_t *band_swir2 = NULL; /* TM SR_Band7,  OLI SR_Band7 */
     char *band_fmask = NULL;    /* FMASK */
 
     /* Temp variables */
-    float mndwi;                /* (blue - swir1) / (blue + swir1) */
-    float mbsrv;                /* (blue + red) */
+    float mndwi;                /* (green - swir1) / (green + swir1) */
+    float mbsrv;                /* (green + red) */
     float mbsrn;                /* (nir + swir1) */
     float awesh;                /* (blue
                                    + (2.5 * green)
@@ -313,6 +314,7 @@ main (int argc, char *argv[])
     /* Get the command line arguments */
     status = get_args (argc, argv,
                        &xml_filename,
+                       &dem_filename,
                        &use_zeven_thorne_flag,
                        &use_toa_flag,
                        &wigt,
@@ -339,6 +341,7 @@ main (int argc, char *argv[])
     if (verbose_flag)
     {
         printf ("   XML Input File: %s\n", xml_filename);
+        printf ("   DEM Input File: %s\n", dem_filename);
         printf ("             WIGT: %0.3f\n", wigt);
         printf ("             AWGT: %0.3f\n", awgt);
         printf ("           PSWT_1: %0.3f\n", pswt_1);
@@ -402,7 +405,7 @@ main (int argc, char *argv[])
 
     /* Allocate memory buffers for input and temp processing */
     if (! allocate_input_memory (&band_blue, &band_green, &band_red,
-                                 &band_nir, &band_swir1, &band_bt,
+                                 &band_nir, &band_swir1, &band_swir2,
                                  element_count))
     {
         ERROR_MESSAGE ("Failed reading bands into memory", MODULE_NAME);
@@ -418,7 +421,7 @@ main (int argc, char *argv[])
 
         /* Cleanup memory */
         free_allocated_input_memory (band_blue, band_green, band_red,
-                                     band_nir, band_swir1, band_bt);
+                                     band_nir, band_swir1, band_swir2);
         return false;
     }
 
@@ -426,16 +429,17 @@ main (int argc, char *argv[])
     /* -------------------------------------------------------------------- */
     /* Read the input files into the buffers */
     if (! read_bands_into_memory (input_data, band_blue, band_green,
-                                  band_red, band_nir, band_swir1, band_bt,
+                                  band_red, band_nir, band_swir1, band_swir2,
                                   band_fmask, element_count))
     {
         ERROR_MESSAGE ("Failed reading bands into memory", MODULE_NAME);
 
         /* Cleanup memory */
         free_allocated_input_memory (band_blue, band_green, band_red,
-                                     band_nir, band_swir1, band_bt);
+                                     band_nir, band_swir1, band_swir2);
         free (band_dswe);
         free (xml_filename);
+        free (dem_filename);
         free (input_data);
 
         return EXIT_FAILURE;
@@ -477,7 +481,7 @@ main (int argc, char *argv[])
             band_red[index] == red_fill_value ||
             band_nir[index] == nir_fill_value ||
             band_swir1[index] == swir1_fill_value ||
-            band_bt[index] == swir2_fill_value)
+            band_swir2[index] == swir2_fill_value)
         {
             band_dswe[index] = DSWE_NO_DATA_VALUE;
             continue;
@@ -493,7 +497,7 @@ main (int argc, char *argv[])
         band_red_float = band_red[index];
         band_nir_float = band_nir[index];
         band_swir1_float = band_swir1[index];
-        band_swir2_float = band_bt[index];
+        band_swir2_float = band_swir2[index];
 
         /* Modified Normalized Difference Wetness Index (MNDWI) */
         mndwi = (band_green_scaled - band_swir1_scaled) /
@@ -555,13 +559,13 @@ main (int argc, char *argv[])
 
     /* Cleanup all the input band memory */
     free_allocated_input_memory (band_blue, band_green, band_red, band_nir,
-                                 band_swir1, band_bt);
+                                 band_swir1, band_swir2);
     band_blue = NULL;
     band_green = NULL;
     band_red = NULL;
     band_nir = NULL;
     band_swir1 = NULL;
-    band_bt = NULL;
+    band_swir2 = NULL;
 
     /* Add the DSWE band to the metadata file and generate the ENVI image and
        header files */
@@ -572,6 +576,7 @@ main (int argc, char *argv[])
         /* Cleanup memory */
         free (band_dswe);
         free (xml_filename);
+        free (dem_filename);
         free (input_data);
 
         return EXIT_FAILURE;
@@ -584,6 +589,7 @@ main (int argc, char *argv[])
 
     /* Free remaining allocated memory */
     free (xml_filename);
+    free (dem_filename);
     free (input_data);
 
     LOG_MESSAGE ("Processing complete.", MODULE_NAME);
