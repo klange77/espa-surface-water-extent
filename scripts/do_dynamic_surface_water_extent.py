@@ -80,6 +80,10 @@ if __name__ == '__main__':
                         action='store', dest='xml_filename', required=True,
                         help="The XML metadata file to use")
 
+    parser.add_argument('--dem',
+                        action='store', dest='dem_filename', required=True,
+                        help="The DEM metadata file to use")
+
     # Optional parameters
     default_wigt = '0.015'
     parser.add_argument('--wigt',
@@ -166,7 +170,9 @@ if __name__ == '__main__':
     logger = logging.getLogger(__name__)
 
     # Build the command line
-    cmd = ['dswe', '--xml', args.xml_filename,
+    cmd = ['dswe',
+           '--xml', args.xml_filename,
+           '--dem', args.dem_filename,
            '--wigt', args.wigt,
            '--awgt', args.awgt,
            '--pswt_1', args.pswt_1,
