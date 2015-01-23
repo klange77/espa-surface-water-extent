@@ -15,10 +15,17 @@
 /* Default input parameter values */
 static float default_wigt = 0.015;
 static float default_awgt = 0.0;
-static float default_pswt = -0.05;
+
+static float default_pswt_1 = -0.05;
+static float default_pswt_2 = -0.05;
+
 static float default_percent_slope = 3.0;
-static int default_pswnt = 1500;
-static int default_pswst = 1000;
+
+static int default_pswnt_1 = 1500;
+static int default_pswst_1 = 1000;
+
+static int default_pswnt_2 = 1700;
+static int default_pswst_2 = 650;
 
 
 /*****************************************************************************
@@ -48,18 +55,28 @@ usage ()
     printf ("    --awgt: Automated Water Extent Shadow"
             " Threshold between -2.00 and 2.00"
             " (default value is %0.2f)\n", default_awgt);
-    printf ("    --pswt: Partial Surface Water Threshold between -2.00 and"
-            " 2.00 (default value is %0.2f)\n", default_pswt);
-    printf ("    --pswnt: Partial Surface Water NIR Threshold between 0 and"
-            " data maximum (default value is %d)\n", default_pswnt);
-    printf ("    --pswst: Partial Surface Water SWIR1 Threshold between 0 and"
-            " data maximum (default value is %d)\n", default_pswst);
+
+    printf ("    --pswt_1: Partial Surface Water 1 Threshold between -2.00 and"
+            " 2.00 (default value is %0.2f)\n", default_pswt_1);
+    printf ("    --pswt_2: Partial Surface Water 2 Threshold between -2.00 and"
+            " 2.00 (default value is %0.2f)\n", default_pswt_2);
+
+    printf ("    --pswnt_1: Partial Surface Water 1 NIR Threshold"
+            " between 0 and data maximum (default value is %d)\n",
+            default_pswnt_1);
+    printf ("    --pswnt_2: Partial Surface Water 2 NIR Threshold"
+            " between 0 and data maximum (default value is %d)\n",
+            default_pswnt_2);
+
+    printf ("    --pswst_1: Partial Surface Water 1 SWIR1 Threshold"
+            " between 0 and data maximum (default value is %d)\n",
+            default_pswst_1);
+    printf ("    --pswst_2: Partial Surface Water 2 SWIR1 Threshold"
+            " between 0 and data maximum (default value is %d)\n",
+            default_pswst_2);
+
     printf ("    --percent-slope: Threshold between 0.00 and 100.00"
             " (default value is %0.1f)\n", default_percent_slope);
-    printf ("    --use_ledaps_mask: should ledaps cloud/shadow mask be used?"
-            " (default is\n"
-            "                       false, meaning fmask cloud/shadow will be"
-            " used)\n");
     printf ("    --use_zeven_thorne: should Zevenbergen&Thorne's shaded"
             " algorithm be used?\n"
             "                        (default is false, meaning Horn's shaded"
@@ -94,29 +111,29 @@ get_args
     int argc,                    /* I: number of cmd-line args */
     char *argv[],                /* I: string of cmd-line args */
     char **xml_infile,           /* O: address of input XML filename */
-    bool *use_ledaps_mask_flag,  /* O: use ledaps mask */
     bool *use_zeven_thorne_flag, /* O: use zeven thorne */
     bool *use_toa_flag,          /* O: process using TOA */
     float *wigt,                 /* O: tolerance value */
     float *awgt,                 /* O: tolerance value */
-    float *pswt,                 /* O: tolerance value */
+    float *pswt_1,               /* O: tolerance value */
+    float *pswt_2,               /* O: tolerance value */
     float *percent_slope,        /* O: slope tolerance */
-    int *pswnt,                  /* O: tolerance value */
-    int *pswst,                  /* O: tolerance value */
+    int *pswnt_1,                /* O: tolerance value */
+    int *pswnt_2,                /* O: tolerance value */
+    int *pswst_1,                /* O: tolerance value */
+    int *pswst_2,                /* O: tolerance value */
     bool * verbose_flag          /* O: verbose messaging */
 )
 {
     int c;
     int option_index;
     char msg[256];
-    int tmp_ledaps_mask_flag;
     int tmp_zeven_thorne_flag;
     int tmp_toa_flag;
     int tmp_verbose_flag;
 
     struct option long_options[] = {
         /* These options set a flag */
-        {"use-ledaps-mask", no_argument, &tmp_ledaps_mask_flag, true},
         {"use-zeven-thorne", no_argument, &tmp_zeven_thorne_flag, true},
         {"use-toa", no_argument, &tmp_toa_flag, true},
 
@@ -124,10 +141,17 @@ get_args
         {"xml", required_argument, 0, 'x'},
         {"wigt", required_argument, 0, 'w'},
         {"awgt", required_argument, 0, 'a'},
-        {"pswt", required_argument, 0, 'p'},
-        {"pswnt", required_argument, 0, 'n'},
-        {"pswst", required_argument, 0, 'r'},
-        {"percent-slope", required_argument, 0, 's'},
+
+        {"pswt_1", required_argument, 0, 'p'},
+        {"pswt_2", required_argument, 0, 'q'},
+
+        {"pswnt_1", required_argument, 0, 'n'},
+        {"pswnt_2", required_argument, 0, 'o'},
+
+        {"pswst_1", required_argument, 0, 'r'},
+        {"pswst_2", required_argument, 0, 's'},
+
+        {"percent-slope", required_argument, 0, 't'},
 
         /* Special options */
         {"verbose", no_argument, &tmp_verbose_flag, true},
@@ -151,10 +175,13 @@ get_args
     /* Assign the default values */
     *wigt = default_wigt;
     *awgt = default_awgt;
-    *pswt = default_pswt;
+    *pswt_1 = default_pswt_1;
+    *pswt_2 = default_pswt_2;
     *percent_slope = default_percent_slope;
-    *pswnt = default_pswnt;
-    *pswst = default_pswst;
+    *pswnt_1 = default_pswnt_1;
+    *pswnt_2 = default_pswnt_2;
+    *pswst_1 = default_pswst_1;
+    *pswst_2 = default_pswst_2;
 
     /* loop through all the cmd-line options */
     opterr = 0; /* turn off getopt_long error msgs as we'll print our own */
@@ -186,16 +213,29 @@ get_args
         case 'a':
             *awgt = atof (optarg);
             break;
+
         case 'p':
-            *pswt = atof (optarg);
+            *pswt_1 = atof (optarg);
             break;
+        case 'q':
+            *pswt_2 = atof (optarg);
+            break;
+
         case 'n':
-            *pswnt = atoi (optarg);
+            *pswnt_1 = atoi (optarg);
             break;
+        case 'o':
+            *pswnt_2 = atoi (optarg);
+            break;
+
         case 'r':
-            *pswst = atoi (optarg);
+            *pswst_1 = atoi (optarg);
             break;
         case 's':
+            *pswst_2 = atoi (optarg);
+            break;
+
+        case 't':
             *percent_slope = atof (optarg);
             break;
         case '?':
@@ -210,11 +250,6 @@ get_args
     }
 
     /* Grab the boolean command line options */
-    if (tmp_ledaps_mask_flag)
-        *use_ledaps_mask_flag = true;
-    else
-        *use_ledaps_mask_flag = false;
-
     if (tmp_zeven_thorne_flag)
         *use_zeven_thorne_flag = true;
     else
@@ -257,27 +292,53 @@ get_args
         return ERROR;
     }
 
-    if ((*pswt + 2) < MINSIGMA || (*pswt - 2.0) > MINSIGMA)
+    if ((*pswt_1 + 2) < MINSIGMA || (*pswt_1 - 2.0) > MINSIGMA)
     {
-        ERROR_MESSAGE ("PSWT is out of range\n\n", MODULE_NAME);
+        ERROR_MESSAGE ("PSWT_1 is out of range\n\n", MODULE_NAME);
+
+        usage ();
+        return ERROR;
+    }
+
+    if ((*pswt_2 + 2) < MINSIGMA || (*pswt_2 - 2.0) > MINSIGMA)
+    {
+        ERROR_MESSAGE ("PSWT_2 is out of range\n\n", MODULE_NAME);
 
         usage ();
         return ERROR;
     }
 
     /* Only checking the low side here */
-    if (*pswnt < 0)
+    if (*pswnt_1 < 0)
     {
-        ERROR_MESSAGE ("PSWB4T is out of range\n\n", MODULE_NAME);
+        ERROR_MESSAGE ("PSWNT_1 is out of range\n\n", MODULE_NAME);
 
         usage ();
         return ERROR;
     }
 
     /* Only checking the low side here */
-    if (*pswst < 0)
+    if (*pswnt_2 < 0)
     {
-        ERROR_MESSAGE ("PSWB4T is out of range\n\n", MODULE_NAME);
+        ERROR_MESSAGE ("PSWNT_2 is out of range\n\n", MODULE_NAME);
+
+        usage ();
+        return ERROR;
+    }
+
+    /* Only checking the low side here */
+    if (*pswst_1 < 0)
+    {
+        ERROR_MESSAGE ("PSWST_1 is out of range\n\n", MODULE_NAME);
+
+        usage ();
+        return ERROR;
+    }
+
+    /* Only checking the low side here */
+    if (*pswst_2 < 0)
+    {
+        ERROR_MESSAGE ("PSWST_2 is out of range\n\n", MODULE_NAME);
 
         usage ();
         return ERROR;
