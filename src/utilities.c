@@ -56,5 +56,7 @@ void write_message
         line,
         type,
         message);
+
+    fflush(fd);
 }
 
