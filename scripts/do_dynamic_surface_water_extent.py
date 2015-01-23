@@ -95,26 +95,56 @@ if __name__ == '__main__':
                               " Threshold between -2.00 and 2.00"
                               " (default value is {0})".format(default_awgt)))
 
-    default_pswt = '0.0'
-    parser.add_argument('--pswt',
-                        action='store', dest='pswt', default=default_pswt,
-                        help=("Partial Surface Water"
+    default_pswt_1 = '0.0'
+    parser.add_argument('--pswt_1',
+                        action='store', dest='pswt_1',
+                        default=default_pswt_1,
+                        help=("Partial Surface Water 1"
                               " Threshold between -2.00 and 2.00"
-                              " (default value is {0})".format(default_pswt)))
+                              " (default value is {0})"
+                              .format(default_pswt_1)))
+    default_pswt_2 = '0.0'
+    parser.add_argument('--pswt_2',
+                        action='store', dest='pswt_2',
+                        default=default_pswt_2,
+                        help=("Partial Surface Water 2"
+                              " Threshold between -2.00 and 2.00"
+                              " (default value is {0})"
+                              .format(default_pswt_2)))
 
-    default_pswnt = '1500'
-    parser.add_argument('--pswnt',
-                        action='store', dest='pswnt', default=default_pswnt,
-                        help=("Partial Surface Water NIR"
+    default_pswnt_1 = '1500'
+    parser.add_argument('--pswnt_1',
+                        action='store', dest='pswnt_1',
+                        default=default_pswnt_1,
+                        help=("Partial Surface Water 1 NIR"
                               " Threshold between 0 and data maximum value"
-                              " (default value is {0})".format(default_pswnt)))
+                              " (default value is {0})"
+                              .format(default_pswnt_1)))
+    default_pswnt_2 = '1700'
+    parser.add_argument('--pswnt_2',
+                        action='store', dest='pswnt_2',
+                        default=default_pswnt_2,
+                        help=("Partial Surface Water 2 NIR"
+                              " Threshold between 0 and data maximum value"
+                              " (default value is {0})"
+                              .format(default_pswnt_2)))
 
-    default_pswst = '1000'
-    parser.add_argument('--pswst',
-                        action='store', dest='pswst', default=default_pswst,
-                        help=("Partial Surface Water SWIR1"
+    default_pswst_1 = '1000'
+    parser.add_argument('--pswst_1',
+                        action='store', dest='pswst_1',
+                        default=default_pswst_1,
+                        help=("Partial Surface Water 1 SWIR1"
                               " Threshold between 0 and data maximum value"
-                              " (default value is {0})".format(default_pswst)))
+                              " (default value is {0})"
+                              .format(default_pswst_1)))
+    default_pswst_2 = '1000'
+    parser.add_argument('--pswst_2',
+                        action='store', dest='pswst_2',
+                        default=default_pswst_2,
+                        help=("Partial Surface Water 2 SWIR1"
+                              " Threshold between 0 and data maximum value"
+                              " (default value is {0})"
+                              .format(default_pswst_2)))
 
     parser.add_argument('--verbose',
                         action='store_true', dest='verbose', default=False,
@@ -139,9 +169,12 @@ if __name__ == '__main__':
     cmd = ['dswe', '--xml', args.xml_filename,
            '--wigt', args.wigt,
            '--awgt', args.awgt,
-           '--pswt', args.pswt,
-           '--pswnt', args.pswnt,
-           '--pswst', args.pswst]
+           '--pswt_1', args.pswt_1,
+           '--pswt_2', args.pswt_2,
+           '--pswnt_1', args.pswnt_1,
+           '--pswnt_2', args.pswnt_2,
+           '--pswst_1', args.pswst_1,
+           '--pswst_2', args.pswst_2]
 
     if args.verbose:
         cmd.append('--verbose')
@@ -151,12 +184,17 @@ if __name__ == '__main__':
 
     logger.info("Executing [{0}]".format(cmd))
 
+    output = ''
     try:
-        execute_cmd(cmd)
+        output = execute_cmd(cmd)
+
     except Exception, e:
-        logger.fatal(str(e))
-        logger.fatal("Error running DSWE.  Processing will terminate.")
+        logger.exception("Error running DSWE.  Processing will terminate.")
         sys.exit(EXIT_FAILURE)
+
+    finally:
+        if len(output) > 0:
+            logger.info("STDOUT/STDERR Follows: {0}".format(output))
 
     logger.info("Completion of DSWE")
     sys.exit(EXIT_SUCCESS)
