@@ -96,7 +96,7 @@ read_bands_into_memory
     }
 
     count = fread (band_bt, sizeof (char), element_count,
-                   input_data->band_fd[I_BAND_BT]);
+                   input_data->band_fd[I_BAND_SWIR2]);
     if (count != element_count)
     {
         ERROR_MESSAGE ("Failed reading bt band data", MODULE_NAME);
@@ -245,15 +245,17 @@ main (int argc, char *argv[])
     /* Command line parameters */
     char *xml_filename = NULL;  /* filename for the XML input */
     Espa_internal_meta_t xml_metadata;  /* XML metadata structure */
-    bool use_ledaps_mask_flag;
     bool use_zeven_thorne_flag;
     bool use_toa_flag;
     float wigt;
     float awgt;
-    float pswt;
+    float pswt_1;
+    float pswt_2;
     float percent_slope;
-    int pswnt;
-    int pswst;
+    int pswnt_1;
+    int pswnt_2;
+    int pswst_1;
+    int pswst_2;
     bool verbose_flag;
 
     /* Band data */
@@ -276,33 +278,32 @@ main (int argc, char *argv[])
                                    - (0.25 * bt)) */
     int16_t *band_dswe = NULL;  /* Output DSWE band data */
 
-    float band_blue_scaled;
-    float band_green_scaled;
-    float band_red_scaled;
-    float band_nir_scaled;
-    float band_swir1_scaled;
-    float band_bt_scaled;
+    float band_blue_float;
+    float band_green_float;
+    float band_red_float;
+    float band_nir_float;
+    float band_swir1_float;
+    float band_swir2_float;
 
-/* TODO TODO TODO - The algorithm breaks using scaled values */
-#if 0
-    float blue_scale_factor;
+    float band_green_scaled;
+    float band_swir1_scaled;
+
     float green_scale_factor;
-    float red_scale_factor;
-    float nir_scale_factor;
     float swir1_scale_factor;
-    float bt_scale_factor;
-#endif
 
     float blue_fill_value;
     float green_fill_value;
     float red_fill_value;
     float nir_fill_value;
     float swir1_fill_value;
-    float bt_fill_value;
+    float swir2_fill_value;
 
     int16_t band_dswe_value;
-    float pswnt_scaled;
-    float pswst_scaled;
+
+    float pswnt_1_float;
+    float pswnt_2_float;
+    float pswst_1_float;
+    float pswst_2_float;
 
     /* Other variables */
     int status;
@@ -312,15 +313,17 @@ main (int argc, char *argv[])
     /* Get the command line arguments */
     status = get_args (argc, argv,
                        &xml_filename,
-                       &use_ledaps_mask_flag,
                        &use_zeven_thorne_flag,
                        &use_toa_flag,
                        &wigt,
                        &awgt,
-                       &pswt,
+                       &pswt_1,
+                       &pswt_2,
                        &percent_slope,
-                       &pswnt,
-                       &pswst,
+                       &pswnt_1,
+                       &pswnt_2,
+                       &pswst_1,
+                       &pswst_2,
                        &verbose_flag);
     if (status != SUCCESS)
     {
@@ -338,15 +341,13 @@ main (int argc, char *argv[])
         printf ("   XML Input File: %s\n", xml_filename);
         printf ("             WIGT: %0.3f\n", wigt);
         printf ("             AWGT: %0.3f\n", awgt);
-        printf ("             PSWT: %0.3f\n", pswt);
-        printf ("            PSWNT: %d\n", pswnt);
-        printf ("            PSWST: %d\n", pswst);
+        printf ("           PSWT_1: %0.3f\n", pswt_1);
+        printf ("           PSWT_2: %0.3f\n", pswt_2);
+        printf ("          PSWNT_1: %d\n", pswnt_1);
+        printf ("          PSWNT_2: %d\n", pswnt_2);
+        printf ("          PSWST_1: %d\n", pswst_1);
+        printf ("          PSWST_2: %d\n", pswst_2);
         printf ("    Percent Slope: %0.1f\n", percent_slope);
-        printf ("  Use LEDAPS Mask:");
-        if (use_ledaps_mask_flag)
-            printf (" true\n");
-        else
-            printf (" false\n");
         printf (" Use Zeven Thorne:");
         if (use_zeven_thorne_flag)
             printf (" true\n");
@@ -449,40 +450,21 @@ main (int argc, char *argv[])
 
     /* Place the scale factor values into local variables mostly for code
        clarity */
-/* TODO TODO TODO - The algorithm breaks using scaled values */
-#if 0
-    blue_scale_factor = input_data->scale_factor[I_BAND_BLUE];
     green_scale_factor = input_data->scale_factor[I_BAND_GREEN];
-    red_scale_factor = input_data->scale_factor[I_BAND_RED];
-    nir_scale_factor = input_data->scale_factor[I_BAND_NIR];
     swir1_scale_factor = input_data->scale_factor[I_BAND_SWIR1];
-    bt_scale_factor = input_data->scale_factor[I_BAND_BT];
-#endif
 
     blue_fill_value = input_data->fill_value[I_BAND_BLUE];
     green_fill_value = input_data->fill_value[I_BAND_GREEN];
     red_fill_value = input_data->fill_value[I_BAND_RED];
     nir_fill_value = input_data->fill_value[I_BAND_NIR];
     swir1_fill_value = input_data->fill_value[I_BAND_SWIR1];
-    bt_fill_value = input_data->fill_value[I_BAND_BT];
+    swir2_fill_value = input_data->fill_value[I_BAND_SWIR2];
 
-    /* Scale the nir and swir1 tolerances */
-/* TODO TODO TODO - The algorithm breaks using scaled values */
-#if 0
-    pswnt_scaled = pswnt * nir_scale_factor;
-    pswst_scaled = pswst * swir1_scale_factor;
-#endif
-/* TODO TODO TODO - So just convert to float for now */
-    pswnt_scaled = pswnt;
-    pswst_scaled = pswst;
-
-    /* -------------------------------------------------------------------- */
-    /* Provide user information if verbose is turned on */
-    if (verbose_flag)
-    {
-        printf ("     PSWNT SCALED: %f\n", pswnt_scaled);
-        printf ("     PSWST SCALED: %f\n", pswst_scaled);
-    }
+    /* Just convert to float */
+    pswnt_1_float = pswnt_1;
+    pswnt_2_float = pswnt_2;
+    pswst_1_float = pswst_1;
+    pswst_2_float = pswst_2;
 
     /* -------------------------------------------------------------------- */
     /* Process through each data element and populate the dswe band memory */
@@ -495,45 +477,39 @@ main (int argc, char *argv[])
             band_red[index] == red_fill_value ||
             band_nir[index] == nir_fill_value ||
             band_swir1[index] == swir1_fill_value ||
-            band_bt[index] == bt_fill_value)
+            band_bt[index] == swir2_fill_value)
         {
             band_dswe[index] = DSWE_NO_DATA_VALUE;
             continue;
         }
 
-        /* Apply the scaling to the band data accordingly */
-/* TODO TODO TODO - The algorithm breaks using scaled values */
-#if 0
-        band_blue_scaled = band_blue[index] * blue_scale_factor;
+        /* Apply the scaling to these bands accordingly */
         band_green_scaled = band_green[index] * green_scale_factor;
-        band_red_scaled = band_red[index] * red_scale_factor;
-        band_nir_scaled = band_nir[index] * nir_scale_factor;
         band_swir1_scaled = band_swir1[index] * swir1_scale_factor;
-        band_bt_scaled = band_bt[index] * bt_scale_factor;
-#endif
-/* TODO TODO TODO - So just convert to float for now */
-        band_blue_scaled = band_blue[index];
-        band_green_scaled = band_green[index];
-        band_red_scaled = band_red[index];
-        band_nir_scaled = band_nir[index];
-        band_swir1_scaled = band_swir1[index];
-        band_bt_scaled = band_bt[index];
+
+        /* Just convert to float for now */
+        band_blue_float = band_blue[index];
+        band_green_float = band_green[index];
+        band_red_float = band_red[index];
+        band_nir_float = band_nir[index];
+        band_swir1_float = band_swir1[index];
+        band_swir2_float = band_bt[index];
 
         /* Modified Normalized Difference Wetness Index (MNDWI) */
-        mndwi = (band_blue_scaled - band_swir1_scaled) /
-                (band_blue_scaled + band_swir1_scaled);
+        mndwi = (band_green_scaled - band_swir1_scaled) /
+                (band_green_scaled + band_swir1_scaled);
 
         /* Multi-band Spectral Relationship Visible (MBSRV) */
-        mbsrv = band_blue_scaled - band_red_scaled;
+        mbsrv = band_green_float + band_red_float;
 
         /* Multi-band Spectral Relationship Near-Infrared (MBSRN) */
-        mbsrn = band_nir_scaled + band_swir1_scaled;
+        mbsrn = band_nir_float + band_swir1_float;
 
         /* Automated Water Extent shadow (AWEsh) */
-        awesh = (band_blue_scaled
-                 + (2.5 * band_green_scaled)
+        awesh = (band_blue_float
+                 + (2.5 * band_green_float)
                  - (1.5 * mbsrn)
-                 - (0.25 * band_bt_scaled));
+                 - (0.25 * band_swir2_float));
 
         /* Initialize to 0 or 1 on the first test */
         if (mndwi < wigt)
@@ -547,13 +523,22 @@ main (int argc, char *argv[])
         if (awesh > awgt)
             band_dswe_value += 100; /* Set the hundreds digit */
 
-        /* Partial Surface Water (PSW)
-           The logic in the if results in a true/false called PSW */
-        if (mndwi > pswt &&
-            band_swir1_scaled < pswst_scaled &&
-            band_nir_scaled < pswnt_scaled)
+        /* Partial Surface Water 1 (PSW1)
+           The logic in the if results in a true/false called PSW1 */
+        if (mndwi > pswt_1 &&
+            band_swir1_float < pswst_1_float &&
+            band_nir_float < pswnt_1_float)
         {
             band_dswe_value += 1000; /* Set the thousands digit */
+        }
+
+        /* Partial Surface Water 2 (PSW2)
+           The logic in the if results in a true/false called PSW2 */
+        if (mndwi > pswt_2 &&
+            band_swir1_float < pswst_2_float &&
+            band_nir_float < pswnt_2_float)
+        {
+            band_dswe_value += 10000; /* Set the ten thousands digit */
         }
 
         band_dswe[index] = band_dswe_value;
