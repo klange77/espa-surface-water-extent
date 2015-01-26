@@ -16,7 +16,7 @@
 
 
 /******************************************************************************
-  NAME:  write_espa_product
+  NAME:  write_dswe_product
 
   PURPOSE:  Create the *.img file and the associated ENVI header.
 
@@ -64,7 +64,7 @@ write_dswe_product
 
 
 /******************************************************************************
-  NAME:  add_espa_image_product
+  NAME:  add_dswe_band_product
 
   PURPOSE:  Create a new envi output file including envi header and add the
             associated information to the XML metadata file.
