@@ -44,7 +44,8 @@ read_bands_into_memory
     int16_t *band_nir,
     int16_t *band_swir1,
     int16_t *band_swir2,
-    char *band_fmask,
+    int16_t *band_dem,
+    char *band_cfmask,
     int element_count
 )
 {
@@ -99,7 +100,25 @@ read_bands_into_memory
                    input_data->band_fd[I_BAND_SWIR2]);
     if (count != element_count)
     {
-        ERROR_MESSAGE ("Failed reading bt band data", MODULE_NAME);
+        ERROR_MESSAGE ("Failed reading swir2 band data", MODULE_NAME);
+
+        return false;
+    }
+
+    count = fread (band_dem, sizeof (int16_t), element_count,
+                   input_data->band_fd[I_BAND_DEM]);
+    if (count != element_count)
+    {
+        ERROR_MESSAGE ("Failed reading DEM band data", MODULE_NAME);
+
+        return false;
+    }
+
+    count = fread (band_cfmask, sizeof (char), element_count,
+                   input_data->band_fd[I_BAND_CFMASK]);
+    if (count != element_count)
+    {
+        ERROR_MESSAGE ("Failed reading CFMASK band data", MODULE_NAME);
 
         return false;
     }
@@ -109,21 +128,27 @@ read_bands_into_memory
 
 
 /*****************************************************************************
-  NAME:  free_allocated_input_memory
+  NAME:  free_band_memory
 
-  PURPOSE:  Free the memory allocated by allocate_input_memory.
+  PURPOSE:  Free the memory allocated by allocate_band_memory.
 
   RETURN VALUE:  None
 *****************************************************************************/
 void
-free_allocated_input_memory
+free_band_memory
 (
     int16_t *band_blue,
     int16_t *band_green,
     int16_t *band_red,
     int16_t *band_nir,
     int16_t *band_swir1,
-    int16_t *band_swir2
+    int16_t *band_swir2,
+    int16_t *band_dem,
+    char *band_cfmask,
+    float *band_ps,
+    int16_t *band_raw_dswe,
+    int16_t *band_raw_sc_dswe,
+    int16_t *band_raw_sc_ps_dswe
 )
 {
     free (band_blue);
@@ -132,11 +157,17 @@ free_allocated_input_memory
     free (band_nir);
     free (band_swir1);
     free (band_swir2);
+    free (band_dem);
+    free (band_cfmask);
+    free (band_ps);
+    free (band_raw_dswe);
+    free (band_raw_sc_dswe);
+    free (band_raw_sc_ps_dswe);
 }
 
 
 /*****************************************************************************
-  NAME:  allocate_input_memory
+  NAME:  allocate_band_memory
 
   PURPOSE:  Allocate memory for all the input bands.
 
@@ -148,7 +179,7 @@ free_allocated_input_memory
       false    Failed to allocate memory for an input band.
 *****************************************************************************/
 bool
-allocate_input_memory
+allocate_band_memory
 (
     int16_t **band_blue,
     int16_t **band_green,
@@ -156,10 +187,16 @@ allocate_input_memory
     int16_t **band_nir,
     int16_t **band_swir1,
     int16_t **band_swir2,
+    int16_t **band_dem,
+    char **band_cfmask,
+    float **band_ps,
+    int16_t **band_raw_dswe,
+    int16_t **band_raw_sc_dswe,
+    int16_t **band_raw_sc_ps_dswe,
     int element_count
 )
 {
-    *band_blue = (int16_t *) malloc (element_count * sizeof (int16_t));
+    *band_blue = calloc (element_count, sizeof (int16_t));
     if (*band_blue == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for BLUE band", MODULE_NAME);
@@ -168,59 +205,152 @@ allocate_input_memory
         return false;
     }
 
-    *band_green = (int16_t *) malloc (element_count * sizeof (int16_t));
+    *band_green = calloc (element_count, sizeof (int16_t));
     if (*band_green == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for GREEN band", MODULE_NAME);
 
         /* Free allocated memory */
-        free_allocated_input_memory (*band_blue, *band_green, *band_red,
-                                     *band_nir, *band_swir1, *band_swir2);
+        free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
+                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
+                          *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
+                          *band_raw_sc_ps_dswe);
         return false;
     }
 
-    *band_red = (int16_t *) malloc (element_count * sizeof (int16_t));
+    *band_red = calloc (element_count, sizeof (int16_t));
     if (*band_red == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for RED band", MODULE_NAME);
 
         /* Free allocated memory */
-        free_allocated_input_memory (*band_blue, *band_green, *band_red,
-                                     *band_nir, *band_swir1, *band_swir2);
+        free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
+                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
+                          *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
+                          *band_raw_sc_ps_dswe);
         return false;
     }
 
-    *band_nir = (int16_t *) malloc (element_count * sizeof (int16_t));
+    *band_nir = calloc (element_count, sizeof (int16_t));
     if (*band_nir == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for NIR band", MODULE_NAME);
 
         /* Free allocated memory */
-        free_allocated_input_memory (*band_blue, *band_green, *band_red,
-                                     *band_nir, *band_swir1, *band_swir2);
+        free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
+                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
+                          *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
+                          *band_raw_sc_ps_dswe);
         return false;
     }
 
-    *band_swir1 = (int16_t *) malloc (element_count * sizeof (int16_t));
+    *band_swir1 = calloc (element_count, sizeof (int16_t));
     if (*band_swir1 == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for SWIR1 band", MODULE_NAME);
 
         /* Free allocated memory */
-        free_allocated_input_memory (*band_blue, *band_green, *band_red,
-                                     *band_nir, *band_swir1, *band_swir2);
+        free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
+                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
+                          *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
+                          *band_raw_sc_ps_dswe);
         return false;
     }
 
-    *band_swir2 = (int16_t *) malloc (element_count * sizeof (int16_t));
+    *band_swir2 = calloc (element_count, sizeof (int16_t));
     if (*band_swir2 == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for brightness temp band",
                        MODULE_NAME);
 
         /* Free allocated memory */
-        free_allocated_input_memory (*band_blue, *band_green, *band_red,
-                                     *band_nir, *band_swir1, *band_swir2);
+        free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
+                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
+                          *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
+                          *band_raw_sc_ps_dswe);
+        return false;
+    }
+
+    *band_dem = calloc (element_count, sizeof (int16_t));
+    if (*band_dem == NULL)
+    {
+        ERROR_MESSAGE ("Failed allocating memory for DEM band", MODULE_NAME);
+
+        /* Free allocated memory */
+        free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
+                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
+                          *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
+                          *band_raw_sc_ps_dswe);
+        return false;
+    }
+
+    *band_cfmask = calloc (element_count, sizeof (char));
+    if (*band_cfmask == NULL)
+    {
+        ERROR_MESSAGE ("Failed allocating memory for CFMASK band",
+                       MODULE_NAME);
+
+        /* Free allocated memory */
+        free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
+                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
+                          *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
+                          *band_raw_sc_ps_dswe);
+        return false;
+    }
+
+    *band_ps = calloc (element_count, sizeof (float));
+    if (*band_ps == NULL)
+    {
+        ERROR_MESSAGE ("Failed allocating memory for percent slope band",
+                       MODULE_NAME);
+
+        /* Free allocated memory */
+        free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
+                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
+                          *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
+                          *band_raw_sc_ps_dswe);
+        return false;
+    }
+
+    *band_raw_dswe = calloc (element_count, sizeof (int16_t));
+    if (band_raw_dswe == NULL)
+    {
+        ERROR_MESSAGE ("Failed allocating memory for Raw DSWE band",
+                       MODULE_NAME);
+
+        /* Cleanup memory */
+        free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
+                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
+                          *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
+                          *band_raw_sc_ps_dswe);
+        return false;
+    }
+
+    *band_raw_sc_dswe = calloc (element_count, sizeof (int16_t));
+    if (band_raw_sc_dswe == NULL)
+    {
+        ERROR_MESSAGE ("Failed allocating memory for Raw Shadow Cloud DSWE"
+                       " band", MODULE_NAME);
+
+        /* Cleanup memory */
+        free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
+                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
+                          *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
+                          *band_raw_sc_ps_dswe);
+        return false;
+    }
+
+    *band_raw_sc_ps_dswe = calloc (element_count, sizeof (int16_t));
+    if (band_raw_sc_ps_dswe == NULL)
+    {
+        ERROR_MESSAGE ("Failed allocating memory for Raw Shadow Cloud PS DSWE"
+                       " band", MODULE_NAME);
+
+        /* Cleanup memory */
+        free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
+                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
+                          *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
+                          *band_raw_sc_ps_dswe);
         return false;
     }
 
@@ -267,7 +397,14 @@ main (int argc, char *argv[])
     int16_t *band_nir = NULL;   /* TM SR_Band4,  OLI SR_Band5 */
     int16_t *band_swir1 = NULL; /* TM SR_Band5,  OLI SR_Band6 */
     int16_t *band_swir2 = NULL; /* TM SR_Band7,  OLI SR_Band7 */
-    char *band_fmask = NULL;    /* FMASK */
+    int16_t *band_dem = NULL;   /* Contains the DEM band */
+    char *band_cfmask = NULL;   /* CFMASK */
+    float *band_ps = NULL;      /* Contains the generated percent slope */
+    int16_t *band_raw_dswe = NULL; /* Output Raw DSWE band data */
+    int16_t *band_raw_sc_dswe = NULL; /* Output Raw Shadow Cloud DSWE band
+                                         data */
+    int16_t *band_raw_sc_ps_dswe = NULL; /* Output Raw shadow Cloud PS DSWE
+                                            band data */
 
     /* Temp variables */
     float mndwi;                /* (green - swir1) / (green + swir1) */
@@ -277,7 +414,6 @@ main (int argc, char *argv[])
                                    + (2.5 * green)
                                    - (1.5 * MBSRN)
                                    - (0.25 * bt)) */
-    int16_t *band_dswe = NULL;  /* Output DSWE band data */
 
     float band_blue_float;
     float band_green_float;
@@ -299,7 +435,10 @@ main (int argc, char *argv[])
     float swir1_fill_value;
     float swir2_fill_value;
 
-    int16_t band_dswe_value;
+    int16_t raw_dswe_value;
+    int16_t raw_shadow_dswe_value;
+    int16_t raw_shadow_cloud_dswe_value;
+    int16_t raw_shadow_cloud_ps_dswe_value;
 
     float pswnt_1_float;
     float pswnt_2_float;
@@ -385,7 +524,7 @@ main (int argc, char *argv[])
 
     /* -------------------------------------------------------------------- */
     /* Open the input files */
-    input_data = open_input (&xml_metadata, use_toa_flag);
+    input_data = open_input (&xml_metadata, use_toa_flag, dem_filename);
     if (input_data == NULL)
     {
         ERROR_MESSAGE ("Failed opening input files", MODULE_NAME);
@@ -404,40 +543,30 @@ main (int argc, char *argv[])
     element_count = input_data->lines * input_data->samples;
 
     /* Allocate memory buffers for input and temp processing */
-    if (! allocate_input_memory (&band_blue, &band_green, &band_red,
-                                 &band_nir, &band_swir1, &band_swir2,
-                                 element_count))
+    if (! allocate_band_memory (&band_blue, &band_green, &band_red, &band_nir,
+                                &band_swir1, &band_swir2, &band_dem,
+                                &band_cfmask, &band_ps, &band_raw_dswe,
+                                &band_raw_sc_dswe, &band_raw_sc_ps_dswe,
+                                element_count))
     {
         ERROR_MESSAGE ("Failed reading bands into memory", MODULE_NAME);
 
         return EXIT_FAILURE;
     }
 
-    /* Use calloc on dswe to set the data to zero */
-    band_dswe = (int16_t *) calloc (element_count, sizeof (int16_t));
-    if (band_dswe == NULL)
-    {
-        ERROR_MESSAGE ("Failed allocating memory for DSWE band", MODULE_NAME);
-
-        /* Cleanup memory */
-        free_allocated_input_memory (band_blue, band_green, band_red,
-                                     band_nir, band_swir1, band_swir2);
-        return false;
-    }
-
-
     /* -------------------------------------------------------------------- */
     /* Read the input files into the buffers */
-    if (! read_bands_into_memory (input_data, band_blue, band_green,
-                                  band_red, band_nir, band_swir1, band_swir2,
-                                  band_fmask, element_count))
+    if (! read_bands_into_memory (input_data, band_blue, band_green, band_red,
+                                  band_nir, band_swir1, band_swir2, band_dem,
+                                  band_cfmask, element_count))
     {
         ERROR_MESSAGE ("Failed reading bands into memory", MODULE_NAME);
 
         /* Cleanup memory */
-        free_allocated_input_memory (band_blue, band_green, band_red,
-                                     band_nir, band_swir1, band_swir2);
-        free (band_dswe);
+        free_band_memory (band_blue, band_green, band_red, band_nir,
+                          band_swir1, band_swir2, band_dem, band_cfmask,
+                          band_ps, band_raw_dswe, band_raw_sc_dswe,
+                          band_raw_sc_ps_dswe);
         free (xml_filename);
         free (dem_filename);
         free (input_data);
@@ -452,6 +581,15 @@ main (int argc, char *argv[])
         WARNING_MESSAGE ("Failed closing input files", MODULE_NAME);
     }
 
+    /* -------------------------------------------------------------------- */
+    // TODO TODO TODO  - Build the percent slope band
+    // TODO TODO TODO  - Build the percent slope band
+    // TODO TODO TODO  - Build the percent slope band
+    // TODO TODO TODO  - Build the percent slope band
+
+
+
+    /* -------------------------------------------------------------------- */
     /* Place the scale factor values into local variables mostly for code
        clarity */
     green_scale_factor = input_data->scale_factor[I_BAND_GREEN];
@@ -463,6 +601,10 @@ main (int argc, char *argv[])
     nir_fill_value = input_data->fill_value[I_BAND_NIR];
     swir1_fill_value = input_data->fill_value[I_BAND_SWIR1];
     swir2_fill_value = input_data->fill_value[I_BAND_SWIR2];
+
+    /* Free memory no longer needed */
+    free (input_data);
+    input_data = NULL;
 
     /* Just convert to float */
     pswnt_1_float = pswnt_1;
@@ -483,7 +625,9 @@ main (int argc, char *argv[])
             band_swir1[index] == swir1_fill_value ||
             band_swir2[index] == swir2_fill_value)
         {
-            band_dswe[index] = DSWE_NO_DATA_VALUE;
+            band_raw_dswe[index] = DSWE_NO_DATA_VALUE;
+            band_raw_sc_dswe[index] = DSWE_NO_DATA_VALUE;
+            band_raw_sc_ps_dswe[index] = DSWE_NO_DATA_VALUE;
             continue;
         }
 
@@ -517,15 +661,15 @@ main (int argc, char *argv[])
 
         /* Initialize to 0 or 1 on the first test */
         if (mndwi < wigt)
-            band_dswe_value = 0;
+            raw_dswe_value = 0;
         else
-            band_dswe_value = 1; /* >= wigt */  /* Set the ones digit */
+            raw_dswe_value = 1; /* >= wigt */  /* Set the ones digit */
 
         if (mbsrv > mbsrn)
-            band_dswe_value += 10; /* Set the tens digit */
+            raw_dswe_value += 10; /* Set the tens digit */
 
         if (awesh > awgt)
-            band_dswe_value += 100; /* Set the hundreds digit */
+            raw_dswe_value += 100; /* Set the hundreds digit */
 
         /* Partial Surface Water 1 (PSW1)
            The logic in the if results in a true/false called PSW1 */
@@ -533,7 +677,7 @@ main (int argc, char *argv[])
             band_swir1_float < pswst_1_float &&
             band_nir_float < pswnt_1_float)
         {
-            band_dswe_value += 1000; /* Set the thousands digit */
+            raw_dswe_value += 1000; /* Set the thousands digit */
         }
 
         /* Partial Surface Water 2 (PSW2)
@@ -542,10 +686,19 @@ main (int argc, char *argv[])
             band_swir1_float < pswst_2_float &&
             band_nir_float < pswnt_2_float)
         {
-            band_dswe_value += 10000; /* Set the ten thousands digit */
+            raw_dswe_value += 10000; /* Set the ten thousands digit */
         }
 
-        band_dswe[index] = band_dswe_value;
+        // TODO TODO TODO - Apply the CFMASK Shadow constraints to Raw
+        raw_shadow_dswe_value = 0;
+        // TODO TODO TODO - Apply the CFMASK Cloud constraints to Raw_Shadow
+        raw_shadow_cloud_dswe_value = raw_shadow_dswe_value;
+        // TODO TODO TODO - Apply the PS constraints Raw_Shadow_Cloud
+        raw_shadow_cloud_ps_dswe_value = 0;
+
+        band_raw_dswe[index] = raw_dswe_value;
+        band_raw_sc_dswe[index] = raw_shadow_cloud_dswe_value;
+        band_raw_sc_ps_dswe[index] = raw_shadow_cloud_ps_dswe_value;
 
         if (index%99999 == 0)
         {
@@ -557,40 +710,44 @@ main (int argc, char *argv[])
     printf ("Processed data element %d", index);
     printf ("\n");
 
-    /* Cleanup all the input band memory */
-    free_allocated_input_memory (band_blue, band_green, band_red, band_nir,
-                                 band_swir1, band_swir2);
-    band_blue = NULL;
-    band_green = NULL;
-    band_red = NULL;
-    band_nir = NULL;
-    band_swir1 = NULL;
-    band_swir2 = NULL;
-
     /* Add the DSWE band to the metadata file and generate the ENVI image and
        header files */
-    if (! add_dswe_band_product(xml_filename, band_dswe))
+    // TODO TODO TODO - Add the other bands here
+    // TODO TODO TODO - Add the other bands here
+    // TODO TODO TODO - Add the other bands here
+    if (! add_dswe_band_product(xml_filename, band_raw_dswe))
     {
         ERROR_MESSAGE ("Failed adding DSWE band product", MODULE_NAME);
 
         /* Cleanup memory */
-        free (band_dswe);
         free (xml_filename);
         free (dem_filename);
-        free (input_data);
 
         return EXIT_FAILURE;
     }
 
     /* CLEANUP & EXIT ----------------------------------------------------- */
 
-    /* Free the DSWE band memory */
-    free (band_dswe);
+    /* Cleanup all the input band memory */
+    free_band_memory (band_blue, band_green, band_red, band_nir, band_swir1,
+                      band_swir2, band_dem, band_cfmask, band_ps,
+                      band_raw_dswe, band_raw_sc_dswe, band_raw_sc_ps_dswe);
+    band_blue = NULL;
+    band_green = NULL;
+    band_red = NULL;
+    band_nir = NULL;
+    band_swir1 = NULL;
+    band_swir2 = NULL;
+    band_dem = NULL;
+    band_cfmask = NULL;
+    band_ps = NULL;
+    band_raw_dswe = NULL;
+    band_raw_sc_dswe = NULL;
+    band_raw_sc_ps_dswe = NULL;
 
     /* Free remaining allocated memory */
     free (xml_filename);
     free (dem_filename);
-    free (input_data);
 
     LOG_MESSAGE ("Processing complete.", MODULE_NAME);
 

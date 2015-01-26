@@ -55,6 +55,7 @@ GetXMLInput
 (
     Espa_internal_meta_t *metadata, /* I: input metadata */
     bool use_toa_flag,              /* I: use TOA or SR data */
+    char *dem_filename,             /* I: the name of the DEM file */
     Input_Data_t *input_data        /* O: updated with information from XML */
 )
 {
@@ -313,7 +314,7 @@ GetXMLInput
             }
         }
 
-        /* Search for the fmask band */
+        /* Search for the CFMASK band */
         if (!strcmp (metadata->band[index].product, "cfmask"))
         {
             if (!strcmp (metadata->band[index].name, "cfmask"))
@@ -323,12 +324,15 @@ GetXMLInput
 
                 if (metadata->band[index].data_type != 1)
                 {
-                    WARNING_MESSAGE("fmask incompatable data type"
+                    WARNING_MESSAGE("cfmask incompatable data type"
                                     " expecting UINT8", MODULE_NAME);
                 }
             }
         }
     }
+
+    /* Add the DEM band to the list */
+    open_band (dem_filename, input_data, I_BAND_DEM);
 
     /* Verify all the bands have something (all are required for dswe) */
     for (index = 0; index < MAX_INPUT_BANDS; index++)
@@ -363,7 +367,8 @@ Input_Data_t *
 open_input
 (
     Espa_internal_meta_t *metadata, /* I: input metadata */
-    bool use_toa_flag               /* I: use TOA or SR data */
+    bool use_toa_flag,              /* I: use TOA or SR data */
+    char *dem_filename              /* I: the name of the DEM file */
 )
 {
     int index;
@@ -388,7 +393,7 @@ open_input
     input_data->samples = 0;
 
     /* Open the input images from the XML file */
-    if (!GetXMLInput (metadata, use_toa_flag, input_data))
+    if (!GetXMLInput (metadata, use_toa_flag, dem_filename, input_data))
     {
         /* error messages provided by GetXMLInput */
         close_input (input_data);

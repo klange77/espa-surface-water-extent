@@ -22,15 +22,16 @@ typedef struct
 Input_Data_t *
 open_input
 (
-    Espa_internal_meta_t * metadata, /* I: input metadata */
-    bool use_toa_flag                /* I: use TOA or SR data */
+    Espa_internal_meta_t *metadata, /* I: input metadata */
+    bool use_toa_flag,              /* I: use TOA or SR data */
+    char *dem_filename              /* I: the name of the DEM file */
 );
 
 
 bool
 close_input
 (
-    Input_Data_t * input_data /* I: updated with information from XML */
+    Input_Data_t *input_data /* I: updated with information from XML */
 );
 
 #endif /* INPUT_H */
