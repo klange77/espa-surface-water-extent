@@ -11,7 +11,12 @@ find_library ( Math_Library m ) # We need the standard math library
 
 include_directories ( ${LibESPA_INCLUDES} ${LIBXML2_INCLUDE_DIR} )
 
-add_executable ( dswe dswe.c utilities.c get_args.c input.c output.c )
+add_executable ( dswe dswe.c
+                      utilities.c
+                      build_slope_band.c
+                      get_args.c
+                      input.c
+                      output.c )
 
 target_link_libraries ( dswe ${LibESPA_LIBRARIES}
                              ${LIBXML2_LIBRARIES}
