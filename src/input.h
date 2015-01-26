@@ -12,6 +12,8 @@ typedef struct
 {
     int lines;
     int samples;
+    double x_pixel_size;
+    double y_pixel_size;
     char *band_name[MAX_INPUT_BANDS];    /* Name of the input image files */
     FILE *band_fd[MAX_INPUT_BANDS];      /* Open fd's for the image */
     float scale_factor[MAX_INPUT_BANDS]; /* Scale factors from the metadata */
@@ -28,7 +30,7 @@ open_input
 );
 
 
-bool
+int
 close_input
 (
     Input_Data_t *input_data /* I: updated with information from XML */

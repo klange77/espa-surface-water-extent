@@ -26,7 +26,7 @@
       false    An error was encountered.
       true     No errors encountered.
 ******************************************************************************/
-bool
+int
 write_dswe_product
 (
     char *output_filename,
@@ -42,9 +42,7 @@ write_dswe_product
     {
         snprintf (msg, sizeof (msg), "Failed creating file %s",
                   output_filename);
-        ERROR_MESSAGE (msg, MODULE_NAME);
-
-        return false;
+        RETURN_ERROR (msg, MODULE_NAME, ERROR);
     }
 
     if (write_raw_binary(fd, 1, element_count, sizeof (int16_t), data)
@@ -52,14 +50,12 @@ write_dswe_product
     {
         snprintf (msg, sizeof (msg), "Failed writing file %s",
                   output_filename);
-        ERROR_MESSAGE (msg, MODULE_NAME);
-
-        return false;
+        RETURN_ERROR (msg, MODULE_NAME, ERROR);
     }
 
     fclose(fd);
 
-    return true;
+    return SUCCESS;
 }
 
 
@@ -75,7 +71,7 @@ write_dswe_product
       false    An error was encountered.
       true     No errors encountered.
 ******************************************************************************/
-bool
+int
 add_dswe_band_product
 (
     char *xml_filename,
@@ -108,7 +104,7 @@ add_dswe_band_product
     if (parse_metadata (xml_filename, &in_meta) != SUCCESS)
     {
         /* Error messages already written */
-        return false;
+        return ERROR;
     }
 
     /* Find the representative band for metadata information */
@@ -132,24 +128,19 @@ add_dswe_band_product
     /* Get the current date/time (UTC) for the production date of each band */
     if (time (&tp) == -1)
     {
-        ERROR_MESSAGE ("unable to obtain current time", MODULE_NAME);
-
-        return false;
+        RETURN_ERROR ("unable to obtain current time", MODULE_NAME, ERROR);
     }
 
     tm = gmtime (&tp);
     if (tm == NULL)
     {
-        ERROR_MESSAGE ("converting time to UTC", MODULE_NAME);
-
-        return false;
+        RETURN_ERROR ("converting time to UTC", MODULE_NAME, ERROR);
     }
 
     if (strftime (production_date, MAX_DATE_LEN, "%Y-%m-%dT%H:%M:%SZ", tm) == 0)
     {
-        ERROR_MESSAGE ("formatting the production date/time", MODULE_NAME);
-
-        return false;
+        RETURN_ERROR ("formatting the production date/time", MODULE_NAME,
+                      ERROR);
     }
 
     /* Figure out the output filename */
@@ -157,9 +148,7 @@ add_dswe_band_product
                       "%s_%s.img", scene_name, "dswe");
     if (count < 0 || count >= sizeof (image_filename))
     {
-        ERROR_MESSAGE ("Failed creating output filename", MODULE_NAME);
-
-        return false;
+        RETURN_ERROR ("Failed creating output filename", MODULE_NAME, ERROR);
     }
 
     /* Figure out how many elements are in the data */
@@ -167,11 +156,10 @@ add_dswe_band_product
                     in_meta.band[src_index].nsamps;
 
     /* First write out the ENVI band and header files */
-    if (! write_dswe_product (image_filename, element_count, data))
+    if (write_dswe_product (image_filename, element_count, data) != SUCCESS)
     {
-        ERROR_MESSAGE ("Failed creating output ENVI files", MODULE_NAME);
-
-        return false;
+        RETURN_ERROR ("Failed creating output ENVI files", MODULE_NAME,
+                      ERROR);
     }
 
     /* Gather all the band information from the representative band */
@@ -183,7 +171,7 @@ add_dswe_band_product
 
     /* Allocate memory for the output band */
     if (allocate_band_metadata (&tmp_meta, 1) != SUCCESS)
-        RETURN_ERROR("allocating band metadata", "OpenOutput", NULL);
+        RETURN_ERROR("allocating band metadata", MODULE_NAME, ERROR);
     bmeta = tmp_meta.band;
 
     snprintf (bmeta[0].short_name, sizeof (bmeta[0].short_name),
@@ -218,9 +206,8 @@ add_dswe_band_product
     /* Create the ENVI header file this band */
     if (create_envi_struct (&bmeta[0], &in_meta.global, &envi_hdr) != SUCCESS)
     {
-        ERROR_MESSAGE ("Failed to create ENVI header structure.", MODULE_NAME);
-
-        return false;
+        RETURN_ERROR ("Failed to create ENVI header structure.", MODULE_NAME,
+                      ERROR);
     }
 
     /* Write the ENVI header */
@@ -228,29 +215,26 @@ add_dswe_band_product
     tmp_char = strchr (envi_file, '.');
     if (tmp_char == NULL)
     {
-        ERROR_MESSAGE ("Failed creating ENVI header filename", MODULE_NAME);
-
-        return false;
+        RETURN_ERROR ("Failed creating ENVI header filename", MODULE_NAME,
+                      ERROR);
     }
 
     sprintf (tmp_char, ".hdr");
     if (write_envi_hdr (envi_file, &envi_hdr) != SUCCESS)
     {
-        ERROR_MESSAGE ("Failed writing ENVI header file", MODULE_NAME);
-
-        return false;
+        RETURN_ERROR ("Failed writing ENVI header file", MODULE_NAME, ERROR);
     }
 
     /* Append the DSWE band to the XML file */
     if (append_metadata (1, bmeta, xml_filename)
         != SUCCESS)
     {
-        ERROR_MESSAGE ("Appending spectral index bands to XML file",
-                       MODULE_NAME);
+        RETURN_ERROR ("Appending spectral index bands to XML file",
+                       MODULE_NAME, ERROR);
     }
 
     free_metadata (&in_meta);
     free_metadata (&tmp_meta);
 
-    return true;
+    return SUCCESS;
 }

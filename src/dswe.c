@@ -20,6 +20,7 @@
 #include "get_args.h"
 #include "input.h"
 #include "output.h"
+#include "build_slope_band.h"
 
 
 /*****************************************************************************
@@ -34,7 +35,7 @@
       true     Success with reading all of the bands into memory.
       false    Failed to read a band into memory.
 *****************************************************************************/
-bool
+int
 read_bands_into_memory
 (
     Input_Data_t *input_data,
@@ -57,7 +58,7 @@ read_bands_into_memory
     {
         ERROR_MESSAGE ("Failed reading blue band data", MODULE_NAME);
 
-        return false;
+        return ERROR;
     }
 
     count = fread (band_green, sizeof (int16_t), element_count,
@@ -66,7 +67,7 @@ read_bands_into_memory
     {
         ERROR_MESSAGE ("Failed reading green band data", MODULE_NAME);
 
-        return false;
+        return ERROR;
     }
 
     count = fread (band_red, sizeof (int16_t), element_count,
@@ -75,7 +76,7 @@ read_bands_into_memory
     {
         ERROR_MESSAGE ("Failed reading red band data", MODULE_NAME);
 
-        return false;
+        return ERROR;
     }
 
     count = fread (band_nir, sizeof (int16_t), element_count,
@@ -84,7 +85,7 @@ read_bands_into_memory
     {
         ERROR_MESSAGE ("Failed reading nir band data", MODULE_NAME);
 
-        return false;
+        return ERROR;
     }
 
     count = fread (band_swir1, sizeof (int16_t), element_count,
@@ -93,7 +94,7 @@ read_bands_into_memory
     {
         ERROR_MESSAGE ("Failed reading swir1 band data", MODULE_NAME);
 
-        return false;
+        return ERROR;
     }
 
     count = fread (band_swir2, sizeof (int16_t), element_count,
@@ -102,7 +103,7 @@ read_bands_into_memory
     {
         ERROR_MESSAGE ("Failed reading swir2 band data", MODULE_NAME);
 
-        return false;
+        return ERROR;
     }
 
     count = fread (band_dem, sizeof (int16_t), element_count,
@@ -111,7 +112,7 @@ read_bands_into_memory
     {
         ERROR_MESSAGE ("Failed reading DEM band data", MODULE_NAME);
 
-        return false;
+        return ERROR;
     }
 
     count = fread (band_cfmask, sizeof (char), element_count,
@@ -120,10 +121,10 @@ read_bands_into_memory
     {
         ERROR_MESSAGE ("Failed reading CFMASK band data", MODULE_NAME);
 
-        return false;
+        return ERROR;
     }
 
-    return true;
+    return SUCCESS;
 }
 
 
@@ -178,7 +179,7 @@ free_band_memory
                bands.
       false    Failed to allocate memory for an input band.
 *****************************************************************************/
-bool
+int
 allocate_band_memory
 (
     int16_t **band_blue,
@@ -202,7 +203,7 @@ allocate_band_memory
         ERROR_MESSAGE ("Failed allocating memory for BLUE band", MODULE_NAME);
 
         /* No free because we have not allocated any memory yet */
-        return false;
+        return ERROR;
     }
 
     *band_green = calloc (element_count, sizeof (int16_t));
@@ -215,7 +216,7 @@ allocate_band_memory
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
                           *band_raw_sc_ps_dswe);
-        return false;
+        return ERROR;
     }
 
     *band_red = calloc (element_count, sizeof (int16_t));
@@ -228,7 +229,7 @@ allocate_band_memory
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
                           *band_raw_sc_ps_dswe);
-        return false;
+        return ERROR;
     }
 
     *band_nir = calloc (element_count, sizeof (int16_t));
@@ -241,7 +242,7 @@ allocate_band_memory
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
                           *band_raw_sc_ps_dswe);
-        return false;
+        return ERROR;
     }
 
     *band_swir1 = calloc (element_count, sizeof (int16_t));
@@ -254,7 +255,7 @@ allocate_band_memory
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
                           *band_raw_sc_ps_dswe);
-        return false;
+        return ERROR;
     }
 
     *band_swir2 = calloc (element_count, sizeof (int16_t));
@@ -268,7 +269,7 @@ allocate_band_memory
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
                           *band_raw_sc_ps_dswe);
-        return false;
+        return ERROR;
     }
 
     *band_dem = calloc (element_count, sizeof (int16_t));
@@ -281,7 +282,7 @@ allocate_band_memory
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
                           *band_raw_sc_ps_dswe);
-        return false;
+        return ERROR;
     }
 
     *band_cfmask = calloc (element_count, sizeof (char));
@@ -295,7 +296,7 @@ allocate_band_memory
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
                           *band_raw_sc_ps_dswe);
-        return false;
+        return ERROR;
     }
 
     *band_ps = calloc (element_count, sizeof (float));
@@ -309,7 +310,7 @@ allocate_band_memory
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
                           *band_raw_sc_ps_dswe);
-        return false;
+        return ERROR;
     }
 
     *band_raw_dswe = calloc (element_count, sizeof (int16_t));
@@ -323,7 +324,7 @@ allocate_band_memory
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
                           *band_raw_sc_ps_dswe);
-        return false;
+        return ERROR;
     }
 
     *band_raw_sc_dswe = calloc (element_count, sizeof (int16_t));
@@ -337,7 +338,7 @@ allocate_band_memory
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
                           *band_raw_sc_ps_dswe);
-        return false;
+        return ERROR;
     }
 
     *band_raw_sc_ps_dswe = calloc (element_count, sizeof (int16_t));
@@ -351,10 +352,10 @@ allocate_band_memory
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_raw_dswe, *band_raw_sc_dswe,
                           *band_raw_sc_ps_dswe);
-        return false;
+        return ERROR;
     }
 
-    return true;
+    return SUCCESS;
 }
 
 
@@ -376,8 +377,8 @@ main (int argc, char *argv[])
     char *xml_filename = NULL;  /* filename for the XML input */
     char *dem_filename = NULL;  /* filename for the DEM input */
     Espa_internal_meta_t xml_metadata;  /* XML metadata structure */
-    bool use_zeven_thorne_flag;
-    bool use_toa_flag;
+    bool use_zeven_thorne_flag = false;
+    bool use_toa_flag = false;
     float wigt;
     float awgt;
     float pswt_1;
@@ -387,7 +388,7 @@ main (int argc, char *argv[])
     int pswnt_2;
     int pswst_1;
     int pswst_2;
-    bool verbose_flag;
+    bool verbose_flag = false;
 
     /* Band data */
     Input_Data_t *input_data = NULL;
@@ -450,6 +451,7 @@ main (int argc, char *argv[])
     int index;
     int element_count;
 
+
     /* Get the command line arguments */
     status = get_args (argc, argv,
                        &xml_filename,
@@ -490,16 +492,18 @@ main (int argc, char *argv[])
         printf ("          PSWST_1: %d\n", pswst_1);
         printf ("          PSWST_2: %d\n", pswst_2);
         printf ("    Percent Slope: %0.1f\n", percent_slope);
+
         printf (" Use Zeven Thorne:");
         if (use_zeven_thorne_flag)
-            printf (" true\n");
+            printf (" TRUE\n");
         else
-            printf (" false\n");
+            printf (" FALSE\n");
+
         printf (" Use Top Of Atmos:");
         if (use_toa_flag)
-            printf (" true\n");
+            printf (" TRUE\n");
         else
-            printf (" false\n");
+            printf (" FALSE\n");
     }
 
     /* -------------------------------------------------------------------- */
@@ -543,11 +547,12 @@ main (int argc, char *argv[])
     element_count = input_data->lines * input_data->samples;
 
     /* Allocate memory buffers for input and temp processing */
-    if (! allocate_band_memory (&band_blue, &band_green, &band_red, &band_nir,
-                                &band_swir1, &band_swir2, &band_dem,
-                                &band_cfmask, &band_ps, &band_raw_dswe,
-                                &band_raw_sc_dswe, &band_raw_sc_ps_dswe,
-                                element_count))
+    if (allocate_band_memory (&band_blue, &band_green, &band_red, &band_nir,
+                              &band_swir1, &band_swir2, &band_dem,
+                              &band_cfmask, &band_ps, &band_raw_dswe,
+                              &band_raw_sc_dswe, &band_raw_sc_ps_dswe,
+                              element_count)
+        != SUCCESS)
     {
         ERROR_MESSAGE ("Failed reading bands into memory", MODULE_NAME);
 
@@ -556,9 +561,10 @@ main (int argc, char *argv[])
 
     /* -------------------------------------------------------------------- */
     /* Read the input files into the buffers */
-    if (! read_bands_into_memory (input_data, band_blue, band_green, band_red,
-                                  band_nir, band_swir1, band_swir2, band_dem,
-                                  band_cfmask, element_count))
+    if (read_bands_into_memory (input_data, band_blue, band_green, band_red,
+                                band_nir, band_swir1, band_swir2, band_dem,
+                                band_cfmask, element_count)
+        != SUCCESS)
     {
         ERROR_MESSAGE ("Failed reading bands into memory", MODULE_NAME);
 
@@ -576,18 +582,15 @@ main (int argc, char *argv[])
 
     /* -------------------------------------------------------------------- */
     /* Close the input files */
-    if (!close_input (input_data))
+    if (close_input (input_data) != SUCCESS)
     {
         WARNING_MESSAGE ("Failed closing input files", MODULE_NAME);
     }
 
     /* -------------------------------------------------------------------- */
-    // TODO TODO TODO  - Build the percent slope band
-    // TODO TODO TODO  - Build the percent slope band
-    // TODO TODO TODO  - Build the percent slope band
-    // TODO TODO TODO  - Build the percent slope band
-
-
+    build_slope_band (band_dem, input_data->lines, input_data->samples,
+                      input_data->x_pixel_size, input_data->y_pixel_size,
+                      use_zeven_thorne_flag, band_ps);
 
     /* -------------------------------------------------------------------- */
     /* Place the scale factor values into local variables mostly for code
@@ -715,7 +718,7 @@ main (int argc, char *argv[])
     // TODO TODO TODO - Add the other bands here
     // TODO TODO TODO - Add the other bands here
     // TODO TODO TODO - Add the other bands here
-    if (! add_dswe_band_product(xml_filename, band_raw_dswe))
+    if (add_dswe_band_product (xml_filename, band_raw_dswe) != SUCCESS)
     {
         ERROR_MESSAGE ("Failed adding DSWE band product", MODULE_NAME);
 

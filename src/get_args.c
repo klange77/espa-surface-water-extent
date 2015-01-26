@@ -135,9 +135,9 @@ get_args
     int c;
     int option_index;
     char msg[256];
-    int tmp_zeven_thorne_flag;
-    int tmp_toa_flag;
-    int tmp_verbose_flag;
+    int tmp_zeven_thorne_flag = false;
+    int tmp_toa_flag = false;
+    int tmp_verbose_flag = false;
 
     struct option long_options[] = {
         /* These options set a flag */

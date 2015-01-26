@@ -50,7 +50,7 @@ open_band
       false    Missing or incompatible bands.
       true     No errors encountered.
 *****************************************************************************/
-bool
+int
 GetXMLInput
 (
     Espa_internal_meta_t *metadata, /* I: input metadata */
@@ -79,9 +79,14 @@ GetXMLInput
                     }
 
                     /* Always use this one for the lines and samples since
-                       they will be the same for us */
+                       they will be the same for us, along with the pixel
+                       size values */
                     input_data->lines = metadata->band[index].nlines;
                     input_data->samples = metadata->band[index].nsamps;
+                    input_data->x_pixel_size =
+                        metadata->band[index].pixel_size[0];
+                    input_data->y_pixel_size =
+                        metadata->band[index].pixel_size[1];
 
                     /* Grab the scale factor for this band */
                     input_data->scale_factor[I_BAND_BLUE] =
@@ -198,9 +203,14 @@ GetXMLInput
                                I_BAND_BLUE);
 
                     /* Always use this one for the lines and samples since
-                       they will be the same for us */
+                       they will be the same for us, along with the pixel
+                       size values */
                     input_data->lines = metadata->band[index].nlines;
                     input_data->samples = metadata->band[index].nsamps;
+                    input_data->x_pixel_size =
+                        metadata->band[index].pixel_size[0];
+                    input_data->y_pixel_size =
+                        metadata->band[index].pixel_size[1];
 
                     if (metadata->band[index].data_type != 2)
                     {
@@ -343,11 +353,11 @@ GetXMLInput
             ERROR_MESSAGE ("Error opening required input data", MODULE_NAME);
 
             close_input (input_data);
-            return false;
+            return ERROR;
         }
     }
 
-    return true;
+    return SUCCESS;
 }
 
 
@@ -393,7 +403,8 @@ open_input
     input_data->samples = 0;
 
     /* Open the input images from the XML file */
-    if (!GetXMLInput (metadata, use_toa_flag, dem_filename, input_data))
+    if (GetXMLInput (metadata, use_toa_flag, dem_filename, input_data)
+        != SUCCESS)
     {
         /* error messages provided by GetXMLInput */
         close_input (input_data);
@@ -416,7 +427,7 @@ open_input
       false    An error was encountered.
       true     No errors encountered.
 *****************************************************************************/
-bool
+int
 close_input
 (
     Input_Data_t *input_data /* I: the opened filenames and file descriptors */
@@ -454,7 +465,7 @@ close_input
     }
 
     if (had_issue)
-        return false;
+        return ERROR;
 
-    return true;
+    return SUCCESS;
 }

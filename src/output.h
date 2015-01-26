@@ -7,7 +7,7 @@
 #include "const.h"
 
 
-bool
+int
 add_dswe_band_product
 (
     char *xml_filename,
