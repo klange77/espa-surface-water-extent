@@ -8,9 +8,11 @@
 #include <string.h>
 #include <limits.h>
 
+
 #include "const.h"
 #include "utilities.h"
 #include "get_args.h"
+
 
 /* Default input parameter values */
 static float default_wigt = 0.015;
@@ -94,6 +96,7 @@ usage ()
     printf ("Example: dswe"
             " --xml LE70760172000175AGS00.xml\n");
 }
+
 
 /*****************************************************************************
   NAME:  get_args
