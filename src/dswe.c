@@ -693,14 +693,13 @@ main (int argc, char *argv[])
         /* Partial Surface Water 2 (PSW2)
            The logic in the if results in a true/false called PSW2 */
         if (mndwi > pswt_2 &&
-            band_swir1_float < pswst_2_float &&
+            band_swir2_float < pswst_2_float &&
             band_nir_float < pswnt_2_float)
         {
             raw_dswe_value += 10000; /* Set the ten thousands digit */
         }
 
         /* Recode the value to fit an 8bit output product */
-// TODO TODO TODO
         switch (raw_dswe_value)
         {
             /* From ESPA_recode-1.rmp prototype
