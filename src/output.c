@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <limits.h>
 #include <time.h>
 
@@ -31,7 +32,7 @@ write_dswe_product
 (
     char *output_filename,
     int element_count,
-    int16_t *data
+    uint8_t *data
 )
 {
     FILE *fd = NULL;
@@ -75,7 +76,13 @@ int
 add_dswe_band_product
 (
     char *xml_filename,
-    int16_t *data
+    char *product_name,
+    char *band_name,
+    char *short_name,
+    char *long_name,
+    int min_range,
+    int max_range,
+    uint8_t *data
 )
 {
     int count;
@@ -94,6 +101,7 @@ add_dswe_band_product
     char production_date[MAX_DATE_LEN+1]; /* current date/time for production */
     Envi_header_t envi_hdr;   /* output ENVI header information */
     char envi_file[PATH_MAX];
+    int class_count;
 
     /* Initialize the input metadata structure */
     init_metadata_struct (&in_meta);
@@ -145,7 +153,7 @@ add_dswe_band_product
 
     /* Figure out the output filename */
     count = snprintf (image_filename, sizeof (image_filename),
-                      "%s_%s.img", scene_name, "dswe");
+                      "%s_%s.img", scene_name, product_name);
     if (count < 0 || count >= sizeof (image_filename))
     {
         RETURN_ERROR ("Failed creating output filename", MODULE_NAME, ERROR);
@@ -177,8 +185,8 @@ add_dswe_band_product
     snprintf (bmeta[0].short_name, sizeof (bmeta[0].short_name),
               in_meta.band[src_index].short_name);
     bmeta[0].short_name[3] = '\0';
-    strcat (bmeta[0].short_name, SHORT_NAME);
-    snprintf (bmeta[0].product, sizeof (bmeta[0].product), PRODUCT_NAME);
+    strcat (bmeta[0].short_name, short_name);
+    snprintf (bmeta[0].product, sizeof (bmeta[0].product), product_name);
     snprintf (bmeta[0].source, sizeof (bmeta[0].source), "sr_refl");
     snprintf (bmeta[0].category, sizeof (bmeta[0].category), "qa");
     bmeta[0].nlines = in_meta.band[src_index].nlines;
@@ -190,18 +198,62 @@ add_dswe_band_product
               "dswe_%s", DSWE_VERSION);
     snprintf (bmeta[0].production_date, sizeof (bmeta[0].production_date),
               production_date);
-    bmeta[0].data_type = ESPA_INT16;
+    bmeta[0].data_type = ESPA_UINT8;
     bmeta[0].fill_value = DSWE_NO_DATA_VALUE;
-    bmeta[0].valid_range[0] = 0;
-    bmeta[0].valid_range[1] = 1111;
-    snprintf (bmeta[0].name, sizeof (bmeta[0].name), BAND_NAME);
-    snprintf (bmeta[0].long_name, sizeof (bmeta[0].long_name), LONG_NAME);
+    bmeta[0].valid_range[0] = min_range;
+    bmeta[0].valid_range[1] = max_range;
+    snprintf (bmeta[0].name, sizeof (bmeta[0].name), band_name);
+    snprintf (bmeta[0].long_name, sizeof (bmeta[0].long_name), long_name);
     snprintf (bmeta[0].data_units, sizeof (bmeta[0].data_units),
               "quality/feature classification");
     snprintf (bmeta[0].file_name, sizeof (bmeta[0].file_name), image_filename);
 
-    /* TODO TODO TODO -
-       See cfmask if I need to allocate class value information */
+    /* Figure out how many classes we have */
+    if (max_range == 9)
+    {
+        class_count = 6;
+    }
+    else
+    {
+        class_count = 5;
+    }
+
+    /* Set up class values information */
+    if (allocate_class_metadata (&bmeta[0], class_count) != SUCCESS)
+        RETURN_ERROR ("allocating dswe classes", MODULE_NAME, ERROR);
+
+    bmeta[0].class_values[0].class = 0;
+    snprintf (bmeta[0].class_values[0].description,
+              sizeof (bmeta[0].class_values[0].description),
+              "not water");
+
+    bmeta[0].class_values[1].class = 1;
+    snprintf (bmeta[0].class_values[1].description,
+              sizeof (bmeta[0].class_values[1].description),
+              "high water confidence");
+
+    bmeta[0].class_values[2].class = 2;
+    snprintf (bmeta[0].class_values[2].description,
+              sizeof (bmeta[0].class_values[2].description),
+              "medium water confidence");
+
+    bmeta[0].class_values[3].class = 3;
+    snprintf (bmeta[0].class_values[3].description,
+              sizeof (bmeta[0].class_values[3].description),
+              "low water confidence");
+
+    if (class_count == 6)
+    {
+        bmeta[0].class_values[4].class = 9;
+        snprintf (bmeta[0].class_values[4].description,
+                  sizeof (bmeta[0].class_values[4].description),
+                  "cloud or shadow");
+    }
+
+    bmeta[0].class_values[class_count-1].class = DSWE_NO_DATA_VALUE;
+    snprintf (bmeta[0].class_values[class_count-1].description,
+              sizeof (bmeta[0].class_values[class_count-1].description),
+              "fill");
 
     /* Create the ENVI header file this band */
     if (create_envi_struct (&bmeta[0], &in_meta.global, &envi_hdr) != SUCCESS)

@@ -23,6 +23,10 @@
 #include "build_slope_band.h"
 
 
+#define CFMASK_SHADOW 2
+#define CFMASK_CLOUD 4
+
+
 /*****************************************************************************
   NAME: read_bands_into_memory
 
@@ -46,7 +50,7 @@ read_bands_into_memory
     int16_t *band_swir1,
     int16_t *band_swir2,
     int16_t *band_dem,
-    char *band_cfmask,
+    uint8_t *band_cfmask,
     int element_count
 )
 {
@@ -115,7 +119,7 @@ read_bands_into_memory
         return ERROR;
     }
 
-    count = fread (band_cfmask, sizeof (char), element_count,
+    count = fread (band_cfmask, sizeof (uint8_t), element_count,
                    input_data->band_fd[I_BAND_CFMASK]);
     if (count != element_count)
     {
@@ -145,11 +149,11 @@ free_band_memory
     int16_t *band_swir1,
     int16_t *band_swir2,
     int16_t *band_dem,
-    char *band_cfmask,
+    uint8_t *band_cfmask,
     float *band_ps,
-    int16_t *band_raw_dswe,
-    int16_t *band_raw_sc_dswe,
-    int16_t *band_raw_sc_ps_dswe
+    uint8_t *band_raw_dswe,
+    uint8_t *band_raw_sc_dswe,
+    uint8_t *band_raw_sc_ps_dswe
 )
 {
     free (band_blue);
@@ -189,11 +193,11 @@ allocate_band_memory
     int16_t **band_swir1,
     int16_t **band_swir2,
     int16_t **band_dem,
-    char **band_cfmask,
+    uint8_t **band_cfmask,
     float **band_ps,
-    int16_t **band_raw_dswe,
-    int16_t **band_raw_sc_dswe,
-    int16_t **band_raw_sc_ps_dswe,
+    uint8_t **band_raw_dswe,
+    uint8_t **band_raw_sc_dswe,
+    uint8_t **band_raw_sc_ps_dswe,
     int element_count
 )
 {
@@ -285,7 +289,7 @@ allocate_band_memory
         return ERROR;
     }
 
-    *band_cfmask = calloc (element_count, sizeof (char));
+    *band_cfmask = calloc (element_count, sizeof (uint8_t));
     if (*band_cfmask == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for CFMASK band",
@@ -313,7 +317,7 @@ allocate_band_memory
         return ERROR;
     }
 
-    *band_raw_dswe = calloc (element_count, sizeof (int16_t));
+    *band_raw_dswe = calloc (element_count, sizeof (uint8_t));
     if (band_raw_dswe == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for Raw DSWE band",
@@ -327,7 +331,7 @@ allocate_band_memory
         return ERROR;
     }
 
-    *band_raw_sc_dswe = calloc (element_count, sizeof (int16_t));
+    *band_raw_sc_dswe = calloc (element_count, sizeof (uint8_t));
     if (band_raw_sc_dswe == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for Raw Shadow Cloud DSWE"
@@ -341,7 +345,7 @@ allocate_band_memory
         return ERROR;
     }
 
-    *band_raw_sc_ps_dswe = calloc (element_count, sizeof (int16_t));
+    *band_raw_sc_ps_dswe = calloc (element_count, sizeof (uint8_t));
     if (band_raw_sc_ps_dswe == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for Raw Shadow Cloud PS DSWE"
@@ -399,12 +403,12 @@ main (int argc, char *argv[])
     int16_t *band_swir1 = NULL; /* TM SR_Band5,  OLI SR_Band6 */
     int16_t *band_swir2 = NULL; /* TM SR_Band7,  OLI SR_Band7 */
     int16_t *band_dem = NULL;   /* Contains the DEM band */
-    char *band_cfmask = NULL;   /* CFMASK */
-    float *band_ps = NULL;      /* Contains the generated percent slope */
-    int16_t *band_raw_dswe = NULL; /* Output Raw DSWE band data */
-    int16_t *band_raw_sc_dswe = NULL; /* Output Raw Shadow Cloud DSWE band
+    uint8_t *band_cfmask = NULL; /* CFMASK */
+    float *band_ps = NULL;       /* Contains the generated percent slope */
+    uint8_t *band_raw_dswe = NULL; /* Output Raw DSWE band data */
+    uint8_t *band_raw_sc_dswe = NULL; /* Output Raw Shadow Cloud DSWE band
                                          data */
-    int16_t *band_raw_sc_ps_dswe = NULL; /* Output Raw shadow Cloud PS DSWE
+    uint8_t *band_raw_sc_ps_dswe = NULL; /* Output Raw shadow Cloud PS DSWE
                                             band data */
 
     /* Temp variables */
@@ -429,12 +433,13 @@ main (int argc, char *argv[])
     float green_scale_factor;
     float swir1_scale_factor;
 
-    float blue_fill_value;
-    float green_fill_value;
-    float red_fill_value;
-    float nir_fill_value;
-    float swir1_fill_value;
-    float swir2_fill_value;
+    int16_t blue_fill_value;
+    int16_t green_fill_value;
+    int16_t red_fill_value;
+    int16_t nir_fill_value;
+    int16_t swir1_fill_value;
+    int16_t swir2_fill_value;
+    uint8_t cfmask_fill_value;
 
     int16_t raw_dswe_value;
     int16_t raw_shadow_dswe_value;
@@ -604,6 +609,7 @@ main (int argc, char *argv[])
     nir_fill_value = input_data->fill_value[I_BAND_NIR];
     swir1_fill_value = input_data->fill_value[I_BAND_SWIR1];
     swir2_fill_value = input_data->fill_value[I_BAND_SWIR2];
+    cfmask_fill_value = input_data->fill_value[I_BAND_CFMASK];
 
     /* Free memory no longer needed */
     free (input_data);
@@ -626,7 +632,8 @@ main (int argc, char *argv[])
             band_red[index] == red_fill_value ||
             band_nir[index] == nir_fill_value ||
             band_swir1[index] == swir1_fill_value ||
-            band_swir2[index] == swir2_fill_value)
+            band_swir2[index] == swir2_fill_value ||
+            band_cfmask[index] == cfmask_fill_value)
         {
             band_raw_dswe[index] = DSWE_NO_DATA_VALUE;
             band_raw_sc_dswe[index] = DSWE_NO_DATA_VALUE;
@@ -692,35 +699,174 @@ main (int argc, char *argv[])
             raw_dswe_value += 10000; /* Set the ten thousands digit */
         }
 
-        // TODO TODO TODO - Apply the CFMASK Shadow constraints to Raw
-        raw_shadow_dswe_value = 0;
-        // TODO TODO TODO - Apply the CFMASK Cloud constraints to Raw_Shadow
-        raw_shadow_cloud_dswe_value = raw_shadow_dswe_value;
-        // TODO TODO TODO - Apply the PS constraints Raw_Shadow_Cloud
-        raw_shadow_cloud_ps_dswe_value = 0;
+        /* Recode the value to fit an 8bit output product */
+// TODO TODO TODO
+        switch (raw_dswe_value)
+        {
+            /* From ESPA_recode-1.rmp prototype
+               11999 11999 : 9    ** Not included here only for cfmask tests
+               11001 11111 : 1
+               11000 11000 : 3
+               10111 10999 : 1
+               10012 10110 : 2
+               10011 10011 : 2
+               10001 10010 : 2
+               10000 10000 : 3
+               1111 1111 : 1
+               1001 1110 : 2
+               1000 1000 : 3
+               10 111 : 2
+               0 9 : 0
+             */
 
+            case 11111:
+            case 11110:
+            case 11101:
+            case 11100:
+            case 11011:
+            case 11010:
+            case 11001:
+                raw_dswe_value = 1;
+                break;
+
+            case 11000:
+                raw_dswe_value = 3;
+                break;
+
+            case 10111:
+                raw_dswe_value = 1;
+                break;
+
+            case 10110:
+            case 10101:
+            case 10100:
+                raw_dswe_value = 2;
+                break;
+
+            case 10011:
+                raw_dswe_value = 2;
+                break;
+
+            case 10010:
+            case 10001:
+                raw_dswe_value = 2;
+                break;
+
+            case 10000:
+                raw_dswe_value = 3;
+                break;
+
+            case 01111:
+                raw_dswe_value = 1;
+                break;
+
+            case 01110:
+            case 01101:
+            case 01100:
+            case 01011:
+            case 01010:
+            case 01001:
+                raw_dswe_value = 2;
+                break;
+
+            case 01000:
+                raw_dswe_value = 3;
+                break;
+
+            case 00111:
+            case 00110:
+            case 00101:
+            case 00100:
+            case 0011:
+            case 0010:
+                raw_dswe_value = 3;
+                break;
+
+            case 00001:
+            case 00000:
+            default:
+                raw_dswe_value = 0;
+                break;
+        }
+
+/* TODO TODO TODO - I think the order of the following is messed up, but it
+                    is currently following the prototype code */
+
+        /* Apply the CFMASK Shadow constraints to the Raw DSWE value */
+        if (band_cfmask[index] == CFMASK_SHADOW)
+            /* classified as 11999 in prototype code */
+            raw_shadow_dswe_value = 9;
+        else
+            raw_shadow_dswe_value = raw_dswe_value;
+
+        /* Apply the CFMASK Cloud constraints to Raw_Shadow value */
+        if (band_cfmask[index] == CFMASK_CLOUD)
+            /* classified as 11999 in prototype code */
+            raw_shadow_cloud_dswe_value = 9;
+        else
+            raw_shadow_cloud_dswe_value = raw_shadow_dswe_value;
+
+        /* Apply the PS constraints Raw_Shadow_Cloud value */
+        if (band_ps[index] >= percent_slope)
+            raw_shadow_cloud_ps_dswe_value = 0;
+            raw_shadow_cloud_ps_dswe_value = raw_shadow_cloud_dswe_value;
+
+        /* Assign the values to the correct output band */
         band_raw_dswe[index] = raw_dswe_value;
         band_raw_sc_dswe[index] = raw_shadow_cloud_dswe_value;
         band_raw_sc_ps_dswe[index] = raw_shadow_cloud_ps_dswe_value;
 
+        /* Let the use know where we are in the processing */
         if (index%99999 == 0)
         {
             printf ("\r");
             printf ("Processed data element %d", index);
         }
     }
+    /* Status output cleanup to match the final output size */
     printf ("\r");
     printf ("Processed data element %d", index);
     printf ("\n");
 
-    /* Add the DSWE band to the metadata file and generate the ENVI image and
-       header files */
-    // TODO TODO TODO - Add the other bands here
-    // TODO TODO TODO - Add the other bands here
-    // TODO TODO TODO - Add the other bands here
-    if (add_dswe_band_product (xml_filename, band_raw_dswe) != SUCCESS)
+    /* Add the DSWE bands to the metadata file and generate the ENVI images
+       and header files */
+    if (add_dswe_band_product (xml_filename, RAW_PRODUCT_NAME, RAW_BAND_NAME,
+                               RAW_SHORT_NAME, RAW_LONG_NAME, 0, 3,
+                               band_raw_dswe)
+        != SUCCESS)
     {
-        ERROR_MESSAGE ("Failed adding DSWE band product", MODULE_NAME);
+        ERROR_MESSAGE ("Failed adding Raw DSWE band product", MODULE_NAME);
+
+        /* Cleanup memory */
+        free (xml_filename);
+        free (dem_filename);
+
+        return EXIT_FAILURE;
+    }
+
+    if (add_dswe_band_product (xml_filename, SC_PRODUCT_NAME, SC_BAND_NAME,
+                               SC_SHORT_NAME, SC_LONG_NAME, 0, 9,
+                               band_raw_sc_dswe)
+        != SUCCESS)
+    {
+        ERROR_MESSAGE ("Failed adding DSWE SHADOW CLOUD band product",
+                       MODULE_NAME);
+
+        /* Cleanup memory */
+        free (xml_filename);
+        free (dem_filename);
+
+        return EXIT_FAILURE;
+    }
+
+    if (add_dswe_band_product (xml_filename, SC_PS_PRODUCT_NAME,
+                               SC_PS_BAND_NAME, SC_PS_SHORT_NAME,
+                               SC_PS_LONG_NAME, 0, 9,
+                               band_raw_sc_ps_dswe)
+        != SUCCESS)
+    {
+        ERROR_MESSAGE ("Failed adding DSWE SHADOW CLOUD PERCENT-SLOPE band"
+                       " product", MODULE_NAME);
 
         /* Cleanup memory */
         free (xml_filename);

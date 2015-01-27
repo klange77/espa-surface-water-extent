@@ -337,6 +337,14 @@ GetXMLInput
                     WARNING_MESSAGE("cfmask incompatable data type"
                                     " expecting UINT8", MODULE_NAME);
                 }
+
+                /* Default to a no-op since CFMASK doesn't have a scale
+                   factor */
+                input_data->scale_factor[I_BAND_CFMASK] = 1.0;
+
+                /* Grab the fill value for this band */
+                input_data->fill_value[I_BAND_CFMASK] =
+                    metadata->band[index].fill_value;
             }
         }
     }

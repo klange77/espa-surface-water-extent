@@ -11,10 +11,20 @@
 #define ERROR 1
 
 
-#define PRODUCT_NAME "dswe"
-#define BAND_NAME "dswe"
-#define SHORT_NAME "DSWE"
-#define LONG_NAME "dynamic surface water extent"
+#define RAW_PRODUCT_NAME "raw_dswe"
+#define RAW_BAND_NAME "raw_dswe"
+#define RAW_SHORT_NAME "RAW_DSWE"
+#define RAW_LONG_NAME "dynamic surface water extent - raw"
+
+#define SC_PRODUCT_NAME "sc_dswe"
+#define SC_BAND_NAME "sc_dswe"
+#define SC_SHORT_NAME "SC_DSWE"
+#define SC_LONG_NAME "dynamic surface water extent - shadow and cloud filtered"
+
+#define SC_PS_PRODUCT_NAME "sc_ps_dswe"
+#define SC_PS_BAND_NAME "sc_ps_dswe"
+#define SC_PS_SHORT_NAME "SC_PS_DSWE"
+#define SC_PS_LONG_NAME "dynamic surface water extent - shadow, cloud, and percent-slope filtered"
 
 
 /* These are used in arrays, and they are position dependent */
@@ -35,7 +45,7 @@ typedef enum
 #define MINSIGMA 1e-5
 
 
-#define DSWE_NO_DATA_VALUE -9999
+#define DSWE_NO_DATA_VALUE 255
 
 
 #define MAX_DATE_LEN 28
