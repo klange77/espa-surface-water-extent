@@ -99,7 +99,7 @@ if __name__ == '__main__':
                               " Threshold between -2.00 and 2.00"
                               " (default value is {0})".format(default_awgt)))
 
-    default_pswt_1 = '0.0'
+    default_pswt_1 = '-0.05'
     parser.add_argument('--pswt_1',
                         action='store', dest='pswt_1',
                         default=default_pswt_1,
@@ -107,7 +107,7 @@ if __name__ == '__main__':
                               " Threshold between -2.00 and 2.00"
                               " (default value is {0})"
                               .format(default_pswt_1)))
-    default_pswt_2 = '0.0'
+    default_pswt_2 = '-0.05'
     parser.add_argument('--pswt_2',
                         action='store', dest='pswt_2',
                         default=default_pswt_2,
@@ -141,14 +141,23 @@ if __name__ == '__main__':
                               " Threshold between 0 and data maximum value"
                               " (default value is {0})"
                               .format(default_pswst_1)))
-    default_pswst_2 = '1000'
+    default_pswst_2 = '650'
     parser.add_argument('--pswst_2',
                         action='store', dest='pswst_2',
                         default=default_pswst_2,
-                        help=("Partial Surface Water 2 SWIR1"
+                        help=("Partial Surface Water 2 SWIR2"
                               " Threshold between 0 and data maximum value"
                               " (default value is {0})"
                               .format(default_pswst_2)))
+
+    default_percent_slope = '3.0'
+    parser.add_argument('--percent_slope',
+                        action='store', dest='percent_slope',
+                        default=default_percent_slope,
+                        help=("Percent Slope"
+                              " Threshold between 0.0 and 100.0"
+                              " (default value is {0})"
+                              .format(default_percent_slope)))
 
     parser.add_argument('--verbose',
                         action='store_true', dest='verbose', default=False,
@@ -180,7 +189,8 @@ if __name__ == '__main__':
            '--pswnt_1', args.pswnt_1,
            '--pswnt_2', args.pswnt_2,
            '--pswst_1', args.pswst_1,
-           '--pswst_2', args.pswst_2]
+           '--pswst_2', args.pswst_2,
+           '--percent-slope', args.percent_slope]
 
     if args.verbose:
         cmd.append('--verbose')
