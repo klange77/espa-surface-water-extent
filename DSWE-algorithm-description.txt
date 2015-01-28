@@ -1,0 +1,221 @@
+This was the initial algorithm description our code was based on.  Please see
+the prototype_implementation code for the correct algorithm.
+
+
+Subject:
+DSWE algorithm description
+From:
+"Jones, John" <jwjones@usgs.gov>
+Date:
+04/15/2014 03:53 PM
+To:
+Ronald Dilley <rdilley@usgs.gov>
+CC:
+Michael Starbuck <mstarbuck@usgs.gov>
+
+Greetings Ron!
+
+Below I provide my "algorithm description" (I use model and algorithm
+interchangeably) from a perspective meant to facilitate programming. That
+is, NOT from a theoretical basis standpoint.
+
+I don't expect you to drop what you're doing and work on this right
+away. But in case you do, please know that I'll be on travel tomorrow
+and Thursday with email access again on Friday morning. Should you
+need answers prior to Friday morning, feel free to call my cell (shown
+below). Voicemail is "broken" (long story) but I'll see any missed call
+and call you back ASAP.
+
+Now, while it might seem redundant, you'll see that I've stated the
+model for DSWE calculation (prior to revision with CFMASK and SLOPE)
+a few different ways. My intent is NOT to confuse you but instead just
+in case one type of presentation is easier to use than another. I think
+the rest is pretty self explanatory but certainly let me know if you
+have any questions.
+
+Overview
+
+The model relies on a series of relatively simple and efficient water
+detection tests, each with their own output code for a “positive” test
+result or 0 for a negative test result. This result is output as its own
+composite band. Then, a series of “revisions” based on CFMASK data
+in the CDR and percent slope from a DEM are also performed to generate
+additional DSWE output bands. Finally, the ancillary percent slope input
+is also provided in the output product.
+
+
+
+Succinctly stated, a one sentence version of the “Raw DSWE” decision
+rule is as follows:
+
+1 (if MNDWI >= WIGT) + 10 (if MBSRV > MBSRN) + 100 (if AWEsh > AWGT) + 1000 (if MNDWI > PSWT AND TM_band5 < PSWB5T AND TM_band4 < PSWB4T) otherwise 0.
+
+
+
+Data Inputs
+
+1) LSRP TM_band1, TM_band2, TM_band3, TM_band4, TM_band5, TM_band6 and
+   band 17. (Scaled in the form that is provisionally distributed).
+
+2) Elevation Data Model (or percent slope if you prefer calculating percent
+   slope outside this model) that has been clipped to each scene.
+
+
+
+Output
+
+A 6 band file, each containing (with possible output ranges being):
+
+1) Raw DSWE (potential value range 0 - 1111).
+
+2) CFMASK cloud and cloud shadow revised band 1 (DSWE)
+   (potential value range 0 – 1111 plus a code for “no_data”).
+
+3) CFMASK snow-revised band 2
+   (i.e., cloud and cloud shadow revised DSWE plus a code for “no_data”)
+
+4) Slope revised band 3
+   (i.e., snow, cloud and cloud shadow revised DSWE)
+   (potential value range 0 - 1111 plus a code value for "no_data").
+
+5) Percent Slope (potential range scene dependent).
+
+
+
+Variables derived within the program and on which "decisions" are made: 
+
+1) From LSRP: Modified Normalized Difference Wetness Index (MNDWI):
+
+   MNDWI = (TM_band2 - TM_band5) / (TM_band2 + TM_band5)
+
+2) From LSRP: Multi-band Spectral Relationship Visible (MBSRV).
+
+   MBSRV = (TM_band2 + TM_band3)
+
+3) From LSRP: Multi-band Spectral Relationship Near-Infrared (MBSRN).
+
+   MBSRN = (TM_band4 + TM_band5)
+
+4) From LSRP: Automated Water Extent shadow (AWEsh).
+
+   AWEsh = TM_band1 + 2.5 * TM_band2 - 1.5 * (TM_band4 + TM_band5) - 0.25 * TM_band6
+
+5) From MNDWI (above) and other LSRP bands: Partial Surface Water (PSW).
+   (Presented as a conditional statement).
+
+   PSW = MNDWI > PSWT AND TM_band5 < PSWB5T AND TM_band4 < PSWB4T
+
+6) From digital elevation data clipped to scene boundary:
+   Percent Slope (PERSLP).
+
+
+
+A separate decision rules listing to generate DSWE (in case that’s useful)
+
+A single string was provided above for the decision rule. But in practice
+I generate temporary, separate files in memory for each conditional
+rule with the output codes shown below. Then I add those temporary files
+to produce a composite score for each pixel in the image. This creates
+“band 1” of the output.
+
+
+1 (if MNDWI >= WIGT) otherwise 0
+
+10 (if MBSRV > MBSRN) otherwise 0
+
+100 (if AWEsh > AWGT) otherwise 0
+
+1000 (if MNDWI > PSWT AND TM_band5 < PSWB5T AND TM_band4 < PSWB4T) otherwise 0
+
+
+
+Parameter inputs
+
+*The current thresholds used for most decisions have been quite stable
+but I would like the flexibility to modify them either by over-riding
+the default value via a command string or by providing them dynamically
+as the result from another (as of yet untested) routine (the later may
+be a long term goal for the ECV).
+
+
+I name these parameters below (with names that make sense to me anyway)
+and provide default values. (Let me know if my naming scheme creates
+any problems or you would like to suggest improvements).
+
+
+
+Parameter Name: type and range: default value
+
+1) WIGT:
+   A floating point (3 decimal values) number between 0.000 and 2.000 : 0.015
+
+2) AWGT:
+   A floating point (2 decimal values) number between -2.00 and 2.00 : 0.00
+
+3) PSWT:
+   A floating point (2 decimal values) number between -2.00 and 2.00 : -0.05
+
+4) PSWB4T:
+   Signed 10-bit number between 0 and scene maximum : 1500
+
+5) PSWB5T:
+   Signed 10-bit number between 0 and scene maximum : 1000
+
+5) PSLPT:
+   A floating point (2 decimal values) between 0.00 and 100.00
+
+
+
+Cloud  and shadow revision (output band 2)
+
+The CFMASK band (band 17 in the LSRP) is used to convert potential
+cloud (band17 value “4”) and shadow pixels (band17 value “2”)
+to "no_data value" and all other pixels to the value of Raw DSWE.
+
+
+I’m open to suggestions for the no_data value (other than “0” -
+that's already reserved). I believe ArcMAP uses -9999 but you can tell me
+whether this does very bad things to the output file size! I will write
+that the no_data value needs to be something that is easy to distinguish
+as "no data" as I'll combine the result with evaluation data that can
+have large positive values (in the hundreds of thousands).
+
+
+
+Snow revision (output band 3)
+
+The CFMASK band (band 17 in the LSRP) is used to convert potentially
+snow covered pixel (band17 value “3”) in output band 2 (cloud/shadow
+revised) to "no_data value" and all others to Raw DSWE.
+
+
+
+Slope revision (output band 4)
+
+Percent slope is consulted to flag all pixels with slope greater than
+PSLPT to 0 (not “no data”) and all other pixels to their band 3 value.
+
+
+
+Slope (output band 5)
+
+Finally, percent slope is scaled by 100 and output as an integer value.
+
+
+
+I'm looking forward to churning out lots of additional test data Ron.
+
+
+Thanks!
+
+
+-John
+=============================================
+John W. Jones, Ph.D.                               jwjones@usgs.gov
+Research Geographer                               Tel: 703-648-5543
+Eastern Geographic Science Center           Cell: 703-994-3224
+521 National Center                                  Fax: 703-648-4163
+U.S. Geological Survey
+Reston, VA 20192
+=============================================
+
