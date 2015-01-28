@@ -670,10 +670,10 @@ main (int argc, char *argv[])
                  - (0.25 * band_swir2_float));
 
         /* Initialize to 0 or 1 on the first test */
-        if (mndwi < wigt)
-            raw_dswe_value = 0;
+        if (mndwi > wigt)
+            raw_dswe_value = 1; /* > wigt */  /* Set the ones digit */
         else
-            raw_dswe_value = 1; /* >= wigt */  /* Set the ones digit */
+            raw_dswe_value = 0;
 
         if (mbsrv > mbsrn)
             raw_dswe_value += 10; /* Set the tens digit */
@@ -702,22 +702,12 @@ main (int argc, char *argv[])
         /* Recode the value to fit an 8bit output product */
         switch (raw_dswe_value)
         {
-            /* From ESPA_recode-1.rmp prototype
-               11999 11999 : 9    ** Not included here only for cfmask tests
-               11001 11111 : 1
-               11000 11000 : 3
-               10111 10999 : 1
-               10012 10110 : 2
-               10011 10011 : 2
-               10001 10010 : 2
-               10000 10000 : 3
-               1111 1111 : 1
-               1001 1110 : 2
-               1000 1000 : 3
-               10 111 : 2
-               0 9 : 0
+            /* From ESPA_recode.rmp prototype
+               11999 11999 : 9    ** Not included here it is only for
+                                  ** cfmask tests performed after this
              */
 
+            /* 11001 11111 : 1 */
             case 11111:
             case 11110:
             case 11101:
@@ -725,64 +715,51 @@ main (int argc, char *argv[])
             case 11011:
             case 11010:
             case 11001:
+            /* 10111 10999 : 1 */
+            case 10111:
+            /* 1111 1111 : 1 */
+            case 1111:
                 raw_dswe_value = 1;
                 break;
 
+            /* 11000 11000 : 3 */
             case 11000:
+            /* 10000 10000 : 3 */
+            case 10000:
+            /* 1000 1000 : 3 */
+            case 1000:
                 raw_dswe_value = 3;
                 break;
 
-            case 10111:
-                raw_dswe_value = 1;
-                break;
-
+            /* 10012 10110 : 2 */
             case 10110:
             case 10101:
             case 10100:
-                raw_dswe_value = 2;
-                break;
-
+            /* 10011 10011 : 2 */
             case 10011:
-                raw_dswe_value = 2;
-                break;
-
+            /* 10001 10010 : 2 */
             case 10010:
             case 10001:
+            /* 1001 1110 : 2 */
+            case 1110:
+            case 1101:
+            case 1100:
+            case 1011:
+            case 1010:
+            case 1001:
+            /* 10 111 : 2 */
+            case 111:
+            case 110:
+            case 101:
+            case 100:
+            case 11:
+            case 10:
                 raw_dswe_value = 2;
                 break;
 
-            case 10000:
-                raw_dswe_value = 3;
-                break;
-
-            case 01111:
-                raw_dswe_value = 1;
-                break;
-
-            case 01110:
-            case 01101:
-            case 01100:
-            case 01011:
-            case 01010:
-            case 01001:
-                raw_dswe_value = 2;
-                break;
-
-            case 01000:
-                raw_dswe_value = 3;
-                break;
-
-            case 00111:
-            case 00110:
-            case 00101:
-            case 00100:
-            case 0011:
-            case 0010:
-                raw_dswe_value = 3;
-                break;
-
-            case 00001:
-            case 00000:
+            /* 0 9 : 0 */
+            case 1:
+            case 0:
             default:
                 raw_dswe_value = 0;
                 break;
@@ -793,19 +770,19 @@ main (int argc, char *argv[])
 
         /* Apply the CFMASK Shadow constraints to the Raw DSWE value */
         if (band_cfmask[index] == CFMASK_SHADOW)
-            /* classified as 11999 in prototype code */
+            /* classified as 11999 in prototype code using 9 due to recode */
             raw_shadow_dswe_value = 9;
         else
             raw_shadow_dswe_value = raw_dswe_value;
 
         /* Apply the CFMASK Cloud constraints to Raw_Shadow value */
         if (band_cfmask[index] == CFMASK_CLOUD)
-            /* classified as 11999 in prototype code */
+            /* classified as 11999 in prototype code using 9 due to recode */
             raw_shadow_cloud_dswe_value = 9;
         else
             raw_shadow_cloud_dswe_value = raw_shadow_dswe_value;
 
-        /* Apply the PS constraints Raw_Shadow_Cloud value */
+        /* Apply the PS constraints to Raw_Shadow_Cloud value */
         if (band_ps[index] >= percent_slope)
             raw_shadow_cloud_ps_dswe_value = 0;
             raw_shadow_cloud_ps_dswe_value = raw_shadow_cloud_dswe_value;
