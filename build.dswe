@@ -1,4 +1,0 @@
-make distclean
-cmake -DBUILD_STATIC:BOOL=FALSE -DCMAKE_INSTALL_PREFIX=$PREFIX CMakeLists.txt
-make clean
-make
