@@ -44,7 +44,8 @@ usage ()
             "Determines and builds surface water extent output bands from"
             " surface\nreflectance input data in ESPA raw binary format.\n\n");
     printf ("usage: dswe"
-            " --xml <input_xml_filename> [--help]\n\n");
+            " --xml <input_xml_filename>"
+            " --dem <input_dem_filename> [--help]\n\n");
     printf ("where the following parameters are required:\n");
     printf ("    --xml: name of the input XML file which contains the surface"
             " reflectance,\n"
@@ -94,7 +95,8 @@ usage ()
             " is false)\n\n");
     printf ("dswe --help will print this usage statement\n\n");
     printf ("Example: dswe"
-            " --xml LE70760172000175AGS00.xml\n");
+            " --xml LE70760172000175AGS00.xml"
+            " --dem LE70760172000175AGS00_dem.img\n");
 }
 
 
