@@ -230,24 +230,24 @@ add_dswe_band_product
     bmeta[0].class_values[1].class = 1;
     snprintf (bmeta[0].class_values[1].description,
               sizeof (bmeta[0].class_values[1].description),
-              "high water confidence");
+              "water - high confidence");
 
     bmeta[0].class_values[2].class = 2;
     snprintf (bmeta[0].class_values[2].description,
               sizeof (bmeta[0].class_values[2].description),
-              "medium water confidence");
+              "water - moderate confidence");
 
     bmeta[0].class_values[3].class = 3;
     snprintf (bmeta[0].class_values[3].description,
               sizeof (bmeta[0].class_values[3].description),
-              "low water confidence");
+              "partial surface water pixel");
 
     if (class_count == 6)
     {
         bmeta[0].class_values[4].class = 9;
         snprintf (bmeta[0].class_values[4].description,
                   sizeof (bmeta[0].class_values[4].description),
-                  "cloud or shadow");
+                  "cloud or cloud shadow");
     }
 
     bmeta[0].class_values[class_count-1].class = DSWE_NO_DATA_VALUE;
