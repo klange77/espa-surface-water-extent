@@ -85,7 +85,7 @@ if __name__ == '__main__':
                         help="The DEM metadata file to use")
 
     # Optional parameters
-    default_wigt = '0.015'
+    default_wigt = '0.0123'
     parser.add_argument('--wigt',
                         action='store', dest='wigt', default=default_wigt,
                         help=("Modified Normalized Difference Wetness Index"
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     parser.add_argument('--pswt_1',
                         action='store', dest='pswt_1',
                         default=default_pswt_1,
-                        help=("Partial Surface Water 1"
+                        help=("Partial Surface Water Test-1"
                               " Threshold between -2.00 and 2.00"
                               " (default value is {0})"
                               .format(default_pswt_1)))
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     parser.add_argument('--pswt_2',
                         action='store', dest='pswt_2',
                         default=default_pswt_2,
-                        help=("Partial Surface Water 2"
+                        help=("Partial Surface Water Test-2"
                               " Threshold between -2.00 and 2.00"
                               " (default value is {0})"
                               .format(default_pswt_2)))
@@ -120,7 +120,7 @@ if __name__ == '__main__':
     parser.add_argument('--pswnt_1',
                         action='store', dest='pswnt_1',
                         default=default_pswnt_1,
-                        help=("Partial Surface Water 1 NIR"
+                        help=("Partial Surface Water Test-1 NIR"
                               " Threshold between 0 and data maximum value"
                               " (default value is {0})"
                               .format(default_pswnt_1)))
@@ -128,7 +128,7 @@ if __name__ == '__main__':
     parser.add_argument('--pswnt_2',
                         action='store', dest='pswnt_2',
                         default=default_pswnt_2,
-                        help=("Partial Surface Water 2 NIR"
+                        help=("Partial Surface Water Test-2 NIR"
                               " Threshold between 0 and data maximum value"
                               " (default value is {0})"
                               .format(default_pswnt_2)))
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     parser.add_argument('--pswst_1',
                         action='store', dest='pswst_1',
                         default=default_pswst_1,
-                        help=("Partial Surface Water 1 SWIR1"
+                        help=("Partial Surface Water Test-1 SWIR1"
                               " Threshold between 0 and data maximum value"
                               " (default value is {0})"
                               .format(default_pswst_1)))
@@ -145,12 +145,12 @@ if __name__ == '__main__':
     parser.add_argument('--pswst_2',
                         action='store', dest='pswst_2',
                         default=default_pswst_2,
-                        help=("Partial Surface Water 2 SWIR2"
+                        help=("Partial Surface Water Test-2 SWIR2"
                               " Threshold between 0 and data maximum value"
                               " (default value is {0})"
                               .format(default_pswst_2)))
 
-    default_percent_slope = '3.0'
+    default_percent_slope = '9.0'
     parser.add_argument('--percent_slope',
                         action='store', dest='percent_slope',
                         default=default_percent_slope,
