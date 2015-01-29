@@ -21,11 +21,11 @@
 
   PURPOSE:  Create the *.img file and the associated ENVI header.
 
-  RETURN VALUE:  Type = bool
+  RETURN VALUE:  Type = int
       Value    Description
       -------  ---------------------------------------------------------------
-      false    An error was encountered.
-      true     No errors encountered.
+      SUCCESS  No errors were encountered.
+      ERROR    An error was encountered.
 ******************************************************************************/
 int
 write_dswe_product
@@ -46,7 +46,7 @@ write_dswe_product
         RETURN_ERROR (msg, MODULE_NAME, ERROR);
     }
 
-    if (write_raw_binary(fd, 1, element_count, sizeof (int16_t), data)
+    if (write_raw_binary(fd, 1, element_count, sizeof (uint8_t), data)
         != SUCCESS)
     {
         snprintf (msg, sizeof (msg), "Failed writing file %s",
@@ -66,16 +66,17 @@ write_dswe_product
   PURPOSE:  Create a new envi output file including envi header and add the
             associated information to the XML metadata file.
 
-  RETURN VALUE:  Type = bool
+  RETURN VALUE:  Type = int
       Value    Description
       -------  ---------------------------------------------------------------
-      false    An error was encountered.
-      true     No errors encountered.
+      SUCCESS  No errors were encountered.
+      ERROR    An error was encountered.
 ******************************************************************************/
 int
 add_dswe_band_product
 (
     char *xml_filename,
+    bool use_toa_flag,
     char *product_name,
     char *band_name,
     char *short_name,
@@ -118,12 +119,25 @@ add_dswe_band_product
     /* Find the representative band for metadata information */
     for (band_index = 0; band_index < in_meta.nbands; band_index++)
     {
-        if (!strcmp (in_meta.band[band_index].name, "sr_band1") &&
-            !strcmp (in_meta.band[band_index].product, "sr_refl"))
+        if (use_toa_flag)
         {
-            /* this is the index we'll use for reflectance band info */
-            src_index = band_index;
-            break;
+            if (!strcmp (in_meta.band[band_index].name, "toa_band1") &&
+                !strcmp (in_meta.band[band_index].product, "toa_refl"))
+            {
+                /* this is the index we'll use for reflectance band info */
+                src_index = band_index;
+                break;
+            }
+        }
+        else
+        {
+            if (!strcmp (in_meta.band[band_index].name, "sr_band1") &&
+                !strcmp (in_meta.band[band_index].product, "sr_refl"))
+            {
+                /* this is the index we'll use for reflectance band info */
+                src_index = band_index;
+                break;
+            }
         }
     }
 
