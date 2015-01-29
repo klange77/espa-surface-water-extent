@@ -19,12 +19,12 @@
 #define SC_PRODUCT_NAME "sc_dswe"
 #define SC_BAND_NAME "sc_dswe"
 #define SC_SHORT_NAME "SC_DSWE"
-#define SC_LONG_NAME "dynamic surface water extent - shadow and cloud filtered"
+#define SC_LONG_NAME "dynamic surface water extent - cloud shadow and cloud filtered"
 
-#define SC_PS_PRODUCT_NAME "sc_ps_dswe"
-#define SC_PS_BAND_NAME "sc_ps_dswe"
-#define SC_PS_SHORT_NAME "SC_PS_DSWE"
-#define SC_PS_LONG_NAME "dynamic surface water extent - shadow, cloud, and percent-slope filtered"
+#define PS_SC_PRODUCT_NAME "ps_sc_dswe"
+#define PS_SC_BAND_NAME "ps_sc_dswe"
+#define PS_SC_SHORT_NAME "PS_SC_DSWE"
+#define PS_SC_LONG_NAME "dynamic surface water extent - percent-slope, cloud shadow, and cloud filtered"
 
 
 /* These are used in arrays, and they are position dependent */
