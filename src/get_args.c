@@ -15,19 +15,19 @@
 
 
 /* Default input parameter values */
-static float default_wigt = 0.015;
+static float default_wigt = 0.0123;
 static float default_awgt = 0.0;
 
 static float default_pswt_1 = -0.05;
 static float default_pswt_2 = -0.05;
-
-static float default_percent_slope = 3.0;
 
 static int default_pswnt_1 = 1500;
 static int default_pswst_1 = 1000;
 
 static int default_pswnt_2 = 1700;
 static int default_pswst_2 = 650;
+
+static float default_percent_slope = 9.0;
 
 
 /*****************************************************************************
@@ -41,59 +41,74 @@ void
 usage ()
 {
     printf ("Dynamic Surface Water Extent\n"
-            "Determines and builds surface water extent output bands from"
-            " surface\nreflectance input data in ESPA raw binary format.\n\n");
+            "Determines and builds Dynamic Surface Water Extent output bands"
+            " from Surface\n"
+            "Reflectance input data in ESPA raw binary format.\n\n");
     printf ("usage: dswe"
             " --xml <input_xml_filename>"
             " --dem <input_dem_filename> [--help]\n\n");
     printf ("where the following parameters are required:\n");
-    printf ("    --xml: name of the input XML file which contains the surface"
+    printf ("    --xml: Name of the input XML file which contains the surface"
             " reflectance,\n"
             "           and top of atmos files output from LEDAPS in raw binary"
             "\n           (envi) format\n");
-    printf ("    --dem: name of the input DEM file which will is expected to"
+    printf ("    --dem: Name of the input DEM file which will is expected to"
             " be the same\n"
             "           size and area as the source data\n");
+
     printf ("where the following parameters are optional:\n");
     printf ("    --wigt: Modified Normalized Difference Wetness Index"
-            " Threshold between 0.00 and 2.00 (default value is %0.3f)\n",
+            " Threshold\n"
+            "            between 0.00 and 2.00 (default value is %0.3f)\n",
             default_wigt);
     printf ("    --awgt: Automated Water Extent Shadow"
-            " Threshold between -2.00 and 2.00"
-            " (default value is %0.2f)\n", default_awgt);
+            " Threshold\n"
+            "            between -2.00 and 2.00 (default value is %0.2f)\n",
+            default_awgt);
 
-    printf ("    --pswt_1: Partial Surface Water 1 Threshold between -2.00 and"
-            " 2.00 (default value is %0.2f)\n", default_pswt_1);
-    printf ("    --pswt_2: Partial Surface Water 2 Threshold between -2.00 and"
-            " 2.00 (default value is %0.2f)\n", default_pswt_2);
+    printf ("    --pswt_1: Partial Surface Water Test-1 Threshold\n"
+            "              between -2.00 and 2.00 (default value is %0.2f)\n",
+            default_pswt_1);
+    printf ("    --pswt_2: Partial Surface Water Test-2 Threshold\n"
+            "              between -2.00 and 2.00 (default value is %0.2f)\n",
+            default_pswt_2);
 
-    printf ("    --pswnt_1: Partial Surface Water 1 NIR Threshold"
-            " between 0 and data maximum (default value is %d)\n",
-            default_pswnt_1);
-    printf ("    --pswnt_2: Partial Surface Water 2 NIR Threshold"
-            " between 0 and data maximum (default value is %d)\n",
-            default_pswnt_2);
+    printf ("    --pswnt_1: Partial Surface Water Test-1 NIR Threshold\n"
+            "               between 0 and data maximum"
+            " (default value is %d)\n", default_pswnt_1);
+    printf ("    --pswnt_2: Partial Surface Water Test-2 NIR Threshold\n"
+            "               between 0 and data maximum"
+            " (default value is %d)\n", default_pswnt_2);
 
-    printf ("    --pswst_1: Partial Surface Water 1 SWIR1 Threshold"
-            " between 0 and data maximum (default value is %d)\n",
-            default_pswst_1);
-    printf ("    --pswst_2: Partial Surface Water 2 SWIR1 Threshold"
-            " between 0 and data maximum (default value is %d)\n",
-            default_pswst_2);
+    printf ("    --pswst_1: Partial Surface Water Test-1 SWIR1 Threshold\n"
+            "               between 0 and data maximum"
+            " (default value is %d)\n", default_pswst_1);
+    printf ("    --pswst_2: Partial Surface Water Test-2 SWIR2 Threshold\n"
+            "               between 0 and data maximum"
+            " (default value is %d)\n", default_pswst_2);
 
     printf ("    --percent-slope: Threshold between 0.00 and 100.00"
             " (default value is %0.1f)\n", default_percent_slope);
-    printf ("    --use_zeven_thorne: should Zevenbergen&Thorne's shaded"
+
+    printf ("    --use_zeven_thorne: Should Zevenbergen&Thorne's slope"
             " algorithm be used?\n"
-            "                        (default is false, meaning Horn's shaded"
-            " algorithm will\n" "                        be used)\n");
-    printf ("    --use-toa: should Top of Atmosphere be used instead of"
+            "                        (default is false, meaning Horn's slope"
+            " algorithm will\n"
+            "                        be used)\n"
+            "                        Output using zeven_thorne has *NOT* been"
+            " validated.\n");
+
+    printf ("    --use-toa: Should Top of Atmosphere be used instead of"
             " Surface Reflectance\n"
             "               (default is false, meaning Surface Reflectance"
-            " will be used)\n");
-    printf ("    --verbose: should intermediate messages be printed? (default"
+            " will be used)\n"
+            "               Also default parameters are taylored to Surface"
+            " Reflectance.\n");
+
+    printf ("    --verbose: Should intermediate messages be printed? (default"
             " is false)\n\n");
-    printf ("dswe --help will print this usage statement\n\n");
+
+    printf ("    --help will print this usage statement\n\n");
     printf ("Example: dswe"
             " --xml LE70760172000175AGS00.xml"
             " --dem LE70760172000175AGS00_dem.img\n");
