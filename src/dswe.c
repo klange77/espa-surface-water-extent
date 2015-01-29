@@ -27,6 +27,13 @@
 #define CFMASK_CLOUD 4
 
 
+#define DSWE_NOT_WATER 0
+#define DSWE_WATER_HIGH_CONFIDENCE 1
+#define DSWE_WATER_MODERATE_CONFIDENCE 2
+#define DSWE_PARTIAL_SURFACE_WATER_PIXEL 3
+#define DSWE_CLOUD_SHADOW_CLOUD 9
+
+
 /*****************************************************************************
   NAME: read_bands_into_memory
 
@@ -442,8 +449,8 @@ main (int argc, char *argv[])
     uint8_t cfmask_fill_value;
 
     int16_t raw_dswe_value;
-    int16_t raw_csc_dswe_value;
-    int16_t raw_ps_csc_dswe_value;
+    uint8_t raw_csc_dswe_value;
+    uint8_t raw_ps_csc_dswe_value;
 
     float pswnt_1_float;
     float pswnt_2_float;
@@ -718,7 +725,7 @@ main (int argc, char *argv[])
             case 10111:
             /* 1111 1111 : 1 */
             case 1111:
-                raw_dswe_value = 1;
+                raw_dswe_value = DSWE_WATER_HIGH_CONFIDENCE;
                 break;
 
             /* 11000 11000 : 3 */
@@ -727,7 +734,7 @@ main (int argc, char *argv[])
             case 10000:
             /* 1000 1000 : 3 */
             case 1000:
-                raw_dswe_value = 3;
+                raw_dswe_value = DSWE_PARTIAL_SURFACE_WATER_PIXEL;
                 break;
 
             /* 10012 10110 : 2 */
@@ -753,14 +760,14 @@ main (int argc, char *argv[])
             case 100:
             case 11:
             case 10:
-                raw_dswe_value = 2;
+                raw_dswe_value = DSWE_WATER_MODERATE_CONFIDENCE;
                 break;
 
             /* 0 9 : 0 */
             case 1:
             case 0:
             default:
-                raw_dswe_value = 0;
+                raw_dswe_value = DSWE_NOT_WATER;
                 break;
         }
 
@@ -784,7 +791,7 @@ main (int argc, char *argv[])
            and Cloud output */
         if (band_ps[index] >= percent_slope)
         {
-            raw_ps_csc_dswe_value = 0;
+            raw_ps_csc_dswe_value = DSWE_NOT_WATER;
         }
 
         /* Apply the CFMASK Cloud Shadow constraint to both the
@@ -794,8 +801,8 @@ main (int argc, char *argv[])
         if (band_cfmask[index] == CFMASK_SHADOW)
         {
             /* classified as 11999 in prototype code using 9 due to recode */
-            raw_csc_dswe_value = 9;
-            raw_ps_csc_dswe_value = 9;
+            raw_csc_dswe_value = DSWE_CLOUD_SHADOW_CLOUD;
+            raw_ps_csc_dswe_value = DSWE_CLOUD_SHADOW_CLOUD;
         }
 
         /* Apply the CFMASK Cloud constraint to both the
@@ -805,8 +812,8 @@ main (int argc, char *argv[])
         if (band_cfmask[index] == CFMASK_CLOUD)
         {
             /* classified as 11999 in prototype code using 9 due to recode */
-            raw_csc_dswe_value = 9;
-            raw_ps_csc_dswe_value = 9;
+            raw_csc_dswe_value = DSWE_CLOUD_SHADOW_CLOUD;
+            raw_ps_csc_dswe_value = DSWE_CLOUD_SHADOW_CLOUD;
         }
 
         /* Assign the values to the correct output band */
@@ -828,8 +835,10 @@ main (int argc, char *argv[])
 
     /* Add the DSWE bands to the metadata file and generate the ENVI images
        and header files */
-    if (add_dswe_band_product (xml_filename, RAW_PRODUCT_NAME, RAW_BAND_NAME,
-                               RAW_SHORT_NAME, RAW_LONG_NAME, 0, 3,
+    if (add_dswe_band_product (xml_filename, use_toa_flag,
+                               RAW_PRODUCT_NAME, RAW_BAND_NAME,
+                               RAW_SHORT_NAME, RAW_LONG_NAME, DSWE_NOT_WATER,
+                               DSWE_PARTIAL_SURFACE_WATER_PIXEL,
                                band_raw_dswe)
         != SUCCESS)
     {
@@ -842,8 +851,10 @@ main (int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    if (add_dswe_band_product (xml_filename, SC_PRODUCT_NAME, SC_BAND_NAME,
-                               SC_SHORT_NAME, SC_LONG_NAME, 0, 9,
+    if (add_dswe_band_product (xml_filename, use_toa_flag,
+                               SC_PRODUCT_NAME, SC_BAND_NAME,
+                               SC_SHORT_NAME, SC_LONG_NAME,
+                               DSWE_NOT_WATER, DSWE_CLOUD_SHADOW_CLOUD,
                                band_raw_csc_dswe)
         != SUCCESS)
     {
@@ -857,9 +868,10 @@ main (int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    if (add_dswe_band_product (xml_filename, PS_SC_PRODUCT_NAME,
-                               PS_SC_BAND_NAME, PS_SC_SHORT_NAME,
-                               PS_SC_LONG_NAME, 0, 9,
+    if (add_dswe_band_product (xml_filename, use_toa_flag,
+                               PS_SC_PRODUCT_NAME, PS_SC_BAND_NAME,
+                               PS_SC_SHORT_NAME, PS_SC_LONG_NAME,
+                               DSWE_NOT_WATER, DSWE_CLOUD_SHADOW_CLOUD,
                                band_raw_ps_csc_dswe)
         != SUCCESS)
     {
