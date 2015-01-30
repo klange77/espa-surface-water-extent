@@ -44,11 +44,11 @@ open_band
   PURPOSE:  Find the files needed by this application in the XML file and open
             them.
 
-  RETURN VALUE:  Type = bool
+  RETURN VALUE:  Type = int
       Value    Description
       -------  ---------------------------------------------------------------
-      false    Missing or incompatible bands.
-      true     No errors encountered.
+      SUCCESS  No errors were encountered.
+      ERROR    An error was encountered.
 *****************************************************************************/
 int
 GetXMLInput
@@ -128,8 +128,10 @@ GetXMLInput
         RETURN_ERROR ("Error invalid satellite", MODULE_NAME, ERROR);
     }
 
+    /* Scan the metadata searching for the bands to open */
     for (index = 0; index < metadata->nbands; index++)
     {
+        /* Only look at the onse with the product name we are looking for */
         if (strcmp (metadata->band[index].product, product_name) == 0)
         {
             if (strcmp (metadata->band[index].name, blue_band_name) == 0)
@@ -297,8 +299,13 @@ GetXMLInput
 
     /* Add the DEM band to the list */
     open_band (dem_filename, input_data, I_BAND_DEM);
+    /* Default to a no-op since DEM doesn't have a scale factor */
+    input_data->scale_factor[I_BAND_DEM] = 1.0;
+    /* Default so the variable is initialized
+       The DEM should not have values this negative */
+    input_data->fill_value[I_BAND_DEM] = -9999;
 
-    /* Verify all the bands have something (all are required for dswe) */
+    /* Verify all the bands have something (all are required for DSWE) */
     for (index = 0; index < MAX_INPUT_BANDS; index++)
     {
         if (input_data->band_fd[index] == NULL ||
@@ -375,11 +382,11 @@ open_input
   PURPOSE:  Close all the input files and free associated memory that resides
             in the data structure.
 
-  RETURN VALUE:  Type = bool
+  RETURN VALUE:  Type = int
       Value    Description
       -------  ---------------------------------------------------------------
-      false    An error was encountered.
-      true     No errors encountered.
+      SUCCESS  No errors were encountered.
+      ERROR    An error was encountered.
 *****************************************************************************/
 int
 close_input
