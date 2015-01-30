@@ -215,6 +215,7 @@ void build_slope_band
                     slope = calculate_slope_horn(elevation_window,
                                                  ew_resolution, ns_resolution);
 
+                /* Convert from a 0.0 - 1.0 value to a 0.0 - 100.0 value */
                 band_ps[output_pixel] = 100.0 * slope;
             }
             else
