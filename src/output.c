@@ -16,6 +16,9 @@
 #include "utilities.h"
 
 
+#define MAX_DATE_LEN 28
+
+
 /******************************************************************************
   NAME:  write_dswe_product
 

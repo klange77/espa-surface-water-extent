@@ -318,7 +318,7 @@ get_args
         return ERROR;
     }
 
-    if (*wigt < 0.0 || (*wigt - 2.0) > MINSIGMA)
+    if ((*wigt < 0.0) || (*wigt > 2.0))
     {
         ERROR_MESSAGE ("WIGT is out of range\n\n", MODULE_NAME);
 
@@ -326,7 +326,7 @@ get_args
         return ERROR;
     }
 
-    if ((*awgt + 2) < MINSIGMA || (*awgt - 2.0) > MINSIGMA)
+    if ((*awgt < -2.0) || (*awgt > 2.0))
     {
         ERROR_MESSAGE ("AWGT is out of range\n\n", MODULE_NAME);
 
@@ -334,7 +334,7 @@ get_args
         return ERROR;
     }
 
-    if ((*pswt_1 + 2) < MINSIGMA || (*pswt_1 - 2.0) > MINSIGMA)
+    if ((*pswt_1 < -2.0) || (*pswt_1 > 2.0))
     {
         ERROR_MESSAGE ("PSWT_1 is out of range\n\n", MODULE_NAME);
 
@@ -342,7 +342,7 @@ get_args
         return ERROR;
     }
 
-    if ((*pswt_2 + 2) < MINSIGMA || (*pswt_2 - 2.0) > MINSIGMA)
+    if ((*pswt_2 < -2.0) || (*pswt_2 > 2.0))
     {
         ERROR_MESSAGE ("PSWT_2 is out of range\n\n", MODULE_NAME);
 
@@ -386,7 +386,7 @@ get_args
         return ERROR;
     }
 
-    if (*percent_slope < 0.0 || (*percent_slope - 100.0) > MINSIGMA)
+    if ((*percent_slope < 0.0) || (*percent_slope > 100.0))
     {
         ERROR_MESSAGE ("Percent Slope is out of range\n\n", MODULE_NAME);
 

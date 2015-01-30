@@ -42,13 +42,7 @@ typedef enum
 } Input_Bands_e;
 
 
-#define MINSIGMA 1e-5
-
-
 #define DSWE_NO_DATA_VALUE 255
-
-
-#define MAX_DATE_LEN 28
 
 
 #endif /* CONST_H */
