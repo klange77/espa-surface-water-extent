@@ -1,13 +1,13 @@
 #------------------------------------------------------------------------------
-# Makefile.static
+# Makefile
 #
-# For statically building dynamic-surface-water-extent.
+# For building dynamic-surface-water-extent code.
 #------------------------------------------------------------------------------
 
 # Set up compile options
 CC = gcc
 RM = rm -f
-EXTRA = -Wall -static -O2
+EXTRA = -Wall -g -O2
 
 # Define the include files
 INC = const.h utilities.h get_args.h input.h output.h build_slope_band.h

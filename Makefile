@@ -1,8 +1,7 @@
 #------------------------------------------------------------------------------
-# Makefile.static
+# Makefile
 #
-# Simple makefile for statically building and installing
-# dynamic-surface-water-extent.
+# Simple makefile for building and installing dynamic-surface-water-extent
 #------------------------------------------------------------------------------
 
 SUBDIRS	= scripts src
@@ -10,15 +9,15 @@ SUBDIRS	= scripts src
 all:
 	@for dir in $(SUBDIRS); do \
         echo "make all in $$dir..."; \
-        (cd $$dir; $(MAKE) -f Makefile.static); done
+        (cd $$dir; $(MAKE) -f Makefile); done
 
 install: all
 	@for dir in $(SUBDIRS); do \
         echo "make install in $$dir..."; \
-        (cd $$dir; $(MAKE) -f Makefile.static install); done
+        (cd $$dir; $(MAKE) -f Makefile install); done
 
 clean:
 	@for dir in $(SUBDIRS); do \
         echo "make clean in $$dir..."; \
-        (cd $$dir; $(MAKE) -f Makefile.static clean); done
+        (cd $$dir; $(MAKE) -f Makefile clean); done
 
