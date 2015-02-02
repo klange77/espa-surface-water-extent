@@ -375,6 +375,22 @@ allocate_band_memory
 
   PURPOSE:  Implements the core algorithm for DSWE.
 
+  ALGORITHM DEVELOPERS:
+
+      The algorithm implemented here was developed by the following:
+
+      John W. Jones
+      Research Geographer
+      Eastern Geographic Science Center
+      U.S. Geological Survey
+      email: jwjones@usgs.gov
+
+      Michael J. Starbuck
+      Physical Scientist
+      Earth Resources Observation and Science Center
+      U.S. Geological Survey
+      email: mstarbuck@usgs.gov
+
   RETURN VALUE:  Type = int
       Value           Description
       --------------  --------------------------------------------------------
@@ -669,7 +685,7 @@ main (int argc, char *argv[])
         /* Multi-band Spectral Relationship Near-Infrared (MBSRN) */
         mbsrn = band_nir_float + band_swir1_float;
 
-        /* Automated Water Extent shadow (AWEsh) */
+        /* Automated Water Extent Shadow (AWEsh) */
         awesh = (band_blue_float
                  + (2.5 * band_green_float)
                  - (1.5 * mbsrn)
