@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # Makefile
 #
-# Simple makefile for building and installing dynamic-surface-water-extent
+# Simple makefile for building and installing dynamic-surface-water-extent.
 #------------------------------------------------------------------------------
 
 SUBDIRS	= scripts src

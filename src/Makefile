@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # Makefile
 #
-# For building dynamic-surface-water-extent code.
+# For building dynamic-surface-water-extent.
 #------------------------------------------------------------------------------
 
 # Set up compile options
