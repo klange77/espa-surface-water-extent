@@ -11,6 +11,16 @@
 #define ERROR 1
 
 
+#define RAW_TESTS_PRODUCT_NAME "raw_tests_dswe"
+#define RAW_TESTS_BAND_NAME "raw_tests_dswe"
+#define RAW_TESTS_SHORT_NAME "RAW_TESTS_DSWE"
+#define RAW_TESTS_LONG_NAME "dynamic surface water extent - raw tests"
+
+#define PS_PRODUCT_NAME "percent_slope"
+#define PS_BAND_NAME "percent_slope"
+#define PS_SHORT_NAME "PERCENT_SLOPE"
+#define PS_LONG_NAME "dynamic surface water extent - percent slope"
+
 #define RAW_PRODUCT_NAME "raw_dswe"
 #define RAW_BAND_NAME "raw_dswe"
 #define RAW_SHORT_NAME "RAW_DSWE"
@@ -43,6 +53,7 @@ typedef enum
 
 
 #define DSWE_NO_DATA_VALUE 255
+#define TESTS_NO_DATA_VALUE -9999
 
 
 #endif /* CONST_H */

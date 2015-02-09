@@ -137,6 +137,8 @@ get_args
     char **dem_infile,           /* O: input DEM filename */
     bool *use_zeven_thorne_flag, /* O: use zeven thorne */
     bool *use_toa_flag,          /* O: process using TOA */
+    bool *include_tests_flag,    /* O: include raw DSWE tests as output */
+    bool *include_ps_flag,       /* O: include ps as output */
     float *wigt,                 /* O: tolerance value */
     float *awgt,                 /* O: tolerance value */
     float *pswt_1,               /* O: tolerance value */
@@ -155,11 +157,16 @@ get_args
     int tmp_zeven_thorne_flag = false;
     int tmp_toa_flag = false;
     int tmp_verbose_flag = false;
+    int tmp_include_tests_flag = false;
+    int tmp_include_ps_flag = false;
 
     struct option long_options[] = {
         /* These options set a flag */
         {"use-zeven-thorne", no_argument, &tmp_zeven_thorne_flag, true},
         {"use-toa", no_argument, &tmp_toa_flag, true},
+
+        {"include-tests", no_argument, &tmp_include_tests_flag, true},
+        {"include-ps", no_argument, &tmp_include_ps_flag, true},
 
         /* These options provide values */
         {"xml", required_argument, 0, 'x'},
@@ -291,6 +298,16 @@ get_args
         *use_toa_flag = true;
     else
         *use_toa_flag = false;
+
+    if (tmp_include_tests_flag)
+        *include_tests_flag = true;
+    else
+        *include_tests_flag = false;
+
+    if (tmp_include_ps_flag)
+        *include_ps_flag = true;
+    else
+        *include_ps_flag = false;
 
     if (tmp_verbose_flag)
         *verbose_flag = true;

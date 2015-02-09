@@ -11,6 +11,8 @@ get_args (int argc,                    /* I: number of cmd-line args */
           char **dem_infile,           /* O: input DEM filename */
           bool *use_zeven_thorne_flag, /* O: use zeven thorne */
           bool *use_toa_flag,          /* O: process using TOA */
+          bool *include_tests_flag,    /* O: include raw DSWE tests as output */
+          bool *include_ps_flag,       /* O: include ps as output */
           float *wigt,                 /* O: tolerance value */
           float *awgt,                 /* O: tolerance value */
           float *pswt_1,               /* O: tolerance value */

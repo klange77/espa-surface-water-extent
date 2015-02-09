@@ -182,6 +182,8 @@ if __name__ == '__main__':
     cmd = ['dswe',
            '--xml', args.xml_filename,
            '--dem', args.dem_filename,
+           # These include parameters are temporary
+           '--include-tests', '--include-ps',
            '--wigt', args.wigt,
            '--awgt', args.awgt,
            '--pswt_1', args.pswt_1,
