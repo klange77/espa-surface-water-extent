@@ -22,7 +22,7 @@ Algorithm Authors:
 ==============================================================================
 Algorithm Description - Overview:
 
-    The algorithm relies on a series of relatiely simple and efficient water
+    The algorithm relies on a series of relatively simple and efficient water
     detection tests, each with their own output code for a "positive" test
     result or 0 for a negative test result.  Resulting in a 5 digit output
     value in the range 00000 to 11111, where each digit correspondes to a
@@ -134,8 +134,8 @@ Algorithm Description - Detailed:
             data maximum and is defaulted to a value of 650.
 
             if (mndwi > -0.05
-                && SWIR2 < 650
-                && NIR < 1700) set the ten-thousands digit  (Example 10000)
+                && SWIR2 < 1000
+                && NIR < 2000) set the ten-thousands digit  (Example 10000)
 
         10) Recode the results from the previous steps using the following
             ranges and values.
