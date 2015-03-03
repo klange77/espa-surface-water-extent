@@ -131,7 +131,7 @@ GetXMLInput
     /* Scan the metadata searching for the bands to open */
     for (index = 0; index < metadata->nbands; index++)
     {
-        /* Only look at the onse with the product name we are looking for */
+        /* Only look at the ones with the product name we are looking for */
         if (strcmp (metadata->band[index].product, product_name) == 0)
         {
             if (strcmp (metadata->band[index].name, blue_band_name) == 0)
