@@ -124,7 +124,7 @@ if __name__ == '__main__':
                               " Threshold between 0 and data maximum value"
                               " (default value is {0})"
                               .format(default_pswnt_1)))
-    default_pswnt_2 = '1700'
+    default_pswnt_2 = '2000'
     parser.add_argument('--pswnt_2',
                         action='store', dest='pswnt_2',
                         default=default_pswnt_2,
@@ -141,7 +141,7 @@ if __name__ == '__main__':
                               " Threshold between 0 and data maximum value"
                               " (default value is {0})"
                               .format(default_pswst_1)))
-    default_pswst_2 = '650'
+    default_pswst_2 = '1000'
     parser.add_argument('--pswst_2',
                         action='store', dest='pswst_2',
                         default=default_pswst_2,

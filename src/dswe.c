@@ -941,8 +941,8 @@ main (int argc, char *argv[])
     if (include_tests_flag)
     {
         if (add_test_band_product (xml_filename, use_toa_flag,
-                                   RAW_TESTS_PRODUCT_NAME, RAW_TESTS_BAND_NAME,
-                                   RAW_TESTS_SHORT_NAME, RAW_TESTS_LONG_NAME,
+                                   RAW_DIAG_PRODUCT_NAME, RAW_DIAG_BAND_NAME,
+                                   RAW_DIAG_SHORT_NAME, RAW_DIAG_LONG_NAME,
                                    0, 11111, band_raw_tests)
             != SUCCESS)
         {

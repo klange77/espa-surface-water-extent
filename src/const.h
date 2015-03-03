@@ -11,30 +11,30 @@
 #define ERROR 1
 
 
-#define RAW_TESTS_PRODUCT_NAME "raw_tests_dswe"
-#define RAW_TESTS_BAND_NAME "raw_tests_dswe"
-#define RAW_TESTS_SHORT_NAME "RAW_TESTS_DSWE"
-#define RAW_TESTS_LONG_NAME "dynamic surface water extent - raw tests"
+#define RAW_DIAG_PRODUCT_NAME "dswe_diag"
+#define RAW_DIAG_BAND_NAME "dswe_diag"
+#define RAW_DIAG_SHORT_NAME "DSWE_DIAG"
+#define RAW_DIAG_LONG_NAME "dynamic surface water extent - raw diagnostic tests"
 
 #define PS_PRODUCT_NAME "percent_slope"
 #define PS_BAND_NAME "percent_slope"
 #define PS_SHORT_NAME "PERCENT_SLOPE"
 #define PS_LONG_NAME "dynamic surface water extent - percent slope"
 
-#define RAW_PRODUCT_NAME "raw_dswe"
-#define RAW_BAND_NAME "raw_dswe"
-#define RAW_SHORT_NAME "RAW_DSWE"
+#define RAW_PRODUCT_NAME "dswe_raw"
+#define RAW_BAND_NAME "dswe_raw"
+#define RAW_SHORT_NAME "DSWE_RAW"
 #define RAW_LONG_NAME "dynamic surface water extent - raw"
 
-#define SC_PRODUCT_NAME "sc_dswe"
-#define SC_BAND_NAME "sc_dswe"
-#define SC_SHORT_NAME "SC_DSWE"
-#define SC_LONG_NAME "dynamic surface water extent - cloud shadow and cloud filtered"
+#define SC_PRODUCT_NAME "dswe_ccs"
+#define SC_BAND_NAME "dswe_ccs"
+#define SC_SHORT_NAME "DSWE_CCS"
+#define SC_LONG_NAME "dynamic surface water extent - cloud, and cloud shadow filtered"
 
-#define PS_SC_PRODUCT_NAME "ps_sc_dswe"
-#define PS_SC_BAND_NAME "ps_sc_dswe"
-#define PS_SC_SHORT_NAME "PS_SC_DSWE"
-#define PS_SC_LONG_NAME "dynamic surface water extent - percent-slope, cloud shadow, and cloud filtered"
+#define PS_SC_PRODUCT_NAME "dswe_psccs"
+#define PS_SC_BAND_NAME "dswe_psccs"
+#define PS_SC_SHORT_NAME "DSWE_PSCCS"
+#define PS_SC_LONG_NAME "dynamic surface water extent - percent-slope, cloud, and cloud shadow filtered"
 
 
 /* These are used in arrays, and they are position dependent */
