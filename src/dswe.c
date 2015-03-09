@@ -158,10 +158,10 @@ free_band_memory
     int16_t *band_dem,
     uint8_t *band_cfmask,
     float *band_ps,
-    int16_t *band_raw_tests,
-    uint8_t *band_raw_dswe,
-    uint8_t *band_raw_csc_dswe,
-    uint8_t *band_raw_ps_csc_dswe
+    int16_t *band_dswe_diag,
+    uint8_t *band_dswe_raw,
+    uint8_t *band_dswe_ccs,
+    uint8_t *band_dswe_psccs
 )
 {
     free (band_blue);
@@ -173,9 +173,10 @@ free_band_memory
     free (band_dem);
     free (band_cfmask);
     free (band_ps);
-    free (band_raw_dswe);
-    free (band_raw_csc_dswe);
-    free (band_raw_ps_csc_dswe);
+    free (band_dswe_diag);
+    free (band_dswe_raw);
+    free (band_dswe_ccs);
+    free (band_dswe_psccs);
 }
 
 
@@ -204,10 +205,10 @@ allocate_band_memory
     int16_t **band_dem,
     uint8_t **band_cfmask,
     float **band_ps,
-    int16_t **band_raw_tests,
-    uint8_t **band_raw_dswe,
-    uint8_t **band_raw_csc_dswe,
-    uint8_t **band_raw_ps_csc_dswe,
+    int16_t **band_dswe_diag,
+    uint8_t **band_dswe_raw,
+    uint8_t **band_dswe_ccs,
+    uint8_t **band_dswe_psccs,
     int element_count
 )
 {
@@ -228,8 +229,8 @@ allocate_band_memory
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_raw_tests, *band_raw_dswe,
-                          *band_raw_csc_dswe, *band_raw_ps_csc_dswe);
+                          *band_ps, *band_dswe_diag, *band_dswe_raw,
+                          *band_dswe_ccs, *band_dswe_psccs);
         return ERROR;
     }
 
@@ -241,8 +242,8 @@ allocate_band_memory
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_raw_tests, *band_raw_dswe,
-                          *band_raw_csc_dswe, *band_raw_ps_csc_dswe);
+                          *band_ps, *band_dswe_diag, *band_dswe_raw,
+                          *band_dswe_ccs, *band_dswe_psccs);
         return ERROR;
     }
 
@@ -254,8 +255,8 @@ allocate_band_memory
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_raw_tests, *band_raw_dswe,
-                          *band_raw_csc_dswe, *band_raw_ps_csc_dswe);
+                          *band_ps, *band_dswe_diag, *band_dswe_raw,
+                          *band_dswe_ccs, *band_dswe_psccs);
         return ERROR;
     }
 
@@ -267,8 +268,8 @@ allocate_band_memory
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_raw_tests, *band_raw_dswe,
-                          *band_raw_csc_dswe, *band_raw_ps_csc_dswe);
+                          *band_ps, *band_dswe_diag, *band_dswe_raw,
+                          *band_dswe_ccs, *band_dswe_psccs);
         return ERROR;
     }
 
@@ -281,8 +282,8 @@ allocate_band_memory
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_raw_tests, *band_raw_dswe,
-                          *band_raw_csc_dswe, *band_raw_ps_csc_dswe);
+                          *band_ps, *band_dswe_diag, *band_dswe_raw,
+                          *band_dswe_ccs, *band_dswe_psccs);
         return ERROR;
     }
 
@@ -294,8 +295,8 @@ allocate_band_memory
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_raw_tests, *band_raw_dswe,
-                          *band_raw_csc_dswe, *band_raw_ps_csc_dswe);
+                          *band_ps, *band_dswe_diag, *band_dswe_raw,
+                          *band_dswe_ccs, *band_dswe_psccs);
         return ERROR;
     }
 
@@ -308,8 +309,8 @@ allocate_band_memory
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_raw_tests, *band_raw_dswe,
-                          *band_raw_csc_dswe, *band_raw_ps_csc_dswe);
+                          *band_ps, *band_dswe_diag, *band_dswe_raw,
+                          *band_dswe_ccs, *band_dswe_psccs);
         return ERROR;
     }
 
@@ -322,15 +323,15 @@ allocate_band_memory
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_raw_tests, *band_raw_dswe,
-                          *band_raw_csc_dswe, *band_raw_ps_csc_dswe);
+                          *band_ps, *band_dswe_diag, *band_dswe_raw,
+                          *band_dswe_ccs, *band_dswe_psccs);
         return ERROR;
     }
 
     if (include_tests_flag)
     {
-        *band_raw_tests = calloc (element_count, sizeof (int16_t));
-        if (band_raw_tests == NULL)
+        *band_dswe_diag = calloc (element_count, sizeof (int16_t));
+        if (band_dswe_diag == NULL)
         {
             ERROR_MESSAGE ("Failed allocating memory for Raw DSWE tests band",
                            MODULE_NAME);
@@ -338,15 +339,15 @@ allocate_band_memory
             /* Cleanup memory */
             free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                               *band_swir1, *band_swir2, *band_dem,
-                              *band_cfmask, *band_ps, *band_raw_tests,
-                              *band_raw_dswe, *band_raw_csc_dswe,
-                              *band_raw_ps_csc_dswe);
+                              *band_cfmask, *band_ps, *band_dswe_diag,
+                              *band_dswe_raw, *band_dswe_ccs,
+                              *band_dswe_psccs);
             return ERROR;
         }
     }
 
-    *band_raw_dswe = calloc (element_count, sizeof (uint8_t));
-    if (band_raw_dswe == NULL)
+    *band_dswe_raw = calloc (element_count, sizeof (uint8_t));
+    if (band_dswe_raw == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for Raw DSWE band",
                        MODULE_NAME);
@@ -354,13 +355,13 @@ allocate_band_memory
         /* Cleanup memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_raw_tests, *band_raw_dswe,
-                          *band_raw_csc_dswe, *band_raw_ps_csc_dswe);
+                          *band_ps, *band_dswe_diag, *band_dswe_raw,
+                          *band_dswe_ccs, *band_dswe_psccs);
         return ERROR;
     }
 
-    *band_raw_csc_dswe = calloc (element_count, sizeof (uint8_t));
-    if (band_raw_csc_dswe == NULL)
+    *band_dswe_ccs = calloc (element_count, sizeof (uint8_t));
+    if (band_dswe_ccs == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for Raw Shadow Cloud DSWE"
                        " band", MODULE_NAME);
@@ -368,13 +369,13 @@ allocate_band_memory
         /* Cleanup memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_raw_tests, *band_raw_dswe,
-                          *band_raw_csc_dswe, *band_raw_ps_csc_dswe);
+                          *band_ps, *band_dswe_diag, *band_dswe_raw,
+                          *band_dswe_ccs, *band_dswe_psccs);
         return ERROR;
     }
 
-    *band_raw_ps_csc_dswe = calloc (element_count, sizeof (uint8_t));
-    if (band_raw_ps_csc_dswe == NULL)
+    *band_dswe_psccs = calloc (element_count, sizeof (uint8_t));
+    if (band_dswe_psccs == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for Raw Shadow Cloud PS DSWE"
                        " band", MODULE_NAME);
@@ -382,8 +383,8 @@ allocate_band_memory
         /* Cleanup memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_raw_tests, *band_raw_dswe,
-                          *band_raw_csc_dswe, *band_raw_ps_csc_dswe);
+                          *band_ps, *band_dswe_diag, *band_dswe_raw,
+                          *band_dswe_ccs, *band_dswe_psccs);
         return ERROR;
     }
 
@@ -451,12 +452,13 @@ main (int argc, char *argv[])
     int16_t *band_dem = NULL;   /* Contains the DEM band */
     uint8_t *band_cfmask = NULL; /* CFMASK */
     float *band_ps = NULL;       /* Contains the generated percent slope */
-    int16_t *band_raw_tests = NULL; /* Output Raw DSWE tests band data */
-    uint8_t *band_raw_dswe = NULL; /* Output Raw DSWE band data */
-    uint8_t *band_raw_csc_dswe = NULL; /* Output Raw Shadow Cloud DSWE band
-                                          data */
-    uint8_t *band_raw_ps_csc_dswe = NULL; /* Output Raw shadow Cloud PS DSWE
-                                             band data */
+    int16_t *band_dswe_diag = NULL;  /* Output Raw DSWE tests band data */
+    uint8_t *band_dswe_raw = NULL;   /* Output Raw DSWE band data */
+    uint8_t *band_dswe_ccs = NULL;   /* Output Raw DSWE band data with Cloud
+                                        and Cloud Shadow filtering applied */
+    uint8_t *band_dswe_psccs = NULL; /* Output Raw DSWE band data with Percent
+                                        Slope, Cloud, and Cloud Shadow
+                                        filtering applied */
 
     /* Temp variables */
     float mndwi;                /* (green - swir1) / (green + swir1) */
@@ -603,8 +605,8 @@ main (int argc, char *argv[])
     if (allocate_band_memory (include_tests_flag, &band_blue, &band_green,
                               &band_red, &band_nir, &band_swir1, &band_swir2,
                               &band_dem, &band_cfmask, &band_ps,
-                              &band_raw_tests, &band_raw_dswe,
-                              &band_raw_csc_dswe, &band_raw_ps_csc_dswe,
+                              &band_dswe_diag, &band_dswe_raw,
+                              &band_dswe_ccs, &band_dswe_psccs,
                               element_count)
         != SUCCESS)
     {
@@ -625,8 +627,8 @@ main (int argc, char *argv[])
         /* Cleanup memory */
         free_band_memory (band_blue, band_green, band_red, band_nir,
                           band_swir1, band_swir2, band_dem, band_cfmask,
-                          band_ps, band_raw_tests, band_raw_dswe,
-                          band_raw_csc_dswe, band_raw_ps_csc_dswe);
+                          band_ps, band_dswe_diag, band_dswe_raw,
+                          band_dswe_ccs, band_dswe_psccs);
         free (xml_filename);
         free (dem_filename);
         free (input_data);
@@ -686,11 +688,11 @@ main (int argc, char *argv[])
         {
             if (include_tests_flag)
             {
-                band_raw_tests[index] = TESTS_NO_DATA_VALUE;
+                band_dswe_diag[index] = TESTS_NO_DATA_VALUE;
             }
-            band_raw_dswe[index] = DSWE_NO_DATA_VALUE;
-            band_raw_csc_dswe[index] = DSWE_NO_DATA_VALUE;
-            band_raw_ps_csc_dswe[index] = DSWE_NO_DATA_VALUE;
+            band_dswe_raw[index] = DSWE_NO_DATA_VALUE;
+            band_dswe_ccs[index] = DSWE_NO_DATA_VALUE;
+            band_dswe_psccs[index] = DSWE_NO_DATA_VALUE;
             continue;
         }
 
@@ -755,7 +757,7 @@ main (int argc, char *argv[])
         /* Assign it to the tests band */
         if (include_tests_flag)
         {
-            band_raw_tests[index] = raw_dswe_value;
+            band_dswe_diag[index] = raw_dswe_value;
         }
 
         /* Recode the value to fit an 8bit output product */
@@ -870,9 +872,9 @@ main (int argc, char *argv[])
         }
 
         /* Assign the values to the correct output band */
-        band_raw_dswe[index] = raw_dswe_value;
-        band_raw_csc_dswe[index] = raw_csc_dswe_value;
-        band_raw_ps_csc_dswe[index] = raw_ps_csc_dswe_value;
+        band_dswe_raw[index] = raw_dswe_value;
+        band_dswe_ccs[index] = raw_csc_dswe_value;
+        band_dswe_psccs[index] = raw_ps_csc_dswe_value;
 
         /* Let the use know where we are in the processing */
         if (index%99999 == 0)
@@ -892,7 +894,7 @@ main (int argc, char *argv[])
                                RAW_PRODUCT_NAME, RAW_BAND_NAME,
                                RAW_SHORT_NAME, RAW_LONG_NAME, DSWE_NOT_WATER,
                                DSWE_PARTIAL_SURFACE_WATER_PIXEL,
-                               band_raw_dswe)
+                               band_dswe_raw)
         != SUCCESS)
     {
         ERROR_MESSAGE ("Failed adding Raw DSWE band product", MODULE_NAME);
@@ -908,7 +910,7 @@ main (int argc, char *argv[])
                                SC_PRODUCT_NAME, SC_BAND_NAME,
                                SC_SHORT_NAME, SC_LONG_NAME,
                                DSWE_NOT_WATER, DSWE_CLOUD_SHADOW_CLOUD,
-                               band_raw_csc_dswe)
+                               band_dswe_ccs)
         != SUCCESS)
     {
         ERROR_MESSAGE ("Failed adding DSWE SHADOW CLOUD band product",
@@ -925,7 +927,7 @@ main (int argc, char *argv[])
                                PS_SC_PRODUCT_NAME, PS_SC_BAND_NAME,
                                PS_SC_SHORT_NAME, PS_SC_LONG_NAME,
                                DSWE_NOT_WATER, DSWE_CLOUD_SHADOW_CLOUD,
-                               band_raw_ps_csc_dswe)
+                               band_dswe_psccs)
         != SUCCESS)
     {
         ERROR_MESSAGE ("Failed adding DSWE PERCENT-SLOPE SHADOW CLOUD band"
@@ -943,7 +945,7 @@ main (int argc, char *argv[])
         if (add_test_band_product (xml_filename, use_toa_flag,
                                    RAW_DIAG_PRODUCT_NAME, RAW_DIAG_BAND_NAME,
                                    RAW_DIAG_SHORT_NAME, RAW_DIAG_LONG_NAME,
-                                   0, 11111, band_raw_tests)
+                                   0, 11111, band_dswe_diag)
             != SUCCESS)
         {
             ERROR_MESSAGE ("Failed adding RAW TESTS DSWE band product",
@@ -962,13 +964,13 @@ main (int argc, char *argv[])
         /* Convert to a scaled 16bit integer value */
         for (index = 0; index < element_count; index++)
         {
-            band_raw_tests[index] = (int16_t)((band_ps[index] * 100.0) + 0.5);
+            band_dswe_diag[index] = (int16_t)((band_ps[index] * 100.0) + 0.5);
         }
 
         if (add_ps_band_product (xml_filename, use_toa_flag,
                                  PS_PRODUCT_NAME, PS_BAND_NAME,
                                  PS_SHORT_NAME, PS_LONG_NAME,
-                                 0, 10000, band_raw_tests)
+                                 0, 10000, band_dswe_diag)
             != SUCCESS)
         {
             ERROR_MESSAGE ("Failed adding DSWE PERCENT-SLOPE band product",
@@ -987,8 +989,8 @@ main (int argc, char *argv[])
     /* Cleanup all the input band memory */
     free_band_memory (band_blue, band_green, band_red, band_nir, band_swir1,
                       band_swir2, band_dem, band_cfmask, band_ps,
-                      band_raw_tests, band_raw_dswe, band_raw_csc_dswe,
-                      band_raw_ps_csc_dswe);
+                      band_dswe_diag, band_dswe_raw, band_dswe_ccs,
+                      band_dswe_psccs);
     band_blue = NULL;
     band_green = NULL;
     band_red = NULL;
@@ -998,9 +1000,10 @@ main (int argc, char *argv[])
     band_dem = NULL;
     band_cfmask = NULL;
     band_ps = NULL;
-    band_raw_dswe = NULL;
-    band_raw_csc_dswe = NULL;
-    band_raw_ps_csc_dswe = NULL;
+    band_dswe_diag = NULL;
+    band_dswe_raw = NULL;
+    band_dswe_ccs = NULL;
+    band_dswe_psccs = NULL;
 
     /* Free remaining allocated memory */
     free (xml_filename);
