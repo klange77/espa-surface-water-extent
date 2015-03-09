@@ -18,8 +18,8 @@
 static float default_wigt = 0.0123;
 static float default_awgt = 0.0;
 
-static float default_pswt_1 = -0.05;
-static float default_pswt_2 = -0.05;
+static float default_pswt_1 = -0.5;
+static float default_pswt_2 = -0.5;
 
 static int default_pswnt_1 = 1500;
 static int default_pswst_1 = 1000;
