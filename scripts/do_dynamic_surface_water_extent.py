@@ -99,7 +99,7 @@ if __name__ == '__main__':
                               " Threshold between -2.00 and 2.00"
                               " (default value is {0})".format(default_awgt)))
 
-    default_pswt_1 = '-0.05'
+    default_pswt_1 = '-0.5'
     parser.add_argument('--pswt_1',
                         action='store', dest='pswt_1',
                         default=default_pswt_1,
@@ -107,7 +107,7 @@ if __name__ == '__main__':
                               " Threshold between -2.00 and 2.00"
                               " (default value is {0})"
                               .format(default_pswt_1)))
-    default_pswt_2 = '-0.05'
+    default_pswt_2 = '-0.5'
     parser.add_argument('--pswt_2',
                         action='store', dest='pswt_2',
                         default=default_pswt_2,
