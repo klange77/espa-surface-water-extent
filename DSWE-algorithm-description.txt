@@ -35,14 +35,14 @@ Algorithm Description - Overview:
           1 -> Water - High Confidence
           2 -> Water - Moderate Confidence
           3 -> Partial Surface Water Pixel
-          9 -> Cloud Shadow or Cloud
+          9 -> Cloud or Cloud Shadow
         255 -> Fill (no data)
 
     The algorithm provides an output of 3 bands.  The first band represents
     the Raw DSWE (recoded values 0, 1, 2, 3, and 255).  The second band
-    represents the Raw DSWE with filtering applied for Cloud Shadow and Cloud
+    represents the Raw DSWE with filtering applied for Cloud and Cloud Shadow
     (recoded values 0, 1, 2, 3, 9, and 255).  The third band represents the
-    Raw DSWE with filtering applied for Percent-Slope, Cloud Shadow and Cloud
+    Raw DSWE with filtering applied for Percent-Slope, Cloud and Cloud Shadow
     (recoded values 0, 1, 2, 3, 9, and 255).
 
     Percent-Slope is utilized to remove locations where the terrain is too
@@ -114,26 +114,26 @@ Algorithm Description - Detailed:
          8) Perform the fourth test by comparing the MNDWI along with the
             NIR and SWIR1 bands to the following thresholds. Partial Surface
             Water Test-1 threshold; Where the threshold ranges from -2.0 to
-            2.0 and is defaulted to a value of -0.05.  Partial Surface Water
+            2.0 and is defaulted to a value of -0.5.  Partial Surface Water
             Test-1 NIR threshold; Where the threshold ranges from 0 to data
             maximum and is defaulted to a value of 1500.  Partial Surface
             Water Test-1 SWIR1 threshold; Where the threshold ranges from 0 to
             data maximum and is defaulted to a value of 1000.
 
-            if (mndwi > -0.05
+            if (mndwi > -0.5
                 && SWIR1 < 1000
                 && NIR < 1500) set the thousands digit  (Example 01000)
 
          9) Perform the fourth test by comparing the MNDWI along with the
             NIR and SWIR2 bands to the following thresholds. Partial Surface
             Water Test-2 threshold; Where the threshold ranges from -2.0 to
-            2.0 and is defaulted to a value of -0.05.  Partial Surface Water
+            2.0 and is defaulted to a value of -0.5.  Partial Surface Water
             Test-2 NIR threshold; Where the threshold ranges from 0 to data
             maximum and is defaulted to a value of 1700.  Partial Surface
             Water Test-2 SWIR2 threshold; Where the threshold ranges from 0 to
             data maximum and is defaulted to a value of 650.
 
-            if (mndwi > -0.05
+            if (mndwi > -0.5
                 && SWIR2 < 1000
                 && NIR < 2000) set the ten-thousands digit  (Example 10000)
 
@@ -159,18 +159,18 @@ Algorithm Description - Detailed:
         11) Output the Raw DSWE
 
 
-    Raw DSWE -> Cloud Shadow or Cloud -> Output:
+    Raw DSWE -> Cloud or Cloud Shadow-> Output:
 
-         1) Perform a test by comparing CFMASK band to the Cloud Shadow and
-            Cloud values.
+         1) Perform a test by comparing CFMASK band to the Cloud and Cloud
+            Shadow values.
 
             if (cfmask == 2 or cfmask == 4) set the cloud filtered Raw DSWE to
                 a recoded value of 9, otherwise set to Raw DSWE
 
-         2) Output the Cloud Shadow and Cloud filtered Raw DSWE.
+         2) Output the Cloud and Cloud Shadow filtered Raw DSWE.
 
 
-    Raw DSWE -> Percent-Slope -> Cloud Shadow or Cloud -> Output:
+    Raw DSWE -> Percent-Slope -> Cloud or Cloud Shadow -> Output:
 
          1) Build a Percent-Slope band from the DEM source.
 
@@ -181,11 +181,11 @@ Algorithm Description - Detailed:
             if (percent-slope >= 9.0) set the Percent-Slope filtered Raw DSWE
                 to a recoded value of 0, otherwise set to Raw DSWE
 
-         3) Perform a test by comparing CFMASK band to the Cloud Shadow and
-            Cloud values.
+         3) Perform a test by comparing CFMASK band to the Cloud and Cloud
+            Shadow values.
 
             if (cfmask == 2 or cfmask == 4) set the Percent-Slope filtered
                 Raw DSWE to a recoded value of 9, otherwise leave alone
 
-         4) Output the Percent-Slope, Cloud Shadow and Cloud filtered Raw DSWE.
+         4) Output the Percent-Slope, Cloud and Cloud Shadow filtered Raw DSWE.
 
