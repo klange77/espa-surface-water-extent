@@ -39,7 +39,7 @@ EXE = dswe
 # Target for the executable
 all: $(EXE)
 
-dswe: $(OBJ) $(INC)
+$(EXE): $(OBJ) $(INC)
 	$(CC) $(EXTRA) -o $(EXE) $(OBJ) $(LOADLIB)
 
 install:
