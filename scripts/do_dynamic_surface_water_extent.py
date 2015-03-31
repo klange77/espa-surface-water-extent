@@ -150,7 +150,7 @@ if __name__ == '__main__':
                               " (default value is {0})"
                               .format(default_pswst_2)))
 
-    default_percent_slope = '9.0'
+    default_percent_slope = '6.0'
     parser.add_argument('--percent_slope',
                         action='store', dest='percent_slope',
                         default=default_percent_slope,
