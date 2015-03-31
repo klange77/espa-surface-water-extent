@@ -309,7 +309,7 @@ add_dswe_band_product
         bmeta[0].class_values[4].class = 9;
         snprintf (bmeta[0].class_values[4].description,
                   sizeof (bmeta[0].class_values[4].description),
-                  "cloud or cloud shadow");
+                  "cloud, cloud shadow, and snow");
     }
 
     bmeta[0].class_values[class_count-1].class = DSWE_NO_DATA_VALUE;
