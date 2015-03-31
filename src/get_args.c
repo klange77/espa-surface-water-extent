@@ -27,7 +27,7 @@ static int default_pswst_1 = 1000;
 static int default_pswnt_2 = 2000;
 static int default_pswst_2 = 1000;
 
-static float default_percent_slope = 9.0;
+static float default_percent_slope = 6.0;
 
 
 /*****************************************************************************
