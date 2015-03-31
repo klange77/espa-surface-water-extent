@@ -23,7 +23,8 @@
 #include "build_slope_band.h"
 
 
-#define CFMASK_SHADOW 2
+#define CFMASK_CLOUD_SHADOW 2
+#define CFMASK_SNOW 3
 #define CFMASK_CLOUD 4
 
 
@@ -31,7 +32,7 @@
 #define DSWE_WATER_HIGH_CONFIDENCE 1
 #define DSWE_WATER_MODERATE_CONFIDENCE 2
 #define DSWE_PARTIAL_SURFACE_WATER_PIXEL 3
-#define DSWE_CLOUD_SHADOW_CLOUD 9
+#define DSWE_CLOUD_CLOUD_SHADOW_SNOW 9
 
 
 /*****************************************************************************
@@ -160,8 +161,8 @@ free_band_memory
     float *band_ps,
     int16_t *band_dswe_diag,
     uint8_t *band_dswe_raw,
-    uint8_t *band_dswe_ccs,
-    uint8_t *band_dswe_psccs
+    uint8_t *band_dswe_ccss,
+    uint8_t *band_dswe_psccss
 )
 {
     free (band_blue);
@@ -175,8 +176,8 @@ free_band_memory
     free (band_ps);
     free (band_dswe_diag);
     free (band_dswe_raw);
-    free (band_dswe_ccs);
-    free (band_dswe_psccs);
+    free (band_dswe_ccss);
+    free (band_dswe_psccss);
 }
 
 
@@ -207,8 +208,8 @@ allocate_band_memory
     float **band_ps,
     int16_t **band_dswe_diag,
     uint8_t **band_dswe_raw,
-    uint8_t **band_dswe_ccs,
-    uint8_t **band_dswe_psccs,
+    uint8_t **band_dswe_ccss,
+    uint8_t **band_dswe_psccss,
     int element_count
 )
 {
@@ -230,7 +231,7 @@ allocate_band_memory
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccs, *band_dswe_psccs);
+                          *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -243,7 +244,7 @@ allocate_band_memory
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccs, *band_dswe_psccs);
+                          *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -256,7 +257,7 @@ allocate_band_memory
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccs, *band_dswe_psccs);
+                          *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -269,7 +270,7 @@ allocate_band_memory
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccs, *band_dswe_psccs);
+                          *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -283,7 +284,7 @@ allocate_band_memory
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccs, *band_dswe_psccs);
+                          *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -296,7 +297,7 @@ allocate_band_memory
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccs, *band_dswe_psccs);
+                          *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -310,7 +311,7 @@ allocate_band_memory
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccs, *band_dswe_psccs);
+                          *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -324,7 +325,7 @@ allocate_band_memory
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccs, *band_dswe_psccs);
+                          *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -340,8 +341,8 @@ allocate_band_memory
             free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                               *band_swir1, *band_swir2, *band_dem,
                               *band_cfmask, *band_ps, *band_dswe_diag,
-                              *band_dswe_raw, *band_dswe_ccs,
-                              *band_dswe_psccs);
+                              *band_dswe_raw, *band_dswe_ccss,
+                              *band_dswe_psccss);
             return ERROR;
         }
     }
@@ -356,12 +357,12 @@ allocate_band_memory
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccs, *band_dswe_psccs);
+                          *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
-    *band_dswe_ccs = calloc (element_count, sizeof (uint8_t));
-    if (band_dswe_ccs == NULL)
+    *band_dswe_ccss = calloc (element_count, sizeof (uint8_t));
+    if (band_dswe_ccss == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for Raw Shadow Cloud DSWE"
                        " band", MODULE_NAME);
@@ -370,12 +371,12 @@ allocate_band_memory
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccs, *band_dswe_psccs);
+                          *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
-    *band_dswe_psccs = calloc (element_count, sizeof (uint8_t));
-    if (band_dswe_psccs == NULL)
+    *band_dswe_psccss = calloc (element_count, sizeof (uint8_t));
+    if (band_dswe_psccss == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for Raw Shadow Cloud PS DSWE"
                        " band", MODULE_NAME);
@@ -384,7 +385,7 @@ allocate_band_memory
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_dem, *band_cfmask,
                           *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccs, *band_dswe_psccs);
+                          *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -452,13 +453,13 @@ main (int argc, char *argv[])
     int16_t *band_dem = NULL;   /* Contains the DEM band */
     uint8_t *band_cfmask = NULL; /* CFMASK */
     float *band_ps = NULL;       /* Contains the generated percent slope */
-    int16_t *band_dswe_diag = NULL;  /* Output Raw DSWE tests band data */
-    uint8_t *band_dswe_raw = NULL;   /* Output Raw DSWE band data */
-    uint8_t *band_dswe_ccs = NULL;   /* Output Raw DSWE band data with Cloud
-                                        and Cloud Shadow filtering applied */
-    uint8_t *band_dswe_psccs = NULL; /* Output Raw DSWE band data with Percent
-                                        Slope, Cloud, and Cloud Shadow
-                                        filtering applied */
+    int16_t *band_dswe_diag = NULL;   /* Output Raw DSWE tests band data */
+    uint8_t *band_dswe_raw = NULL;    /* Output Raw DSWE band data */
+    uint8_t *band_dswe_ccss = NULL;   /* Output Raw DSWE band data with Cloud
+                                         and Cloud Shadow filtering applied */
+    uint8_t *band_dswe_psccss = NULL; /* Output Raw DSWE band data with Percent
+                                         Slope, Cloud, and Cloud Shadow
+                                         filtering applied */
 
     /* Temp variables */
     float mndwi;                /* (green - swir1) / (green + swir1) */
@@ -491,8 +492,8 @@ main (int argc, char *argv[])
     uint8_t cfmask_fill_value;
 
     int16_t raw_dswe_value;
-    uint8_t raw_csc_dswe_value;
-    uint8_t raw_ps_csc_dswe_value;
+    uint8_t raw_ccss_dswe_value;
+    uint8_t raw_ps_ccss_dswe_value;
 
     float pswnt_1_float;
     float pswnt_2_float;
@@ -606,7 +607,7 @@ main (int argc, char *argv[])
                               &band_red, &band_nir, &band_swir1, &band_swir2,
                               &band_dem, &band_cfmask, &band_ps,
                               &band_dswe_diag, &band_dswe_raw,
-                              &band_dswe_ccs, &band_dswe_psccs,
+                              &band_dswe_ccss, &band_dswe_psccss,
                               element_count)
         != SUCCESS)
     {
@@ -628,7 +629,7 @@ main (int argc, char *argv[])
         free_band_memory (band_blue, band_green, band_red, band_nir,
                           band_swir1, band_swir2, band_dem, band_cfmask,
                           band_ps, band_dswe_diag, band_dswe_raw,
-                          band_dswe_ccs, band_dswe_psccs);
+                          band_dswe_ccss, band_dswe_psccss);
         free (xml_filename);
         free (dem_filename);
         free (input_data);
@@ -691,8 +692,8 @@ main (int argc, char *argv[])
                 band_dswe_diag[index] = TESTS_NO_DATA_VALUE;
             }
             band_dswe_raw[index] = DSWE_NO_DATA_VALUE;
-            band_dswe_ccs[index] = DSWE_NO_DATA_VALUE;
-            band_dswe_psccs[index] = DSWE_NO_DATA_VALUE;
+            band_dswe_ccss[index] = DSWE_NO_DATA_VALUE;
+            band_dswe_psccss[index] = DSWE_NO_DATA_VALUE;
             continue;
         }
 
@@ -830,51 +831,62 @@ main (int argc, char *argv[])
            output products.
 
            raw -> output
-           raw -> cloud shadow -> cloud -> output
-           raw -> percent-slope -> cloud shadow -> cloud -> output
-           */
+           raw -> cloud -> cloud shadow -> snow -> output
+           raw -> percent-slope -> cloud -> cloud shadow -> snow -> output
+        */
 
         /* Default the
-           Cloud Shadow, and Cloud output
+           Cloud, Cloud Shadow, and Snow output
            and the
-           Percent Slope, Cloud Shadow, and Cloud output
+           Percent Slope, Cloud, Cloud Shadow, and Snow output
            to the Raw DSWE value */
-        raw_csc_dswe_value = raw_dswe_value;
-        raw_ps_csc_dswe_value = raw_dswe_value;
+        raw_ccss_dswe_value = raw_dswe_value;
+        raw_ps_ccss_dswe_value = raw_dswe_value;
 
-        /* Apply the Percent Slope constraint to Percent Slope, Cloud Shadow,
-           and Cloud output */
+        /* Apply the Percent Slope constraint to the
+           Percent Slope, Cloud, Cloud Shadow, and Snow output */
         if (band_ps[index] >= percent_slope)
         {
-            raw_ps_csc_dswe_value = DSWE_NOT_WATER;
-        }
-
-        /* Apply the CFMASK Cloud Shadow constraint to both the
-           Cloud Shadow, and Cloud output
-           and the
-           Percent Slope, Cloud Shadow, and Cloud output */
-        if (band_cfmask[index] == CFMASK_SHADOW)
-        {
-            /* classified as 11999 in prototype code using 9 due to recode */
-            raw_csc_dswe_value = DSWE_CLOUD_SHADOW_CLOUD;
-            raw_ps_csc_dswe_value = DSWE_CLOUD_SHADOW_CLOUD;
+            raw_ps_ccss_dswe_value = DSWE_NOT_WATER;
         }
 
         /* Apply the CFMASK Cloud constraint to both the
-           Cloud Shadow, and Cloud output
+           Cloud, Cloud Shadow, and Snow output
            and the
-           Percent Slope, Cloud Shadow, and Cloud output */
+           Percent Slope, Cloud, Cloud Shadow, and Snow output */
         if (band_cfmask[index] == CFMASK_CLOUD)
         {
             /* classified as 11999 in prototype code using 9 due to recode */
-            raw_csc_dswe_value = DSWE_CLOUD_SHADOW_CLOUD;
-            raw_ps_csc_dswe_value = DSWE_CLOUD_SHADOW_CLOUD;
+            raw_ccss_dswe_value = DSWE_CLOUD_CLOUD_SHADOW_SNOW;
+            raw_ps_ccss_dswe_value = DSWE_CLOUD_CLOUD_SHADOW_SNOW;
+        }
+
+        /* Apply the CFMASK Cloud Shadow constraint to both the
+           Cloud, Cloud Shadow, and Snow output
+           and the
+           Percent Slope, Cloud, Cloud Shadow, and Snow output */
+        if (band_cfmask[index] == CFMASK_CLOUD_SHADOW)
+        {
+            /* classified as 11999 in prototype code using 9 due to recode */
+            raw_ccss_dswe_value = DSWE_CLOUD_CLOUD_SHADOW_SNOW;
+            raw_ps_ccss_dswe_value = DSWE_CLOUD_CLOUD_SHADOW_SNOW;
+        }
+
+        /* Apply the CFMASK Snow constraint to both the
+           Cloud, Cloud Shadow, and Snow output
+           and the
+           Percent Slope, Cloud, Cloud Shadow, and Snow output */
+        if (band_cfmask[index] == CFMASK_SNOW)
+        {
+            /* classified as 11999 in prototype code using 9 due to recode */
+            raw_ccss_dswe_value = DSWE_CLOUD_CLOUD_SHADOW_SNOW;
+            raw_ps_ccss_dswe_value = DSWE_CLOUD_CLOUD_SHADOW_SNOW;
         }
 
         /* Assign the values to the correct output band */
         band_dswe_raw[index] = raw_dswe_value;
-        band_dswe_ccs[index] = raw_csc_dswe_value;
-        band_dswe_psccs[index] = raw_ps_csc_dswe_value;
+        band_dswe_ccss[index] = raw_ccss_dswe_value;
+        band_dswe_psccss[index] = raw_ps_ccss_dswe_value;
 
         /* Let the use know where we are in the processing */
         if (index%99999 == 0)
@@ -909,8 +921,8 @@ main (int argc, char *argv[])
     if (add_dswe_band_product (xml_filename, use_toa_flag,
                                SC_PRODUCT_NAME, SC_BAND_NAME,
                                SC_SHORT_NAME, SC_LONG_NAME,
-                               DSWE_NOT_WATER, DSWE_CLOUD_SHADOW_CLOUD,
-                               band_dswe_ccs)
+                               DSWE_NOT_WATER, DSWE_CLOUD_CLOUD_SHADOW_SNOW,
+                               band_dswe_ccss)
         != SUCCESS)
     {
         ERROR_MESSAGE ("Failed adding DSWE SHADOW CLOUD band product",
@@ -926,8 +938,8 @@ main (int argc, char *argv[])
     if (add_dswe_band_product (xml_filename, use_toa_flag,
                                PS_SC_PRODUCT_NAME, PS_SC_BAND_NAME,
                                PS_SC_SHORT_NAME, PS_SC_LONG_NAME,
-                               DSWE_NOT_WATER, DSWE_CLOUD_SHADOW_CLOUD,
-                               band_dswe_psccs)
+                               DSWE_NOT_WATER, DSWE_CLOUD_CLOUD_SHADOW_SNOW,
+                               band_dswe_psccss)
         != SUCCESS)
     {
         ERROR_MESSAGE ("Failed adding DSWE PERCENT-SLOPE SHADOW CLOUD band"
@@ -989,8 +1001,8 @@ main (int argc, char *argv[])
     /* Cleanup all the input band memory */
     free_band_memory (band_blue, band_green, band_red, band_nir, band_swir1,
                       band_swir2, band_dem, band_cfmask, band_ps,
-                      band_dswe_diag, band_dswe_raw, band_dswe_ccs,
-                      band_dswe_psccs);
+                      band_dswe_diag, band_dswe_raw, band_dswe_ccss,
+                      band_dswe_psccss);
     band_blue = NULL;
     band_green = NULL;
     band_red = NULL;
@@ -1002,8 +1014,8 @@ main (int argc, char *argv[])
     band_ps = NULL;
     band_dswe_diag = NULL;
     band_dswe_raw = NULL;
-    band_dswe_ccs = NULL;
-    band_dswe_psccs = NULL;
+    band_dswe_ccss = NULL;
+    band_dswe_psccss = NULL;
 
     /* Free remaining allocated memory */
     free (xml_filename);
