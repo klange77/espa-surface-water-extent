@@ -3,12 +3,11 @@
 #define CONST_H
 
 
+#include "espa_common.h"
+
+
 #define MODULE_NAME "DSWE"
 #define DSWE_VERSION "1.0.2"
-
-
-#define SUCCESS 0
-#define ERROR 1
 
 
 #define RAW_DIAG_PRODUCT_NAME "dswe_diag"
