@@ -7,7 +7,7 @@
 
 
 #define MODULE_NAME "DSWE"
-#define DSWE_VERSION "1.0.2"
+#define DSWE_VERSION "1.0.3"
 
 
 #define RAW_DIAG_PRODUCT_NAME "dswe_diag"
