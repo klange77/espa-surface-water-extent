@@ -1,7 +1,7 @@
 ## Surface Water Extent Version 1.0.3 Release Notes
 Release Date: May 13, 2015
 
-This project contains application source code for producing Surface Water Extent products.  It currently only supports Landsat 4-7, as prototype output products that are under evaluation.  Algorithms for specific sensora, where warranted, are located in sensor specific sub-directories.  See the sensor specific sub-directories for more details and usage examples.
+This project contains application source code for producing Surface Water Extent products.  It currently only supports Landsat 4-7, as prototype output products that are under evaluation.  Algorithms for specific sensors, where warranted, are located in sensor specific sub-directories.  See the sensor specific sub-directories for more details and usage examples.
 
 This project is hosted by the US Geological Survey (USGS) Earth Resources Observation and Science (EROS) Land Satellite Data Systems (LSDS) Science Research and Development (LSRD) Project. For questions regarding this source code, please contact the Landsat Contact Us page and specify USGS CDR/ECV in the "Regarding" section. https://landsat.usgs.gov/contactus.php 
 
@@ -12,7 +12,7 @@ Surface Water Extent source code
     git clone https://github.com/USGS-EROS/espa-surface-water-extent.git
 ```
 
-See git tag [dswe-version_1.0.3]
+For current proto-type version, see git tag [dswe-version_1.0.3]
 
 ### Installation
   * Install dependent libraries: ESPA product formatter (https://github.com/USGS-EROS/espa-product-formatter)
