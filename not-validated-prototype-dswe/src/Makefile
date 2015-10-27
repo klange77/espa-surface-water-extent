@@ -18,7 +18,7 @@ EXTRA_OPTIONS = $(static_option) $(threading_options) $(profiling_options)
 EXTRA = -Wall -g -O2 $(EXTRA_OPTIONS)
 
 # Define the include files
-INC = build_slope_band.h  const.h  get_args.h  input.h  output.h  utilities.h
+INC = build_slope_band.h const.h dswe.h get_args.h input.h output.h utilities.h
 INCDIR  = -I. -I$(XML2INC) -I$(ESPAINC)
 NCFLAGS = $(EXTRA) $(INCDIR)
 
