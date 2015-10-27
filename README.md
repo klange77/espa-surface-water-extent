@@ -1,5 +1,7 @@
-## Surface Water Extent Version 1.0.3 Release Notes
-Release Date: May 13, 2015
+## Surface Water Extent Version 1.0.4 Release Notes
+Release Date: Dec XX, 2015
+
+See git tag [2015_Dec]
 
 This project contains application source code for producing Surface Water Extent products.
 
@@ -7,7 +9,7 @@ This project contains application source code for producing Surface Water Extent
 
 ### DSWE - Dynamic Surface Water Extent (Algorithm)
 * Implemented in C
-* This software is based on an algorithm developed by </todo> </todo> </todo>
+* This software is based on an algorithm developed by John W. Jones, and Michael J. Starbuck
 * It currently only supports Landsat 4-7, as prototype output products that are under evaluation.
 
 * See folder <b>not-validated-prototype-dswe</b> for the Landsat 4, 5, and 7 version.
