@@ -571,7 +571,10 @@ main (int argc, char *argv[])
 
     /* -------------------------------------------------------------------- */
     /* Process through each data element and populate the dswe band memory */
-    printf ("Pixel Count = %d\n", pixel_count);
+    if (verbose_flag)
+    {
+        printf ("Pixel Count = %d\n", pixel_count);
+    }
     for (index = 0; index < pixel_count; index++)
     {
         /* If any of the input is fill, make the output fill */
