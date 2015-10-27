@@ -9,8 +9,8 @@ This project contains application source code for producing Surface Water Extent
 
 ### DSWE - Dynamic Surface Water Extent (Algorithm)
 * Implemented in C
+* Only supports Landsat 4-7, as prototype products that are under evaluation
 * This software is based on an algorithm developed by John W. Jones, and Michael J. Starbuck
-* It currently only supports Landsat 4-7, as prototype output products that are under evaluation.
 
 * See folder <b>not-validated-prototype-dswe</b> for the Landsat 4, 5, and 7 version.
 
