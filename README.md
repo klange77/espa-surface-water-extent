@@ -1,54 +1,65 @@
 ## Surface Water Extent Version 1.0.3 Release Notes
 Release Date: May 13, 2015
 
-This project contains application source code for producing Surface Water Extent products.  It currently only supports Landsat 4-7, as prototype output products that are under evaluation.  Algorithms for specific sensors, where warranted, are located in sensor specific sub-directories.  See the sensor specific sub-directories for more details and usage examples.
+This project contains application source code for producing Surface Water Extent products.
 
-This project is hosted by the US Geological Survey (USGS) Earth Resources Observation and Science (EROS) Land Satellite Data Systems (LSDS) Science Research and Development (LSRD) Project. For questions regarding this source code, please contact the Landsat Contact Us page and specify USGS CDR/ECV in the "Regarding" section. https://landsat.usgs.gov/contactus.php 
+## Implemented Algorithms
 
+### DSWE - Dynamic Surface Water Extent (Algorithm)
+* Implemented in C
+* This software is based on an algorithm developed by </todo> </todo> </todo>
+* It currently only supports Landsat 4-7, as prototype output products that are under evaluation.
 
-### Downloads
-Surface Water Extent source code
+* See folder <b>not-validated-prototype-dswe</b> for the Landsat 4, 5, and 7 version.
+
+## Release Notes
+Please see the Wiki pages for release notes related to past versions.
+All current and future versions contain release notes in the respective README files
+within an algorithm sub-directory.
+
+## Installation Notes
+
+### Installation of Specific Algorithms
+Please see the installation instructions within the algorithm sub-directory.
+
+### Installation of All Algorithms
+
+### Dependencies
+* ESPA raw binary libraries, tools, and it's dependencies, found here [espa-product-formatter](https://github.com/USGS-EROS/espa-product-formatter)
+
+### Environment Variables
+* Required for building this software
 ```
-    git clone https://github.com/USGS-EROS/espa-surface-water-extent.git
+export PREFIX="path_to_Installation_Directory"
+export XML2INC="path_to_LIBXML2_include_files"
+export XML2LIB="path_to_LIBXML2_libraries_for_linking"
+export LZMALIB="path_to_LZMA_libraries_for_linking"
+export ZLIBLIB="path_to_ZLIB_libraries_for_linking"
+export ESPAINC="path_to_ESPA_PRODUCT_FORMATTER_include_files"
+export ESPALIB="path_to_ESPA_PRODUCT_FORMATTER_libraries_for_linking"
 ```
 
-For current proto-type version, see git tag [dswe-version_1.0.3]
-
-### Installation
-  * Install dependent libraries: ESPA product formatter (https://github.com/USGS-EROS/espa-product-formatter)
-
-  * Set up environment variables: Can create an environment shell file or add the following to your bash shell.  For C shell, use 'setenv VAR "directory"'.
+### Build Steps
+* Clone the repository and replace the defaulted version(master) with this
+  version of the software
 ```
-    export PREFIX="path_to_directory_for_build_data"
+git clone https://github.com/USGS-EROS/espa-surface-water-extent.git
+cd espa-surface-water-extent
+git checkout <version>
 ```
-
-  * Download: (from GitHub USGS-EROS/espa-surface-water-extent project)
-
-  * Build/Install: The following build will create an executable file under $PREFIX/bin: dswe (tested in Linux with the gcc compiler). It will also copy the Python scripts for running Surface Water Extent into the $PREFIX/bin directory.
+* Build and install the application specific software
 ```
 make
 make install
-make clean
 ```
 
-### Dependencies
-  * ESPA raw binary and ESPA common libraries from ESPA product formatter and associated dependencies
-  * XML2 library
+## Usage
+See the algorithm specific sub-directories for details on usage.
 
-### Data Preprocessing
-This version of the spectral indices application requires the input Landsat products to be in the ESPA internal file format.
-
-### Data Postprocessing
-After compiling the ESPA product formatter raw\_binary libraries and tools, the convert\_espa\_to\_gtif and convert\_espa\_to\_hdf command-line tools can be used to convert the ESPA internal file format to HDF or GeoTIFF.  Otherwise the data will remain in the ESPA internal file format, which includes each band in the ENVI file format (i.e. raw binary file with associated ENVI header file) and an overall XML metadata file.
-
-### Associated Scripts
-
-### Verification Data
-
-### User Manual
-
-### Product Guide
-
-## Changes From Previous Version
-#### Created on May 13th, 2015 - USGS EROS
-  * Initial proto-type release of the software for analysis
+## More Information
+This project is provided by the US Geological Survey (USGS) Earth Resources
+Observation and Science (EROS) Land Satellite Data Systems (LSDS) Science
+Research and Development (LSRD) Project. For questions regarding products
+produced by this source code, please contact the Landsat Contact Us page and
+specify USGS CDR/ECV in the "Regarding" section.
+https://landsat.usgs.gov/contactus.php 
