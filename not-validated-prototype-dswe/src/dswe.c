@@ -16,6 +16,7 @@
 #include "raw_binary_io.h"
 
 #include "const.h"
+#include "dswe.h"
 #include "utilities.h"
 #include "get_args.h"
 #include "input.h"
@@ -33,111 +34,6 @@
 #define DSWE_WATER_MODERATE_CONFIDENCE 2
 #define DSWE_PARTIAL_SURFACE_WATER_PIXEL 3
 #define DSWE_CLOUD_CLOUD_SHADOW_SNOW 9
-
-
-/*****************************************************************************
-  NAME: read_bands_into_memory
-
-  PURPOSE: To read the specified input band data into memory for later
-           processing.
-
-  RETURN VALUE:  Type = bool
-      Value    Description
-      -------  ---------------------------------------------------------------
-      true     Success with reading all of the bands into memory.
-      false    Failed to read a band into memory.
-*****************************************************************************/
-int
-read_bands_into_memory
-(
-    Input_Data_t *input_data,
-    int16_t *band_blue,
-    int16_t *band_green,
-    int16_t *band_red,
-    int16_t *band_nir,
-    int16_t *band_swir1,
-    int16_t *band_swir2,
-    int16_t *band_dem,
-    uint8_t *band_cfmask,
-    int element_count
-)
-{
-    int count;
-
-    count = fread (band_blue, sizeof (int16_t), element_count,
-                   input_data->band_fd[I_BAND_BLUE]);
-    if (count != element_count)
-    {
-        ERROR_MESSAGE ("Failed reading blue band data", MODULE_NAME);
-
-        return ERROR;
-    }
-
-    count = fread (band_green, sizeof (int16_t), element_count,
-                   input_data->band_fd[I_BAND_GREEN]);
-    if (count != element_count)
-    {
-        ERROR_MESSAGE ("Failed reading green band data", MODULE_NAME);
-
-        return ERROR;
-    }
-
-    count = fread (band_red, sizeof (int16_t), element_count,
-                   input_data->band_fd[I_BAND_RED]);
-    if (count != element_count)
-    {
-        ERROR_MESSAGE ("Failed reading red band data", MODULE_NAME);
-
-        return ERROR;
-    }
-
-    count = fread (band_nir, sizeof (int16_t), element_count,
-                   input_data->band_fd[I_BAND_NIR]);
-    if (count != element_count)
-    {
-        ERROR_MESSAGE ("Failed reading nir band data", MODULE_NAME);
-
-        return ERROR;
-    }
-
-    count = fread (band_swir1, sizeof (int16_t), element_count,
-                   input_data->band_fd[I_BAND_SWIR1]);
-    if (count != element_count)
-    {
-        ERROR_MESSAGE ("Failed reading swir1 band data", MODULE_NAME);
-
-        return ERROR;
-    }
-
-    count = fread (band_swir2, sizeof (int16_t), element_count,
-                   input_data->band_fd[I_BAND_SWIR2]);
-    if (count != element_count)
-    {
-        ERROR_MESSAGE ("Failed reading swir2 band data", MODULE_NAME);
-
-        return ERROR;
-    }
-
-    count = fread (band_dem, sizeof (int16_t), element_count,
-                   input_data->band_fd[I_BAND_DEM]);
-    if (count != element_count)
-    {
-        ERROR_MESSAGE ("Failed reading DEM band data", MODULE_NAME);
-
-        return ERROR;
-    }
-
-    count = fread (band_cfmask, sizeof (uint8_t), element_count,
-                   input_data->band_fd[I_BAND_CFMASK]);
-    if (count != element_count)
-    {
-        ERROR_MESSAGE ("Failed reading CFMASK band data", MODULE_NAME);
-
-        return ERROR;
-    }
-
-    return SUCCESS;
-}
 
 
 /*****************************************************************************
@@ -210,10 +106,10 @@ allocate_band_memory
     uint8_t **band_dswe_raw,
     uint8_t **band_dswe_ccss,
     uint8_t **band_dswe_psccss,
-    int element_count
+    int pixel_count
 )
 {
-    *band_blue = calloc (element_count, sizeof (int16_t));
+    *band_blue = calloc (pixel_count, sizeof (int16_t));
     if (*band_blue == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for BLUE band", MODULE_NAME);
@@ -222,7 +118,7 @@ allocate_band_memory
         return ERROR;
     }
 
-    *band_green = calloc (element_count, sizeof (int16_t));
+    *band_green = calloc (pixel_count, sizeof (int16_t));
     if (*band_green == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for GREEN band", MODULE_NAME);
@@ -235,7 +131,7 @@ allocate_band_memory
         return ERROR;
     }
 
-    *band_red = calloc (element_count, sizeof (int16_t));
+    *band_red = calloc (pixel_count, sizeof (int16_t));
     if (*band_red == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for RED band", MODULE_NAME);
@@ -248,7 +144,7 @@ allocate_band_memory
         return ERROR;
     }
 
-    *band_nir = calloc (element_count, sizeof (int16_t));
+    *band_nir = calloc (pixel_count, sizeof (int16_t));
     if (*band_nir == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for NIR band", MODULE_NAME);
@@ -261,7 +157,7 @@ allocate_band_memory
         return ERROR;
     }
 
-    *band_swir1 = calloc (element_count, sizeof (int16_t));
+    *band_swir1 = calloc (pixel_count, sizeof (int16_t));
     if (*band_swir1 == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for SWIR1 band", MODULE_NAME);
@@ -274,7 +170,7 @@ allocate_band_memory
         return ERROR;
     }
 
-    *band_swir2 = calloc (element_count, sizeof (int16_t));
+    *band_swir2 = calloc (pixel_count, sizeof (int16_t));
     if (*band_swir2 == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for brightness temp band",
@@ -288,7 +184,7 @@ allocate_band_memory
         return ERROR;
     }
 
-    *band_dem = calloc (element_count, sizeof (int16_t));
+    *band_dem = calloc (pixel_count, sizeof (int16_t));
     if (*band_dem == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for DEM band", MODULE_NAME);
@@ -301,7 +197,7 @@ allocate_band_memory
         return ERROR;
     }
 
-    *band_cfmask = calloc (element_count, sizeof (uint8_t));
+    *band_cfmask = calloc (pixel_count, sizeof (uint8_t));
     if (*band_cfmask == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for CFMASK band",
@@ -315,7 +211,7 @@ allocate_band_memory
         return ERROR;
     }
 
-    *band_ps = calloc (element_count, sizeof (float));
+    *band_ps = calloc (pixel_count, sizeof (float));
     if (*band_ps == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for percent slope band",
@@ -331,7 +227,7 @@ allocate_band_memory
 
     if (include_tests_flag)
     {
-        *band_dswe_diag = calloc (element_count, sizeof (int16_t));
+        *band_dswe_diag = calloc (pixel_count, sizeof (int16_t));
         if (band_dswe_diag == NULL)
         {
             ERROR_MESSAGE ("Failed allocating memory for Raw DSWE tests band",
@@ -347,7 +243,7 @@ allocate_band_memory
         }
     }
 
-    *band_dswe_raw = calloc (element_count, sizeof (uint8_t));
+    *band_dswe_raw = calloc (pixel_count, sizeof (uint8_t));
     if (band_dswe_raw == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for Raw DSWE band",
@@ -361,7 +257,7 @@ allocate_band_memory
         return ERROR;
     }
 
-    *band_dswe_ccss = calloc (element_count, sizeof (uint8_t));
+    *band_dswe_ccss = calloc (pixel_count, sizeof (uint8_t));
     if (band_dswe_ccss == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for Raw Shadow Cloud DSWE"
@@ -375,7 +271,7 @@ allocate_band_memory
         return ERROR;
     }
 
-    *band_dswe_psccss = calloc (element_count, sizeof (uint8_t));
+    *band_dswe_psccss = calloc (pixel_count, sizeof (uint8_t));
     if (band_dswe_psccss == NULL)
     {
         ERROR_MESSAGE ("Failed allocating memory for Raw Shadow Cloud PS DSWE"
@@ -503,7 +399,7 @@ main (int argc, char *argv[])
     /* Other variables */
     int status;
     int index;
-    int element_count;
+    int pixel_count;
 
 
     /* Get the command line arguments */
@@ -600,7 +496,7 @@ main (int argc, char *argv[])
 
     /* -------------------------------------------------------------------- */
     /* Figure out the number of elements in the data */
-    element_count = input_data->lines * input_data->samples;
+    pixel_count = input_data->lines * input_data->samples;
 
     /* Allocate memory buffers for input and temp processing */
     if (allocate_band_memory (include_tests_flag, &band_blue, &band_green,
@@ -608,7 +504,7 @@ main (int argc, char *argv[])
                               &band_dem, &band_cfmask, &band_ps,
                               &band_dswe_diag, &band_dswe_raw,
                               &band_dswe_ccss, &band_dswe_psccss,
-                              element_count)
+                              pixel_count)
         != SUCCESS)
     {
         ERROR_MESSAGE ("Failed reading bands into memory", MODULE_NAME);
@@ -620,7 +516,7 @@ main (int argc, char *argv[])
     /* Read the input files into the buffers */
     if (read_bands_into_memory (input_data, band_blue, band_green, band_red,
                                 band_nir, band_swir1, band_swir2, band_dem,
-                                band_cfmask, element_count)
+                                band_cfmask, pixel_count)
         != SUCCESS)
     {
         ERROR_MESSAGE ("Failed reading bands into memory", MODULE_NAME);
@@ -675,8 +571,8 @@ main (int argc, char *argv[])
 
     /* -------------------------------------------------------------------- */
     /* Process through each data element and populate the dswe band memory */
-    printf ("Element Count = %d\n", element_count);
-    for (index = 0; index < element_count; index++)
+    printf ("Pixel Count = %d\n", pixel_count);
+    for (index = 0; index < pixel_count; index++)
     {
         /* If any of the input is fill, make the output fill */
         if (band_blue[index] == blue_fill_value ||
@@ -974,7 +870,7 @@ main (int argc, char *argv[])
     if (include_ps_flag)
     {
         /* Convert to a scaled 16bit integer value */
-        for (index = 0; index < element_count; index++)
+        for (index = 0; index < pixel_count; index++)
         {
             band_dswe_diag[index] = (int16_t)((band_ps[index] * 100.0) + 0.5);
         }
@@ -1025,3 +921,4 @@ main (int argc, char *argv[])
 
     return EXIT_SUCCESS;
 }
+

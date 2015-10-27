@@ -6,10 +6,6 @@
 #include "espa_common.h"
 
 
-#define MODULE_NAME "DSWE"
-#define DSWE_VERSION "1.0.3"
-
-
 #define RAW_DIAG_PRODUCT_NAME "dswe_diag"
 #define RAW_DIAG_BAND_NAME "dswe_diag"
 #define RAW_DIAG_SHORT_NAME "DSWE_DIAG"

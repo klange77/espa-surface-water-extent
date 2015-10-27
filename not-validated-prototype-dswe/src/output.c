@@ -13,6 +13,7 @@
 #include "raw_binary_io.h"
 
 #include "const.h"
+#include "dswe.h"
 #include "utilities.h"
 
 

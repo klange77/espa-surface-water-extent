@@ -10,6 +10,7 @@
 
 
 #include "const.h"
+#include "dswe.h"
 #include "utilities.h"
 #include "get_args.h"
 
@@ -31,6 +32,21 @@ static float default_percent_slope = 6.0;
 
 
 /*****************************************************************************
+MODULE:  version
+
+PURPOSE:  Prints the version information for this application.
+
+RETURN VALUE:
+Type = None
+*****************************************************************************/
+void
+version ()
+{
+    printf ("%s version %s\n", DSWE_APP_NAME, DSWE_VERSION);
+}
+
+
+/*****************************************************************************
   NAME:  usage
 
   PURPOSE:  Displays the help/usage to the terminal.
@@ -40,6 +56,8 @@ static float default_percent_slope = 6.0;
 void
 usage ()
 {
+    version();
+
     printf ("Dynamic Surface Water Extent\n"
             "Determines and builds Dynamic Surface Water Extent output bands"
             " from Surface\n"
@@ -188,6 +206,7 @@ get_args
 
         /* Special options */
         {"verbose", no_argument, &tmp_verbose_flag, true},
+        {"version", no_argument, 0, 'v'},
 
         /* The help option */
         {"help", no_argument, 0, 'h'},
@@ -233,9 +252,15 @@ get_args
             /* If this option set a flag, do nothing else now. */
             if (long_options[option_index].flag != 0)
                 break;
+
         case 'h':
             usage ();
-            return ERROR;
+            exit (SUCCESS);
+            break;
+
+        case 'v':
+            version ();
+            exit (SUCCESS);
             break;
 
         case 'x':

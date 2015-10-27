@@ -2,7 +2,9 @@
 #ifndef GET_ARGS_H
 #define GET_ARGS_H
 
+
 #include <stdbool.h>
+
 
 int
 get_args (int argc,                    /* I: number of cmd-line args */
@@ -23,5 +25,6 @@ get_args (int argc,                    /* I: number of cmd-line args */
           int *pswst_1,                /* O: tolerance value */
           int *pswst_2,                /* O: tolerance value */
           bool * verbose_flag);        /* O: verbose messaging */
+
 
 #endif /* GET_ARGS_H */

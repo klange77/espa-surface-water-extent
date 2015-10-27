@@ -2,22 +2,27 @@
 #ifndef UTILITIES_H
 #define UTILITIES_H
 
+
 #define LOG_MESSAGE(message, module) \
             write_message((message), (module), "INFO", \
                           __FILE__, __LINE__, stdout);
+
 
 #define WARNING_MESSAGE(message, module) \
             write_message((message), (module), "WARNING", \
                           __FILE__, __LINE__, stdout);
 
+
 #define ERROR_MESSAGE(message, module) \
             write_message((message), (module), "ERROR", \
                           __FILE__, __LINE__, stdout);
+
 
 #define RETURN_ERROR(message, module, status) \
            {write_message((message), (module), "ERROR", \
                           __FILE__, __LINE__, stdout); \
             return (status);}
+
 
 void write_message
 (

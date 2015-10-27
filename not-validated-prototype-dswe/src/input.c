@@ -1,8 +1,9 @@
 
 #include <stdio.h>
 
-#include "input.h"
+#include "dswe.h"
 #include "utilities.h"
+#include "input.h"
 
 
 /*****************************************************************************
@@ -430,3 +431,109 @@ close_input
 
     return SUCCESS;
 }
+
+
+/*****************************************************************************
+  NAME: read_bands_into_memory
+
+  PURPOSE: To read the specified input band data into memory for later
+           processing.
+
+  RETURN VALUE:  Type = bool
+      Value    Description
+      -------  ---------------------------------------------------------------
+      true     Success with reading all of the bands into memory.
+      false    Failed to read a band into memory.
+*****************************************************************************/
+int
+read_bands_into_memory
+(
+    Input_Data_t *input_data,
+    int16_t *band_blue,
+    int16_t *band_green,
+    int16_t *band_red,
+    int16_t *band_nir,
+    int16_t *band_swir1,
+    int16_t *band_swir2,
+    int16_t *band_dem,
+    uint8_t *band_cfmask,
+    int pixel_count
+)
+{
+    int count;
+
+    count = fread (band_blue, sizeof (int16_t), pixel_count,
+                   input_data->band_fd[I_BAND_BLUE]);
+    if (count != pixel_count)
+    {
+        ERROR_MESSAGE ("Failed reading blue band data", MODULE_NAME);
+
+        return ERROR;
+    }
+
+    count = fread (band_green, sizeof (int16_t), pixel_count,
+                   input_data->band_fd[I_BAND_GREEN]);
+    if (count != pixel_count)
+    {
+        ERROR_MESSAGE ("Failed reading green band data", MODULE_NAME);
+
+        return ERROR;
+    }
+
+    count = fread (band_red, sizeof (int16_t), pixel_count,
+                   input_data->band_fd[I_BAND_RED]);
+    if (count != pixel_count)
+    {
+        ERROR_MESSAGE ("Failed reading red band data", MODULE_NAME);
+
+        return ERROR;
+    }
+
+    count = fread (band_nir, sizeof (int16_t), pixel_count,
+                   input_data->band_fd[I_BAND_NIR]);
+    if (count != pixel_count)
+    {
+        ERROR_MESSAGE ("Failed reading nir band data", MODULE_NAME);
+
+        return ERROR;
+    }
+
+    count = fread (band_swir1, sizeof (int16_t), pixel_count,
+                   input_data->band_fd[I_BAND_SWIR1]);
+    if (count != pixel_count)
+    {
+        ERROR_MESSAGE ("Failed reading swir1 band data", MODULE_NAME);
+
+        return ERROR;
+    }
+
+    count = fread (band_swir2, sizeof (int16_t), pixel_count,
+                   input_data->band_fd[I_BAND_SWIR2]);
+    if (count != pixel_count)
+    {
+        ERROR_MESSAGE ("Failed reading swir2 band data", MODULE_NAME);
+
+        return ERROR;
+    }
+
+    count = fread (band_dem, sizeof (int16_t), pixel_count,
+                   input_data->band_fd[I_BAND_DEM]);
+    if (count != pixel_count)
+    {
+        ERROR_MESSAGE ("Failed reading DEM band data", MODULE_NAME);
+
+        return ERROR;
+    }
+
+    count = fread (band_cfmask, sizeof (uint8_t), pixel_count,
+                   input_data->band_fd[I_BAND_CFMASK]);
+    if (count != pixel_count)
+    {
+        ERROR_MESSAGE ("Failed reading CFMASK band data", MODULE_NAME);
+
+        return ERROR;
+    }
+
+    return SUCCESS;
+}
+
