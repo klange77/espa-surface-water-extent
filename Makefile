@@ -1,9 +1,9 @@
-#------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 # Makefile
 #
 # Simple makefile for building and installing land-surface-temperature
 # applications.
-#------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 .PHONY: check-environment all install clean all-script install-script clean-script all-dswe install-dswe clean-dswe
 
 include make.config
@@ -18,7 +18,7 @@ install: check-environment install-script install-dswe
 
 clean: clean-script clean-dswe
 
-#------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 all-script:
 	echo "make all in scripts"; \
         (cd scripts; $(MAKE) all -f $(MAKEFILE_NAME));
@@ -31,7 +31,7 @@ clean-script:
 	echo "make clean in scripts"; \
         (cd scripts; $(MAKE) clean -f $(MAKEFILE_NAME));
 
-#------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 all-dswe: all-script
 	echo "make all in not-validated-prototype-dswe"; \
         (cd $(DIR_DSWE); $(MAKE) all -f $(MAKEFILE_NAME));

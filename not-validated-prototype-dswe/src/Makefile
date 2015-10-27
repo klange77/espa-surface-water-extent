@@ -1,8 +1,8 @@
-#------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 # Makefile
 #
 # For building dynamic-surface-water-extent.
-#------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 .PHONY: all install clean
 
 # Inherit from upper-level make.config
@@ -19,7 +19,7 @@ EXTRA = -Wall -g -O2 $(EXTRA_OPTIONS)
 
 # Define the include files
 INC = build_slope_band.h const.h dswe.h get_args.h input.h output.h utilities.h
-INCDIR  = -I. -I$(XML2INC) -I$(ESPAINC)
+INCDIR  = -I. -I$(ESPAINC) -I$(XML2INC)
 NCFLAGS = $(EXTRA) $(INCDIR)
 
 # Define the source code and object files
