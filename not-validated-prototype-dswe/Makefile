@@ -1,23 +1,19 @@
-#------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 # Makefile
 #
 # Simple makefile for building and installing dynamic-surface-water-extent.
-#------------------------------------------------------------------------------
-
-SUBDIRS	= scripts src
+#-----------------------------------------------------------------------------
+.PHONY: all install clean
 
 all:
-	@for dir in $(SUBDIRS); do \
-        echo "make all in $$dir..."; \
-        (cd $$dir; $(MAKE) -f Makefile); done
+	echo "make all in src..."; \
+        (cd src; $(MAKE) -f Makefile)
 
 install: all
-	@for dir in $(SUBDIRS); do \
-        echo "make install in $$dir..."; \
-        (cd $$dir; $(MAKE) -f Makefile install); done
+	echo "make install in src..."; \
+        (cd src; $(MAKE) -f Makefile install)
 
 clean:
-	@for dir in $(SUBDIRS); do \
-        echo "make clean in $$dir..."; \
-        (cd $$dir; $(MAKE) -f Makefile clean); done
+	echo "make clean in src..."; \
+        (cd src; $(MAKE) -f Makefile clean)
 
