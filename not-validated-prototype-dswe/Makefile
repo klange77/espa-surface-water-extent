@@ -7,13 +7,13 @@
 
 all:
 	echo "make all in src..."; \
-        (cd src; $(MAKE) -f Makefile)
+        (cd src; $(MAKE))
 
 install: all
 	echo "make install in src..."; \
-        (cd src; $(MAKE) -f Makefile install)
+        (cd src; $(MAKE) install)
 
 clean:
 	echo "make clean in src..."; \
-        (cd src; $(MAKE) -f Makefile clean)
+        (cd src; $(MAKE) clean)
 

@@ -8,8 +8,6 @@
 
 include make.config
 
-MAKEFILE_NAME = Makefile
-
 DIR_DSWE = not-validated-prototype-dswe
 
 all: all-script all-dswe
@@ -21,28 +19,28 @@ clean: clean-script clean-dswe
 #-----------------------------------------------------------------------------
 all-script:
 	echo "make all in scripts"; \
-        (cd scripts; $(MAKE) all -f $(MAKEFILE_NAME));
+        (cd scripts; $(MAKE) all);
 
 install-script: check-environment
 	echo "make install in scripts"; \
-        (cd scripts; $(MAKE) install -f $(MAKEFILE_NAME));
+        (cd scripts; $(MAKE) install);
 
 clean-script:
 	echo "make clean in scripts"; \
-        (cd scripts; $(MAKE) clean -f $(MAKEFILE_NAME));
+        (cd scripts; $(MAKE) clean);
 
 #-----------------------------------------------------------------------------
 all-dswe: all-script
 	echo "make all in not-validated-prototype-dswe"; \
-        (cd $(DIR_DSWE); $(MAKE) all -f $(MAKEFILE_NAME));
+        (cd $(DIR_DSWE); $(MAKE) all);
 
 install-dswe: check-environment install-script
 	echo "make install in not-validated-prototype-dswe"; \
-        (cd $(DIR_DSWE); $(MAKE) install -f $(MAKEFILE_NAME));
+        (cd $(DIR_DSWE); $(MAKE) install);
 
 clean-dswe: clean-script
 	echo "make clean in not-validated-prototype-dswe"; \
-        (cd $(DIR_DSWE); $(MAKE) clean -f $(MAKEFILE_NAME));
+        (cd $(DIR_DSWE); $(MAKE) clean);
 
 check-environment:
 ifndef PREFIX
