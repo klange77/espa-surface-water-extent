@@ -11,14 +11,21 @@ include $(TOP)/make.config
 
 # Define the script installation path
 script_install_path = $(espa_project_dir)/bin
+script_source_link_path = ../$(project_name)/bin
+
+SCRIPTS = surface_water_extent.py
 
 all:
 
 install:
 	install -d $(link_path)
 	install -d $(script_install_path)
-	install -m 755 surface_water_extent.py $(script_install_path)
-	ln -sf ../$(project_name)/bin/surface_water_extent.py $(link_path)/surface_water_extent.py
+	@for script in $(SCRIPTS); do \
+            cmd="install -m 755 $$script $(script_install_path)"; \
+            echo "$$cmd"; $$cmd; \
+            cmd="ln -sf $(script_source_link_path)/$$script $(link_path)/$$script"; \
+            echo "$$cmd"; $$cmd; \
+        done;
 
 clean:
 

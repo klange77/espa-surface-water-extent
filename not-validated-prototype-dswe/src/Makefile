@@ -9,8 +9,7 @@
 TOP = ../..
 include $(TOP)/make.config
 
-bin_install_path = $(dswe_algorithm_dir)/bin
-
+#-----------------------------------------------------------------------------
 # Set up compile options
 CC = gcc
 RM = rm -f
@@ -19,8 +18,6 @@ EXTRA = -Wall -g -O2 $(EXTRA_OPTIONS)
 
 # Define the include files
 INC = build_slope_band.h const.h dswe.h get_args.h input.h output.h utilities.h
-INCDIR  = -I. -I$(ESPAINC) -I$(XML2INC)
-NCFLAGS = $(EXTRA) $(INCDIR)
 
 # Define the source code and object files
 SRC = \
@@ -32,7 +29,11 @@ SRC = \
       dswe.c
 OBJ = $(SRC:.c=.o)
 
-# Define the object libraries
+# Define include paths
+INCDIR  = -I. -I$(ESPAINC) -I$(XML2INC)
+NCFLAGS = $(EXTRA) $(INCDIR)
+
+# Define the object libraries and paths
 EXLIB = -L$(ESPALIB) -l_espa_raw_binary -l_espa_common \
         -L$(XML2LIB) -lxml2 \
         -L$(LZMALIB) -llzma \
@@ -43,22 +44,24 @@ LOADLIB = $(EXLIB) $(MATHLIB)
 # Define the executable
 EXE = dswe
 
-# Target for the executable
+#-----------------------------------------------------------------------------
 all: $(EXE)
 
 $(EXE): $(OBJ) $(INC)
 	$(CC) $(EXTRA) -o $(EXE) $(OBJ) $(LOADLIB)
 
+#-----------------------------------------------------------------------------
 install:
 	install -d $(link_path)
-	install -d $(bin_install_path)
-	install -m 755 $(EXE) $(bin_install_path)
-	ln -sf ../$(project_name)/$(dswe_algorithm)/bin/$(EXE) $(link_path)/$(EXE)
+	install -d $(dswe_bin_install_path)
+	install -m 755 $(EXE) $(dswe_bin_install_path)
+	ln -sf $(dswe_link_source_path)/$(EXE) $(link_path)/$(EXE)
 
-
+#-----------------------------------------------------------------------------
 clean:
 	$(RM) *.o $(EXE)
 
+#-----------------------------------------------------------------------------
 $(OBJ): $(INC)
 
 .c.o:
