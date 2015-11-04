@@ -15,8 +15,10 @@ script_source_link_path = ../$(project_name)/bin
 
 SCRIPTS = surface_water_extent.py
 
+#-----------------------------------------------------------------------------
 all:
 
+#-----------------------------------------------------------------------------
 install:
 	install -d $(link_path)
 	install -d $(script_install_path)
@@ -27,5 +29,6 @@ install:
             echo "$$cmd"; $$cmd; \
         done;
 
+#-----------------------------------------------------------------------------
 clean:
 

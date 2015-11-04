@@ -10,6 +10,7 @@ include make.config
 
 DIR_DSWE = not-validated-prototype-dswe
 
+#-----------------------------------------------------------------------------
 all: all-script all-dswe
 
 install: check-environment install-script install-dswe
@@ -42,6 +43,7 @@ clean-dswe: clean-script
 	echo "make clean in not-validated-prototype-dswe"; \
         (cd $(DIR_DSWE); $(MAKE) clean);
 
+#-----------------------------------------------------------------------------
 check-environment:
 ifndef PREFIX
     $(error Environment variable PREFIX is not defined)
