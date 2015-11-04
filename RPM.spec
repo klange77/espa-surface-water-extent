@@ -19,7 +19,7 @@ BuildArch:	x86_64
 Packager:	USGS EROS LSRD
 
 BuildRequires:	espa-common
-Requires:	espa-common >= 1.4.0
+Requires:	espa-common >= 1.5.0
 
 
 # ----------------------------------------------------------------------------
@@ -76,8 +76,8 @@ rm -rf %{buildroot}
 
 # ----------------------------------------------------------------------------
 %changelog
-* Tue Oct 27 2015 Ronald D Dilley <rdilley@usgs.gov>
-- Updated RPM spec for Dec 2015 release
+* Wed Nov 04 2015 Ronald D Dilley <rdilley@usgs.gov>
+- Updated for Dec 2015 release
 
 * Fri Sep 11 2015 William D Howe <whowe@usgs.gov>
 - Rebuild for espa-common 1.5.0 version
