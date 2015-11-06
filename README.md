@@ -15,7 +15,7 @@ This project contains application source code for producing Surface Water Extent
 * See folder <b>not-validated-prototype-dswe</b> for the Landsat 4, 5, and 7 version.
 
 ## Release Notes
-Please see the Wiki pages for release notes related to past versions.
+Please see the Wiki pages or Release Tags for notes related to past versions.
 
 - Added a helper script for future use with multiple sensor and/or algorithm applications.  Helper script is intended to be called by the espa-processing project code.
 - Enhanced the Makefiles for build and installation.
