@@ -26,10 +26,10 @@ Please see the installation instructions within the algorithm sub-directory.
 
 ### Installation of All Algorithms
 
-### Dependencies
+#### Dependencies
 * ESPA raw binary libraries, tools, and it's dependencies, found here [espa-product-formatter](https://github.com/USGS-EROS/espa-product-formatter)
 
-### Environment Variables
+#### Environment Variables
 * Required for building this software
 ```
 export PREFIX="path_to_Installation_Directory"
@@ -41,7 +41,7 @@ export ESPAINC="path_to_ESPA_PRODUCT_FORMATTER_include_files"
 export ESPALIB="path_to_ESPA_PRODUCT_FORMATTER_libraries_for_linking"
 ```
 
-### Build Steps
+#### Build Steps
 * Clone the repository and replace the defaulted version(master) with this
   version of the software
 ```
