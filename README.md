@@ -16,8 +16,10 @@ This project contains application source code for producing Surface Water Extent
 
 ## Release Notes
 Please see the Wiki pages for release notes related to past versions.
-All current and future versions contain release notes in the respective README files
-within an algorithm sub-directory.
+
+- Added a helper script for future use with multiple sensor and/or algorithm applications.  Helper script is intended to be called by the espa-processing project code.
+- Enhanced the Makefiles for build and installation.
+- Added RPM spec file for generation of RPMs used for installation on the processing nodes.
 
 ## Installation Notes
 
