@@ -15,9 +15,11 @@ This project contains application source code for producing Surface Water Extent
 * See folder <b>not-validated-prototype-dswe</b> for the Landsat 4, 5, and 7 version.
 
 ## Release Notes
-Please see the Wiki pages for release notes related to past versions.
-All current and future versions contain release notes in the respective README files
-within an algorithm sub-directory.
+Please see the Wiki pages or Release Tags for notes related to past versions.
+
+- Added a helper script for future use with multiple sensor and/or algorithm applications.  Helper script is intended to be called by the espa-processing project code.
+- Enhanced the Makefiles for build and installation.
+- Added RPM spec file for generation of RPMs used for installation on the processing nodes.
 
 ## Installation Notes
 
@@ -26,10 +28,10 @@ Please see the installation instructions within the algorithm sub-directory.
 
 ### Installation of All Algorithms
 
-### Dependencies
+#### Dependencies
 * ESPA raw binary libraries, tools, and it's dependencies, found here [espa-product-formatter](https://github.com/USGS-EROS/espa-product-formatter)
 
-### Environment Variables
+#### Environment Variables
 * Required for building this software
 ```
 export PREFIX="path_to_Installation_Directory"
@@ -41,7 +43,7 @@ export ESPAINC="path_to_ESPA_PRODUCT_FORMATTER_include_files"
 export ESPALIB="path_to_ESPA_PRODUCT_FORMATTER_libraries_for_linking"
 ```
 
-### Build Steps
+#### Build Steps
 * Clone the repository and replace the defaulted version(master) with this
   version of the software
 ```
