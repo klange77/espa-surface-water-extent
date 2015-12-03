@@ -7,7 +7,7 @@
 # ----------------------------------------------------------------------------
 Name:		espa-surface-water-extent
 Version:	201512
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	ESPA Surface Water Extent Software
 
 Group:		ESPA
@@ -76,9 +76,11 @@ rm -rf %{buildroot}
 
 # ----------------------------------------------------------------------------
 %changelog
+* Thu Dec 03 2015 Ronald D Dilley <rdilley@usgs.gov>
+- Changed release number for a bug found in the ENVI header for Dec 2015 release
+
 * Wed Dec 02 2015 Ronald D Dilley <rdilley@usgs.gov>
 - Changed release number for a recompile against the product formatter for Dec 2015 release
-
 * Wed Nov 04 2015 Ronald D Dilley <rdilley@usgs.gov>
 - Updated for Dec 2015 release
 * Fri Sep 11 2015 William D Howe <whowe@usgs.gov>
