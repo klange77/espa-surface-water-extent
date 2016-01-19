@@ -1,2 +1,3 @@
 *.o
 not-validated-prototype-dswe/src/dswe
+cfmask-based-water-detection/src/cfmask_water_detection
