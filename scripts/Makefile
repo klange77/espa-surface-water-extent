@@ -13,7 +13,8 @@ include $(TOP)/make.config
 script_install_path = $(espa_project_dir)/bin
 script_source_link_path = ../$(project_name)/bin
 
-SCRIPTS = surface_water_extent.py
+SCRIPTS = surface_water_extent.py \
+          surface_water_qa.py
 
 #-----------------------------------------------------------------------------
 all:
