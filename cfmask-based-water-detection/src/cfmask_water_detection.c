@@ -20,6 +20,8 @@
 #endif
 #include "espa_metadata.h"
 #include "parse_metadata.h"
+#include "write_metadata.h"
+#include "raw_binary_io.h"
 
 
 #include "const.h"
@@ -124,15 +126,46 @@ allocate_band_memory
 }
 
 
-bool zhe_water_test
+/******************************************************************************
+  NAME:  write_u8bit_data
+
+  PURPOSE:  Create the *.img file and the associated ENVI header.
+
+  RETURN VALUE:  Type = int
+      Value    Description
+      -------  ---------------------------------------------------------------
+      SUCCESS  No errors were encountered.
+      ERROR    An error was encountered.
+******************************************************************************/
+int
+write_u8bit_data
 (
-    int16_t *band_nir,
-    int index,
-    float ndvi
+    char *output_filename,
+    int element_count,
+    uint8_t *data
 )
 {
+    FILE *fd = NULL;
+    char msg[512];
 
-    return false;
+    fd = fopen(output_filename, "w");
+    if (fd == NULL)
+    {
+        snprintf(msg, sizeof(msg), "Failed creating file %s",
+                 output_filename);
+        RETURN_ERROR(msg, MODULE_NAME, ERROR);
+    }
+
+    if (write_raw_binary(fd, 1, element_count, sizeof(uint8_t),
+                         data) != SUCCESS)
+    {
+        snprintf(msg, sizeof(msg), "Failed writing file %s", output_filename);
+        RETURN_ERROR(msg, MODULE_NAME, ERROR);
+    }
+
+    fclose(fd);
+
+    return SUCCESS;
 }
 
 
@@ -145,7 +178,12 @@ bool zhe_water_test
 
       The algorithm implemented here was developed by the following:
 
-      TODO TODO TODO
+      This software is based on the Matlab code developed by Zhe Zhu,
+      and Curtis E. Woodcock
+
+      Zhu, Z. and Woodcock, C. E., Object-based cloud and cloud shadow
+      detection in Landsat imagery, Remote Sensing of Environment (2012),
+      doi:10.1016/j.rse.2011.10.028
 
   RETURN VALUE:  Type = int
       Value           Description
@@ -176,6 +214,7 @@ main (int argc, char *argv[])
     /* Other variables */
     int pixel_index;
     int pixel_count;
+    char temp_filename[PATH_MAX];
 
 
     /* Get the command line arguments */
@@ -211,6 +250,9 @@ main (int argc, char *argv[])
        metadata */
     if (parse_metadata(xml_filename, &xml_metadata) != SUCCESS)
     {
+        /* Cleanup memory */
+        free(xml_filename);
+
         /* Error messages already written */
         return EXIT_FAILURE;
     }
@@ -224,12 +266,10 @@ main (int argc, char *argv[])
 
         /* Cleanup memory */
         free_metadata(&xml_metadata);
+        free(xml_filename);
+
         return EXIT_FAILURE;
     }
-
-    /* Free the metadata structure */
-    /* ******** NO LONGER NEEDED IN THIS MAIN CODE ******** */
-    free_metadata(&xml_metadata);
 
     /* -------------------------------------------------------------------- */
     /* Figure out the number of elements in the data */
@@ -245,6 +285,11 @@ main (int argc, char *argv[])
     {
         ERROR_MESSAGE ("Failed reading bands into memory", MODULE_NAME);
 
+        /* Cleanup memory */
+        free_metadata(&xml_metadata);
+        free(input_data);
+        free(xml_filename);
+
         return EXIT_FAILURE;
     }
 
@@ -256,30 +301,21 @@ main (int argc, char *argv[])
         ERROR_MESSAGE("Failed reading bands into memory", MODULE_NAME);
 
         /* Cleanup memory */
+        free_metadata(&xml_metadata);
+        free(input_data);
         free_band_memory(band_red, band_nir, band_l2qa);
-        free (xml_filename);
-        free (input_data);
+        free(xml_filename);
 
         return EXIT_FAILURE;
-    }
-
-    /* -------------------------------------------------------------------- */
-    /* Close the input files */
-    if (close_input (input_data) != SUCCESS)
-    {
-        WARNING_MESSAGE ("Failed closing input files", MODULE_NAME);
     }
 
     red_fill_value = input_data->fill_value[I_BAND_RED];
     nir_fill_value = input_data->fill_value[I_BAND_NIR];
     l2qa_fill_value = input_data->fill_value[I_BAND_L2QA];
 
-#if 0
-    /* Free memory no longer needed */
-    free (input_data);
-    input_data = NULL;
-#endif
-
+    int total_image_pixels = 0;
+    int total_clear_pixels = 0;
+    int total_water_pixels = 0;
     /* -------------------------------------------------------------------- */
     /* Process through each data element and populate the dswe band memory */
     for (pixel_index = 0; pixel_index < pixel_count; pixel_index++)
@@ -292,14 +328,18 @@ main (int argc, char *argv[])
             band_l2qa[pixel_index] = l2qa_fill_value;
             continue;
         }
-        /* If the data is already marked we do not need to process it */
-// TODO TODO TODO - Maybe if the L1 -> L2 converter marks clear, we only need to test for clear pixels here
-        if (band_l2qa[pixel_index] == L2QA_CLOUD_PIXEL ||
-            band_l2qa[pixel_index] == L2QA_CLOUD_SHADOW_PIXEL ||
-            band_l2qa[pixel_index] == L2QA_SNOW_PIXEL)
+
+        /* Get the total image data pixels */
+        total_image_pixels++;
+
+        /* Only need to process clear pixels */
+        if (band_l2qa[pixel_index] != L2QA_CLEAR_PIXEL)
         {
             continue;
         }
+
+        /* Get the total clear image data pixels */
+        total_clear_pixels++;
 
         if ((band_red[pixel_index] + band_nir[pixel_index]) != 0)
         {
@@ -309,14 +349,17 @@ main (int argc, char *argv[])
         else
             ndvi = 0.01;
 
-        /* Zhe's water test (works over thin cloud), equation 5 (CFmask) */
+        /* Zhe's water test (works over thin cloud),
+           equation 5 from (CFmask) */
         if ((ndvi < 0.01 && band_nir[pixel_index] < 1100)
             || (ndvi < 0.1 && ndvi > 0.0 && band_nir[pixel_index] < 500))
         {
-            band_l2qa[pixel_index] |= L2QA_WATER_PIXEL;
+            band_l2qa[pixel_index] = L2QA_WATER_PIXEL;
+
+            /* Update the counts */
+            total_clear_pixels--;
+            total_water_pixels++;
         }
-        else
-            band_l2qa[pixel_index] &= ~L2QA_WATER_PIXEL;
 
         /* Let the use know where we are in the processing */
         if (pixel_index%99999 == 0)
@@ -327,35 +370,105 @@ main (int argc, char *argv[])
     /* Status output cleanup to match the final output size */
     printf("\rProcessed data element %d\n", pixel_index);
 
-// TODO TODO TODO
-# if 0
-    /* The L2 QA Band already exists in the metadata, so we only need to write
-       the band data to disk */
-    // TODO TODO TODO - is that really true????????????????????
-    if (add_dswe_band_product (xml_filename, use_toa_flag,
-                               RAW_PRODUCT_NAME, RAW_BAND_NAME,
-                               RAW_SHORT_NAME, RAW_LONG_NAME, DSWE_NOT_WATER,
-                               DSWE_PARTIAL_SURFACE_WATER_PIXEL,
-                               band_dswe_raw)
-        != SUCCESS)
+    float percent_clear = 100.0 * (float)total_clear_pixels
+                                  / (float)total_image_pixels;
+    float percent_water = 100.0 * (float)total_water_pixels
+                                  / (float)total_image_pixels;
+    if (verbose_flag)
     {
-        ERROR_MESSAGE ("Failed adding Raw DSWE band product", MODULE_NAME);
+        printf ("Total Image Pixels = %d\n", total_image_pixels);
+        printf ("Total Clear Pixels = %d\n", total_clear_pixels);
+        printf ("Total Water Pixels = %d\n", total_water_pixels);
+        printf ("Percent Clear Pixels = %f\n", percent_clear);
+        printf ("Percent Water Pixels = %f\n", percent_water);
+    }
+
+    /* Update percentages in the XML File for clear and water */
+    int cover_index = 0;
+    for (cover_index = 0;
+         cover_index <
+             xml_metadata.band[input_data->meta_index[I_BAND_L2QA]].ncover;
+         cover_index++)
+    {
+        if (strcmp(xml_metadata.band[input_data->meta_index[I_BAND_L2QA]]
+                   .percent_cover[cover_index].description, "clear") == 0)
+        {
+            xml_metadata.band[input_data->meta_index[I_BAND_L2QA]]
+                .percent_cover[cover_index].percent = percent_clear;
+            continue;
+        }
+        if (strcmp(xml_metadata.band[input_data->meta_index[I_BAND_L2QA]]
+                   .percent_cover[cover_index].description, "water") == 0)
+        {
+            xml_metadata.band[input_data->meta_index[I_BAND_L2QA]]
+                .percent_cover[cover_index].percent = percent_water;
+            continue;
+        }
+    }
+
+    /* Write the updated metadata to the XML file */
+    if (write_metadata(&xml_metadata, xml_filename) != SUCCESS)
+    {
+        ERROR_MESSAGE("Writing XML file", MODULE_NAME);
 
         /* Cleanup memory */
-        free (xml_filename);
-        free (dem_filename);
+        free_metadata(&xml_metadata);
+        free(input_data);
+        free_band_memory(band_red, band_nir, band_l2qa);
+        free(xml_filename);
 
         return EXIT_FAILURE;
     }
-#endif
+
+    /* Write the L2 QA Band data to temp file on disk */
+    snprintf(temp_filename, sizeof(temp_filename), "temp_%s",
+             input_data->band_name[I_BAND_L2QA]);
+
+    if (write_u8bit_data(temp_filename, pixel_count, band_l2qa) != SUCCESS)
+    {
+        ERROR_MESSAGE("Failed writing L2 QA band data", MODULE_NAME);
+
+        /* Cleanup memory */
+        free_metadata(&xml_metadata);
+        free(input_data);
+        free_band_memory(band_red, band_nir, band_l2qa);
+        free(xml_filename);
+
+        return EXIT_FAILURE;
+    }
+
+    /* Rename the file over-writing the L2 QA Band filename */
+    if (rename(temp_filename, input_data->band_name[I_BAND_L2QA]) == -1)
+    {
+        ERROR_MESSAGE("Failed over-writing L2 QA band data with new results",
+                      MODULE_NAME);
+
+        /* Cleanup memory */
+        free_metadata(&xml_metadata);
+        free(input_data);
+        free_band_memory(band_red, band_nir, band_l2qa);
+        free(xml_filename);
+
+        return EXIT_FAILURE;
+    }
 
     /* CLEANUP & EXIT ----------------------------------------------------- */
 
+    /* Free the metadata structure */
+    free_metadata(&xml_metadata);
+
+    /* Close the input files */
+    if (close_input(input_data) != SUCCESS)
+    {
+        WARNING_MESSAGE("Failed closing input files", MODULE_NAME);
+    }
+
+    /* Cleanup the input data structure */
+    free(input_data);
+    input_data = NULL;
+
     /* Cleanup all the input band memory */
     free_band_memory(band_red, band_nir, band_l2qa);
-    band_red = NULL;
-    band_nir = NULL;
-    band_l2qa = NULL;
 
     /* Free remaining allocated memory */
     free(xml_filename);
