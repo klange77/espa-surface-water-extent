@@ -86,10 +86,10 @@ GetXMLInput
     }
 
     snprintf(toa_product_name, sizeof(toa_product_name), "toa_refl");
-// TODO TODO TODO
-    snprintf(qa_product_name, sizeof(qa_product_name), "L1T");
-// TODO TODO TODO
-        snprintf(l2qa_band_name, sizeof(nir_band_name), "qa");
+
+    /* Level 2 QA Band information */
+    snprintf(qa_product_name, sizeof(qa_product_name), "l2qa");
+    snprintf(l2qa_band_name, sizeof(l2qa_band_name), "l2qa");
 
     /* Scan the metadata searching for the bands to open */
     for (index = 0; index < metadata->nbands; index++)
@@ -127,6 +127,9 @@ GetXMLInput
                 /* Grab the fill value for this band */
                 input_data->fill_value[I_BAND_RED] =
                     metadata->band[index].fill_value;
+
+                /* Grab the metadata index value for this band */
+                input_data->meta_index[I_BAND_RED] = index;
             }
             else if (strcmp(metadata->band[index].name, nir_band_name) == 0)
             {
@@ -148,6 +151,9 @@ GetXMLInput
                 /* Grab the fill value for this band */
                 input_data->fill_value[I_BAND_NIR] =
                     metadata->band[index].fill_value;
+
+                /* Grab the metadata index value for this band */
+                input_data->meta_index[I_BAND_NIR] = index;
             }
         }
 
@@ -157,12 +163,10 @@ GetXMLInput
             {
                 open_band(metadata->band[index].file_name, input_data,
                           I_BAND_L2QA);
-// TODO TODO TODO ESPA_UINT8
-                if (metadata->band[index].data_type != ESPA_UINT16)
+                if (metadata->band[index].data_type != ESPA_UINT8)
                 {
                     snprintf(msg, sizeof(msg),
-// TODO TODO TODO ESPA_UINT8
-                             "%s incompatable data type expecting UINT16",
+                             "%s incompatable data type expecting UINT8",
                              l2qa_band_name);
                     RETURN_ERROR(msg, MODULE_NAME, ERROR);
                 }
@@ -174,6 +178,9 @@ GetXMLInput
                 /* Grab the fill value for this band */
                 input_data->fill_value[I_BAND_L2QA] =
                     metadata->band[index].fill_value;
+
+                /* Grab the metadata index value for this band */
+                input_data->meta_index[I_BAND_L2QA] = index;
             }
         }
     }
