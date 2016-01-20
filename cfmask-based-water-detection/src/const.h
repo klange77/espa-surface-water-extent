@@ -6,14 +6,6 @@
 #include "espa_common.h"
 
 
-#if 0
-#define RAW_DIAG_PRODUCT_NAME "dswe_diag"
-#define RAW_DIAG_BAND_NAME "dswe_diag"
-#define RAW_DIAG_SHORT_NAME "DSWE_DIAG"
-#define RAW_DIAG_LONG_NAME "dynamic surface water extent: raw diagnostic tests"
-#endif
-
-
 /* L2QA integer classification values */
 #define L2QA_CLEAR_PIXEL        0
 #define L2QA_WATER_PIXEL        1
