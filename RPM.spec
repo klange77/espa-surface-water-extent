@@ -6,8 +6,8 @@
 
 # ----------------------------------------------------------------------------
 Name:		espa-surface-water-extent
-Version:	201512
-Release:	3%{?dist}
+Version:	201603
+Release:	1%{?dist}
 Summary:	ESPA Surface Water Extent Software
 
 Group:		ESPA
@@ -18,8 +18,8 @@ BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 BuildArch:	x86_64
 Packager:	USGS EROS LSRD
 
-BuildRequires:	espa-common
-Requires:	espa-common >= 1.5.0
+BuildRequires:	espa-product-formatter
+Requires:	espa-product-formatter >= 1.5.0
 
 
 # ----------------------------------------------------------------------------
@@ -29,7 +29,7 @@ Provides science application executables for generating surface water extent pro
 
 # ----------------------------------------------------------------------------
 # Specify the repository tag/branch to clone and build from
-%define tagname dev_dec2015
+%define tagname dev_mar2016
 # Specify the name of the directory to clone into
 %define clonedname %{name}-%{tagname}
 
@@ -76,9 +76,11 @@ rm -rf %{buildroot}
 
 # ----------------------------------------------------------------------------
 %changelog
+* Thu Jan 21 2016 Ronald D Dilley <rdilley@usgs.gov>
+- Updated for Mar 2016 release
+
 * Thu Dec 03 2015 Ronald D Dilley <rdilley@usgs.gov>
 - Changed release number for a bug found in the ENVI header for Dec 2015 release
-
 * Wed Dec 02 2015 Ronald D Dilley <rdilley@usgs.gov>
 - Changed release number for a recompile against the product formatter for Dec 2015 release
 * Wed Nov 04 2015 Ronald D Dilley <rdilley@usgs.gov>
