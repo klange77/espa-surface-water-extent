@@ -15,13 +15,10 @@ typedef struct
 {
     int lines;
     int samples;
-    double x_pixel_size;
-    double y_pixel_size;
     char *band_name[MAX_INPUT_BANDS];    /* Name of the input image files */
-    int meta_index[MAX_INPUT_BANDS];     /* Index in the band metadata */
     FILE *band_fd[MAX_INPUT_BANDS];      /* Open fd's for the image */
-    float scale_factor[MAX_INPUT_BANDS]; /* Scale factors from the metadata */
     int fill_value[MAX_INPUT_BANDS];     /* Fill value from the metadata */
+    int meta_index[MAX_INPUT_BANDS];     /* Index in the band metadata */
 } Input_Data_t;
 
 

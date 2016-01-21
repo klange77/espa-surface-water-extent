@@ -115,14 +115,6 @@ GetXMLInput
                    size values */
                 input_data->lines = metadata->band[index].nlines;
                 input_data->samples = metadata->band[index].nsamps;
-                input_data->x_pixel_size =
-                    metadata->band[index].pixel_size[0];
-                input_data->y_pixel_size =
-                    metadata->band[index].pixel_size[1];
-
-                /* Grab the scale factor for this band */
-                input_data->scale_factor[I_BAND_RED] =
-                    metadata->band[index].scale_factor;
 
                 /* Grab the fill value for this band */
                 input_data->fill_value[I_BAND_RED] =
@@ -143,10 +135,6 @@ GetXMLInput
                              nir_band_name);
                     RETURN_ERROR(msg, MODULE_NAME, ERROR);
                 }
-
-                /* Grab the scale factor for this band */
-                input_data->scale_factor[I_BAND_NIR] =
-                    metadata->band[index].scale_factor;
 
                 /* Grab the fill value for this band */
                 input_data->fill_value[I_BAND_NIR] =
@@ -170,10 +158,6 @@ GetXMLInput
                              l2qa_band_name);
                     RETURN_ERROR(msg, MODULE_NAME, ERROR);
                 }
-
-                /* Grab the scale factor for this band */
-                input_data->scale_factor[I_BAND_L2QA] =
-                    metadata->band[index].scale_factor;
 
                 /* Grab the fill value for this band */
                 input_data->fill_value[I_BAND_L2QA] =
@@ -236,6 +220,8 @@ open_input
     {
         input_data->band_name[index] = NULL;
         input_data->band_fd[index] = NULL;
+        input_data->fill_value[index] = -1;
+        input_data->meta_index[index] = -1;
     }
 
     input_data->lines = 0;
