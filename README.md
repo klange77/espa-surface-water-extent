@@ -14,6 +14,17 @@ This project contains application source code for producing Surface Water Extent
 
 * See folder <b>not-validated-prototype-dswe</b> for the Landsat 4, 5, and 7 version.
 
+### CFmask Based Water Determination (Algorithm)
+* Implemented in C
+* Supports Landsat 4-7, as well as Landsat 8.
+* Implemented to support Level 2 Quality Band consistency with previous CFmask
+  products.
+* This software is based on the Matlab code developed by Zhe Zhu, and
+  Curtis E. Woodcock
+  * Zhu, Z. and Woodcock, C. E., Object-based cloud and cloud shadow detection in Landsat imagery, Remote Sensing of Environment (2012), doi:10.1016/j.rse.2011.10.028 
+  * More information from the algorithm developers can be found [here](https://github.com/prs021/fmask).
+
+
 ## Release Notes
 Please see the Wiki pages or Release Tags for notes related to past versions.
 

@@ -1,8 +1,8 @@
-## dswe Version 1.0.4 Release Notes
+## dswe Version 1.0.5 Release Notes
 
-Release Date: December XX, 2015
+Release Date: March XX, 2016
 
-See git tag [dswe-version_1.0.4]
+See git tag [dswe-version_1.0.5]
 
 This application produces Surface Water Extent products for Landsat 4, 5, and 7.
 
@@ -10,11 +10,9 @@ This application produces Surface Water Extent products for Landsat 4, 5, and 7.
 See the [TODO TODO TODO](http://landsat.usgs.gov/CDR_LSR.php) product guide for more information about the DSWE product.
 
 ## Release Notes
-##### December 2015
-* Added --version option to the command line
-* Fixed so that the --help option exits successfully instead of indicating a failure
-* Enhanced Makefile's for build and installation of the software
-* Minor code cleanup related to organization of methods and variable names.
+##### March 2015
+* No changes
+* Only updated for underlying libraries.
 
 ## Installation
 
