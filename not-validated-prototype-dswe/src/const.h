@@ -6,30 +6,30 @@
 #include "espa_common.h"
 
 
-#define RAW_DIAG_PRODUCT_NAME "dswe_diag"
+#define RAW_DIAG_PRODUCT_NAME "dswe"
 #define RAW_DIAG_BAND_NAME "dswe_diag"
 #define RAW_DIAG_SHORT_NAME "DSWE_DIAG"
 #define RAW_DIAG_LONG_NAME "dynamic surface water extent: raw diagnostic tests"
 
-#define PS_PRODUCT_NAME "percent_slope"
+#define PS_PRODUCT_NAME "dswe"
 #define PS_BAND_NAME "percent_slope"
 #define PS_SHORT_NAME "PERCENT_SLOPE"
 #define PS_LONG_NAME "dynamic surface water extent: percent slope"
 
-#define RAW_PRODUCT_NAME "dswe_raw"
+#define RAW_PRODUCT_NAME "dswe"
 #define RAW_BAND_NAME "dswe_raw"
 #define RAW_SHORT_NAME "DSWE_RAW"
 #define RAW_LONG_NAME "dynamic surface water extent: raw"
 
-#define SC_PRODUCT_NAME "dswe_ccss"
+#define SC_PRODUCT_NAME "dswe"
 #define SC_BAND_NAME "dswe_ccss"
 #define SC_SHORT_NAME "DSWE_CCSS"
 #define SC_LONG_NAME "dynamic surface water extent: filtered by: cloud - cloud shadow - snow"
 
-#define PS_SC_PRODUCT_NAME "dswe_psccss"
+#define PS_SC_PRODUCT_NAME "dswe"
 #define PS_SC_BAND_NAME "dswe_psccss"
 #define PS_SC_SHORT_NAME "DSWE_PSCCSS"
-#define PS_SC_LONG_NAME "dynamic surface water extent: filtered by: percent-slope - cloud - cloud shadow - snow"
+#define PS_SC_LONG_NAME "dynamic surface water extent: filtered by: percent slope - cloud - cloud shadow - snow"
 
 
 /* These are used in arrays, and they are position dependent */
