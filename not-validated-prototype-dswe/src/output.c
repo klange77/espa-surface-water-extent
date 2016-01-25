@@ -215,7 +215,7 @@ add_dswe_band_product
 
     /* Figure out the output filename */
     count = snprintf (image_filename, sizeof (image_filename),
-                      "%s_%s.img", scene_name, product_name);
+                      "%s_%s.img", scene_name, band_name);
     if (count < 0 || count >= sizeof (image_filename))
     {
         RETURN_ERROR ("Failed creating output filename", MODULE_NAME, ERROR);
@@ -463,7 +463,7 @@ add_test_band_product
 
     /* Figure out the output filename */
     count = snprintf (image_filename, sizeof (image_filename),
-                      "%s_%s.img", scene_name, product_name);
+                      "%s_%s.img", scene_name, band_name);
     if (count < 0 || count >= sizeof (image_filename))
     {
         RETURN_ERROR ("Failed creating output filename", MODULE_NAME, ERROR);
@@ -664,7 +664,7 @@ add_ps_band_product
 
     /* Figure out the output filename */
     count = snprintf (image_filename, sizeof (image_filename),
-                      "%s_%s.img", scene_name, product_name);
+                      "%s_%s.img", scene_name, band_name);
     if (count < 0 || count >= sizeof (image_filename))
     {
         RETURN_ERROR ("Failed creating output filename", MODULE_NAME, ERROR);
