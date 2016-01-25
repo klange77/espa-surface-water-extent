@@ -11,7 +11,7 @@ This application adds water flags to the Level 2 QA Band for Landsat 4, 5, 7, an
 See the [TODO TODO TODO](http://landsat.usgs.gov/CDR_LSR.php) product guide for more information about the Level 2 QA product.
 
 ## Release Notes
-##### March 2015
+##### March 2016
 * Initial implementation
 * Algorithm derived from our CFmask product code.
 
