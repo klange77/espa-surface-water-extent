@@ -1,4 +1,4 @@
-## dswe Version 1.0.5 Release Notes
+## Dynamic Surface Water Extent Version 1.0.5 - Release Notes
 
 Release Date: March XX, 2016
 
