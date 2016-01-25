@@ -1,7 +1,7 @@
-## Surface Water Extent Version 1.0.4 Release Notes
-Release Date: Dec XX, 2015
+## Surface Water Extent - Release Notes
+Release Date: Mar XX, 2016
 
-See git tag [2015_Dec]
+See git tag [2016_Mar]
 
 This project contains application source code for producing Surface Water Extent products.
 
@@ -11,7 +11,6 @@ This project contains application source code for producing Surface Water Extent
 * Implemented in C
 * Only supports Landsat 4-7, as prototype products that are under evaluation
 * This software is based on an algorithm developed by John W. Jones, and Michael J. Starbuck
-
 * See folder <b>not-validated-prototype-dswe</b> for the Landsat 4, 5, and 7 version.
 
 ### CFmask Based Water Determination (Algorithm)
