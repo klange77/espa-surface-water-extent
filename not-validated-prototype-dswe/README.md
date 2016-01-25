@@ -63,7 +63,7 @@ The following input data are required to generate the surface water extent produ
 * CFmask
 * DEM
 
-The Surface Reflectance and CFmask products can be generated using the [DSWE](https://github.com/USGS-EROS/espa-surface-water-extent) software found in our [espa-surface-water-extent](https://github.com/USGS-EROS/espa-surface-water-extent) project.  Or through our ondemand processing system [ESPA](https://espa.cr.usgs.gov), be sure to select the ENVI output format.
+The Surface Reflectance and CFmask products can be generated using the software found in our [espa-surface-reflectance](https://github.com/USGS-EROS/espa-surface-reflectance) and [espa-cloud-masking](https://github.com/USGS-EROS/espa-cloud-masking) projects.  Or through our ondemand processing system [ESPA](https://espa.cr.usgs.gov), be sure to select the ENVI output format.
 
 The DEM is required to be in the same projection and physical data file size as the CFmask and Surface Reflectance products.
 
