@@ -125,6 +125,10 @@ def main():
     cmd = [get_science_application_name(satellite_sensor_code)]
     # Pass all arguments through to the since application
     cmd.extend(sys.argv[1:])
+    # TODO - For the time being we will always do this
+    #        They were placed here to be easily removed later
+    cmd.extend('--include-tests')
+    cmd.extend('--include-ps')
 
     # Convert the list to a string
     cmd_string = ' '.join(cmd)
