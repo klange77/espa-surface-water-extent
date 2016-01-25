@@ -24,7 +24,7 @@
 #define SC_PRODUCT_NAME "dswe_ccss"
 #define SC_BAND_NAME "dswe_ccss"
 #define SC_SHORT_NAME "DSWE_CCSS"
-#define SC_LONG_NAME "dynamic surface water extent: filtered by: cloud and cloud shadow and snow"
+#define SC_LONG_NAME "dynamic surface water extent: filtered by: cloud - cloud shadow - snow"
 
 #define PS_SC_PRODUCT_NAME "dswe_psccss"
 #define PS_SC_BAND_NAME "dswe_psccss"
