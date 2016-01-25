@@ -10,7 +10,7 @@ This application produces Surface Water Extent products for Landsat 4, 5, and 7.
 See the [TODO TODO TODO](http://landsat.usgs.gov/CDR_LSR.php) product guide for more information about the DSWE product.
 
 ## Release Notes
-##### March 2015
+##### March 2016
 * No changes
 * Only updated for underlying libraries.
 
