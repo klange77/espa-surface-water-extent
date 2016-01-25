@@ -28,6 +28,7 @@ This project contains application source code for producing Surface Water Extent
 Please see the Wiki pages or Release Tags for notes related to past versions.
 
 - Added a CFmask based water detection algorithm.
+- Updated DSWE ENVI headers and XML
 
 ## Installation Notes
 
