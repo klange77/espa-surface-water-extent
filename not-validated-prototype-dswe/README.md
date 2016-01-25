@@ -11,8 +11,8 @@ See the [TODO TODO TODO](http://landsat.usgs.gov/CDR_LSR.php) product guide for 
 
 ## Release Notes
 ##### March 2016
-* No changes
-* Only updated for underlying libraries.
+* Updated filename fields in XML and ENVI headers
+* Also updated for underlying libraries.
 
 ## Installation
 
