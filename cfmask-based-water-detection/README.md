@@ -49,7 +49,7 @@ make install-cfwd
 
 ## Usage
 See `surface_water_qa.py --help` for command line details.<br>
-See `surface_water_qa.py --xml <xml_file> --help` for command line details specific to the Landsat 4, 5, 7, and 8 application.  When the XML file specified is for an Landsat 4, 5, 7, or 8 scene.<br>
+See `surface_water_qa.py --xml <xml_file> --help` for command line details specific to the Landsat 4, 5, 7, and 8 application.<br>
 See `cfmask_water_detection --help` for command line details when the above wrapper script is not called.
 
 ### Environment Variables
