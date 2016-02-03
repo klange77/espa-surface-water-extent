@@ -1,7 +1,7 @@
 
 ## CFmask Based Water Detection Version 1.0.0 - Release Notes
 
-Release Date: March XX, 2016
+Release Date: March 2016
 
 See git tag [cfwd-version_1.0.0]
 
@@ -11,7 +11,6 @@ This application adds water flags to the Level 2 QA Band for Landsat 4, 5, 7, an
 See the [TODO TODO TODO](http://landsat.usgs.gov/CDR_LSR.php) product guide for more information about the Level 2 QA product.
 
 ## Release Notes
-##### March 2016
 * Initial implementation
 * Algorithm derived from our CFmask product code.
 
