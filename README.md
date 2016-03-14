@@ -22,7 +22,7 @@ This project contains application source code for producing Surface Water Extent
   Curtis E. Woodcock
   * Zhu, Z. and Woodcock, C. E., Object-based cloud and cloud shadow detection in Landsat imagery, Remote Sensing of Environment (2012), doi:10.1016/j.rse.2011.10.028 
   * More information from the algorithm developers can be found [here](https://github.com/prs021/fmask).
-* Also See [CFBWD](cfmask-based-water-detection/README.md) in ]cfmask-based-water-detection](cfmask-based-water-detection).
+* Also See [CFBWD](cfmask-based-water-detection/README.md) in [cfmask-based-water-detection](cfmask-based-water-detection).
 
 
 ## Release Notes
