@@ -52,7 +52,7 @@ free_band_memory
     int16_t *band_nir,
     int16_t *band_swir1,
     int16_t *band_swir2,
-    int16_t *band_dem,
+    int16_t *band_elevation,
     uint8_t *band_cfmask,
     float *band_ps,
     int16_t *band_dswe_diag,
@@ -67,7 +67,7 @@ free_band_memory
     free (band_nir);
     free (band_swir1);
     free (band_swir2);
-    free (band_dem);
+    free (band_elevation);
     free (band_cfmask);
     free (band_ps);
     free (band_dswe_diag);
@@ -99,7 +99,7 @@ allocate_band_memory
     int16_t **band_nir,
     int16_t **band_swir1,
     int16_t **band_swir2,
-    int16_t **band_dem,
+    int16_t **band_elevation,
     uint8_t **band_cfmask,
     float **band_ps,
     int16_t **band_dswe_diag,
@@ -125,9 +125,9 @@ allocate_band_memory
 
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
-                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccss, *band_dswe_psccss);
+                          *band_swir1, *band_swir2, *band_elevation,
+                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -138,9 +138,9 @@ allocate_band_memory
 
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
-                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccss, *band_dswe_psccss);
+                          *band_swir1, *band_swir2, *band_elevation,
+                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -151,9 +151,9 @@ allocate_band_memory
 
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
-                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccss, *band_dswe_psccss);
+                          *band_swir1, *band_swir2, *band_elevation,
+                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -164,9 +164,9 @@ allocate_band_memory
 
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
-                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccss, *band_dswe_psccss);
+                          *band_swir1, *band_swir2, *band_elevation,
+                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -178,22 +178,23 @@ allocate_band_memory
 
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
-                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccss, *band_dswe_psccss);
+                          *band_swir1, *band_swir2, *band_elevation,
+                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
-    *band_dem = calloc (pixel_count, sizeof (int16_t));
-    if (*band_dem == NULL)
+    *band_elevation = calloc (pixel_count, sizeof (int16_t));
+    if (*band_elevation == NULL)
     {
-        ERROR_MESSAGE ("Failed allocating memory for DEM band", MODULE_NAME);
+        ERROR_MESSAGE ("Failed allocating memory for elevation band",
+                       MODULE_NAME);
 
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
-                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccss, *band_dswe_psccss);
+                          *band_swir1, *band_swir2, *band_elevation,
+                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -205,9 +206,9 @@ allocate_band_memory
 
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
-                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccss, *band_dswe_psccss);
+                          *band_swir1, *band_swir2, *band_elevation,
+                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -219,9 +220,9 @@ allocate_band_memory
 
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
-                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccss, *band_dswe_psccss);
+                          *band_swir1, *band_swir2, *band_elevation,
+                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -235,7 +236,7 @@ allocate_band_memory
 
             /* Cleanup memory */
             free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
-                              *band_swir1, *band_swir2, *band_dem,
+                              *band_swir1, *band_swir2, *band_elevation,
                               *band_cfmask, *band_ps, *band_dswe_diag,
                               *band_dswe_raw, *band_dswe_ccss,
                               *band_dswe_psccss);
@@ -251,9 +252,9 @@ allocate_band_memory
 
         /* Cleanup memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
-                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccss, *band_dswe_psccss);
+                          *band_swir1, *band_swir2, *band_elevation,
+                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -265,9 +266,9 @@ allocate_band_memory
 
         /* Cleanup memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
-                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccss, *band_dswe_psccss);
+                          *band_swir1, *band_swir2, *band_elevation,
+                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -279,9 +280,9 @@ allocate_band_memory
 
         /* Cleanup memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
-                          *band_swir1, *band_swir2, *band_dem, *band_cfmask,
-                          *band_ps, *band_dswe_diag, *band_dswe_raw,
-                          *band_dswe_ccss, *band_dswe_psccss);
+                          *band_swir1, *band_swir2, *band_elevation,
+                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
@@ -321,7 +322,6 @@ main (int argc, char *argv[])
 {
     /* Command line parameters */
     char *xml_filename = NULL;  /* filename for the XML input */
-    char *dem_filename = NULL;  /* filename for the DEM input */
     Espa_internal_meta_t xml_metadata;  /* XML metadata structure */
     bool use_zeven_thorne_flag = false;
     bool use_toa_flag = false;
@@ -346,7 +346,7 @@ main (int argc, char *argv[])
     int16_t *band_nir = NULL;   /* TM SR_Band4,  OLI SR_Band5 */
     int16_t *band_swir1 = NULL; /* TM SR_Band5,  OLI SR_Band6 */
     int16_t *band_swir2 = NULL; /* TM SR_Band7,  OLI SR_Band7 */
-    int16_t *band_dem = NULL;   /* Contains the DEM band */
+    int16_t *band_elevation = NULL; /* Contains the elevation band */
     uint8_t *band_cfmask = NULL; /* CFMASK */
     float *band_ps = NULL;       /* Contains the generated percent slope */
     int16_t *band_dswe_diag = NULL;   /* Output Raw DSWE tests band data */
@@ -405,7 +405,6 @@ main (int argc, char *argv[])
     /* Get the command line arguments */
     status = get_args (argc, argv,
                        &xml_filename,
-                       &dem_filename,
                        &use_zeven_thorne_flag,
                        &use_toa_flag,
                        &include_tests_flag,
@@ -434,7 +433,6 @@ main (int argc, char *argv[])
     if (verbose_flag)
     {
         printf ("   XML Input File: %s\n", xml_filename);
-        printf ("   DEM Input File: %s\n", dem_filename);
         printf ("             WIGT: %0.3f\n", wigt);
         printf ("             AWGT: %0.3f\n", awgt);
         printf ("           PSWT_1: %0.3f\n", pswt_1);
@@ -480,7 +478,7 @@ main (int argc, char *argv[])
 
     /* -------------------------------------------------------------------- */
     /* Open the input files */
-    input_data = open_input (&xml_metadata, use_toa_flag, dem_filename);
+    input_data = open_input (&xml_metadata, use_toa_flag);
     if (input_data == NULL)
     {
         ERROR_MESSAGE ("Failed opening input files", MODULE_NAME);
@@ -501,7 +499,7 @@ main (int argc, char *argv[])
     /* Allocate memory buffers for input and temp processing */
     if (allocate_band_memory (include_tests_flag, &band_blue, &band_green,
                               &band_red, &band_nir, &band_swir1, &band_swir2,
-                              &band_dem, &band_cfmask, &band_ps,
+                              &band_elevation, &band_cfmask, &band_ps,
                               &band_dswe_diag, &band_dswe_raw,
                               &band_dswe_ccss, &band_dswe_psccss,
                               pixel_count)
@@ -515,19 +513,18 @@ main (int argc, char *argv[])
     /* -------------------------------------------------------------------- */
     /* Read the input files into the buffers */
     if (read_bands_into_memory (input_data, band_blue, band_green, band_red,
-                                band_nir, band_swir1, band_swir2, band_dem,
-                                band_cfmask, pixel_count)
+                                band_nir, band_swir1, band_swir2,
+                                band_elevation, band_cfmask, pixel_count)
         != SUCCESS)
     {
         ERROR_MESSAGE ("Failed reading bands into memory", MODULE_NAME);
 
         /* Cleanup memory */
         free_band_memory (band_blue, band_green, band_red, band_nir,
-                          band_swir1, band_swir2, band_dem, band_cfmask,
+                          band_swir1, band_swir2, band_elevation, band_cfmask,
                           band_ps, band_dswe_diag, band_dswe_raw,
                           band_dswe_ccss, band_dswe_psccss);
         free (xml_filename);
-        free (dem_filename);
         free (input_data);
 
         return EXIT_FAILURE;
@@ -541,7 +538,7 @@ main (int argc, char *argv[])
     }
 
     /* -------------------------------------------------------------------- */
-    build_slope_band (band_dem, input_data->lines, input_data->samples,
+    build_slope_band (band_elevation, input_data->lines, input_data->samples,
                       input_data->x_pixel_size, input_data->y_pixel_size,
                       use_zeven_thorne_flag, band_ps);
 
@@ -812,7 +809,6 @@ main (int argc, char *argv[])
 
         /* Cleanup memory */
         free (xml_filename);
-        free (dem_filename);
 
         return EXIT_FAILURE;
     }
@@ -829,7 +825,6 @@ main (int argc, char *argv[])
 
         /* Cleanup memory */
         free (xml_filename);
-        free (dem_filename);
 
         return EXIT_FAILURE;
     }
@@ -846,7 +841,6 @@ main (int argc, char *argv[])
 
         /* Cleanup memory */
         free (xml_filename);
-        free (dem_filename);
 
         return EXIT_FAILURE;
     }
@@ -864,7 +858,6 @@ main (int argc, char *argv[])
 
             /* Cleanup memory */
             free (xml_filename);
-            free (dem_filename);
 
             return EXIT_FAILURE;
         }
@@ -889,7 +882,6 @@ main (int argc, char *argv[])
 
             /* Cleanup memory */
             free (xml_filename);
-            free (dem_filename);
 
             return EXIT_FAILURE;
         }
@@ -899,7 +891,7 @@ main (int argc, char *argv[])
 
     /* Cleanup all the input band memory */
     free_band_memory (band_blue, band_green, band_red, band_nir, band_swir1,
-                      band_swir2, band_dem, band_cfmask, band_ps,
+                      band_swir2, band_elevation, band_cfmask, band_ps,
                       band_dswe_diag, band_dswe_raw, band_dswe_ccss,
                       band_dswe_psccss);
     band_blue = NULL;
@@ -908,7 +900,7 @@ main (int argc, char *argv[])
     band_nir = NULL;
     band_swir1 = NULL;
     band_swir2 = NULL;
-    band_dem = NULL;
+    band_elevation = NULL;
     band_cfmask = NULL;
     band_ps = NULL;
     band_dswe_diag = NULL;
@@ -918,7 +910,6 @@ main (int argc, char *argv[])
 
     /* Free remaining allocated memory */
     free (xml_filename);
-    free (dem_filename);
 
     LOG_MESSAGE ("Processing complete.", MODULE_NAME);
 

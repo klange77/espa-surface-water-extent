@@ -28,8 +28,7 @@ Input_Data_t *
 open_input
 (
     Espa_internal_meta_t *metadata, /* I: input metadata */
-    bool use_toa_flag,              /* I: use TOA or SR data */
-    char *dem_filename              /* I: the name of the DEM file */
+    bool use_toa_flag               /* I: use TOA or SR data */
 );
 
 
@@ -50,7 +49,7 @@ read_bands_into_memory
     int16_t *band_nir,        /* I: pointer to allocated memory */
     int16_t *band_swir1,      /* I: pointer to allocated memory */
     int16_t *band_swir2,      /* I: pointer to allocated memory */
-    int16_t *band_dem,        /* I: pointer to allocated memory */
+    int16_t *band_elevation,  /* I: pointer to allocated memory */
     uint8_t *band_cfmask,     /* I: pointer to allocated memory */
     int pixel_count           /* I: how many pixel are to be read in */
 );

@@ -56,7 +56,6 @@ GetXMLInput
 (
     Espa_internal_meta_t *metadata, /* I: input metadata */
     bool use_toa_flag,              /* I: use TOA or SR data */
-    char *dem_filename,             /* I: the name of the DEM file */
     Input_Data_t *input_data        /* O: updated with information from XML */
 )
 {
@@ -296,15 +295,31 @@ GetXMLInput
                     metadata->band[index].fill_value;
             }
         }
-    }
 
-    /* Add the DEM band to the list */
-    open_band (dem_filename, input_data, I_BAND_DEM);
-    /* Default to a no-op since DEM doesn't have a scale factor */
-    input_data->scale_factor[I_BAND_DEM] = 1.0;
-    /* Default so the variable is initialized
-       The DEM should not have values this negative */
-    input_data->fill_value[I_BAND_DEM] = -9999;
+        /* Search for the elevation band */
+        if (!strcmp (metadata->band[index].product, "elevation"))
+        {
+            if (!strcmp (metadata->band[index].name, "elevation"))
+            {
+                open_band (metadata->band[index].file_name, input_data,
+                           I_BAND_ELEVATION);
+
+                if (metadata->band[index].data_type != ESPA_INT16)
+                {
+                    RETURN_ERROR("elevation incompatable data type expecting"
+                                 " INT16", MODULE_NAME, ERROR);
+                }
+
+                /* Default to a no-op since elevation doesn't have a scale
+                   factor */
+                input_data->scale_factor[I_BAND_ELEVATION] = 1.0;
+
+                /* Grab the fill value for this band */
+                input_data->fill_value[I_BAND_ELEVATION] =
+                    metadata->band[index].fill_value;
+            }
+        }
+    }
 
     /* Verify all the bands have something (all are required for DSWE) */
     for (index = 0; index < MAX_INPUT_BANDS; index++)
@@ -339,8 +354,7 @@ Input_Data_t *
 open_input
 (
     Espa_internal_meta_t *metadata, /* I: input metadata */
-    bool use_toa_flag,              /* I: use TOA or SR data */
-    char *dem_filename              /* I: the name of the DEM file */
+    bool use_toa_flag               /* I: use TOA or SR data */
 )
 {
     int index;
@@ -365,7 +379,7 @@ open_input
     input_data->samples = 0;
 
     /* Open the input images from the XML file */
-    if (GetXMLInput (metadata, use_toa_flag, dem_filename, input_data)
+    if (GetXMLInput (metadata, use_toa_flag, input_data)
         != SUCCESS)
     {
         /* error messages provided by GetXMLInput */
@@ -455,7 +469,7 @@ read_bands_into_memory
     int16_t *band_nir,
     int16_t *band_swir1,
     int16_t *band_swir2,
-    int16_t *band_dem,
+    int16_t *band_elevation,
     uint8_t *band_cfmask,
     int pixel_count
 )
@@ -516,11 +530,11 @@ read_bands_into_memory
         return ERROR;
     }
 
-    count = fread (band_dem, sizeof (int16_t), pixel_count,
-                   input_data->band_fd[I_BAND_DEM]);
+    count = fread (band_elevation, sizeof (int16_t), pixel_count,
+                   input_data->band_fd[I_BAND_ELEVATION]);
     if (count != pixel_count)
     {
-        ERROR_MESSAGE ("Failed reading DEM band data", MODULE_NAME);
+        ERROR_MESSAGE ("Failed reading elevation band data", MODULE_NAME);
 
         return ERROR;
     }

@@ -63,16 +63,12 @@ usage ()
             " from Surface\n"
             "Reflectance input data in ESPA raw binary format.\n\n");
     printf ("usage: dswe"
-            " --xml <input_xml_filename>"
-            " --dem <input_dem_filename> [--help]\n\n");
+            " --xml <input_xml_filename> [--help]\n\n");
     printf ("where the following parameters are required:\n");
     printf ("    --xml: Name of the input XML file which contains the surface"
             " reflectance,\n"
             "           and top of atmos files output from LEDAPS in raw binary"
             "\n           (envi) format\n");
-    printf ("    --dem: Name of the input DEM file which will is expected to"
-            " be the same\n"
-            "           size and area as the source data\n");
 
     printf ("where the following parameters are optional:\n");
     printf ("    --wigt: Modified Normalized Difference Wetness Index"
@@ -128,8 +124,7 @@ usage ()
 
     printf ("    --help will print this usage statement\n\n");
     printf ("Example: dswe"
-            " --xml LE70760172000175AGS00.xml"
-            " --dem LE70760172000175AGS00_dem.img\n");
+            " --xml LE70760172000175AGS00.xml\n");
 }
 
 
@@ -152,11 +147,10 @@ get_args
     int argc,                    /* I: number of cmd-line args */
     char *argv[],                /* I: string of cmd-line args */
     char **xml_infile,           /* O: input XML filename */
-    char **dem_infile,           /* O: input DEM filename */
     bool *use_zeven_thorne_flag, /* O: use zeven thorne */
     bool *use_toa_flag,          /* O: process using TOA */
-    bool *include_tests_flag,    /* O: include raw DSWE tests as output */
-    bool *include_ps_flag,       /* O: include ps as output */
+    bool *include_tests_flag,    /* O: include raw DSWE with output */
+    bool *include_ps_flag,       /* O: include ps with output */
     float *wigt,                 /* O: tolerance value */
     float *awgt,                 /* O: tolerance value */
     float *pswt_1,               /* O: tolerance value */
@@ -188,7 +182,6 @@ get_args
 
         /* These options provide values */
         {"xml", required_argument, 0, 'x'},
-        {"dem", required_argument, 0, 'd'},
 
         {"wigt", required_argument, 0, 'w'},
         {"awgt", required_argument, 0, 'a'},
@@ -267,10 +260,6 @@ get_args
             *xml_infile = strdup (optarg);
             break;
 
-        case 'd':
-            *dem_infile = strdup (optarg);
-            break;
-
         case 'w':
             *wigt = atof (optarg);
             break;
@@ -344,16 +333,6 @@ get_args
     if (*xml_infile == NULL)
     {
         ERROR_MESSAGE ("XML input file is a required command line"
-                       " argument\n\n", MODULE_NAME);
-
-        usage ();
-        return ERROR;
-    }
-
-    /* Make sure the DEM was specified */
-    if (*dem_infile == NULL)
-    {
-        ERROR_MESSAGE ("DEM input file is a required command line"
                        " argument\n\n", MODULE_NAME);
 
         usage ();

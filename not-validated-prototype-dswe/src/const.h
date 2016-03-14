@@ -41,8 +41,8 @@ typedef enum
     I_BAND_NIR,
     I_BAND_SWIR1,
     I_BAND_SWIR2,
-    I_BAND_CFMASK, /* This band and above are all from the XML */
-    I_BAND_DEM,
+    I_BAND_CFMASK,
+    I_BAND_ELEVATION, /* This band and above are all from the XML */
     MAX_INPUT_BANDS
 } Input_Bands_e;
 
