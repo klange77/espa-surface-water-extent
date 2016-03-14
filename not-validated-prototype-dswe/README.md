@@ -1,8 +1,8 @@
-## Dynamic Surface Water Extent Version 1.0.5 - Release Notes
+## Dynamic Surface Water Extent Version 1.1.0 - Release Notes
 
-Release Date: March 2016
+Release Date: May 2016
 
-See git tag [dswe-version_1.0.5]
+See git tag [dswe-version_1.1.0]
 
 This application produces Surface Water Extent products for Landsat 4, 5, and 7.
 
@@ -10,8 +10,7 @@ This application produces Surface Water Extent products for Landsat 4, 5, and 7.
 See the [TODO TODO TODO](http://landsat.usgs.gov/CDR_LSR.php) product guide for more information about the DSWE product.
 
 ## Release Notes
-* Updated filename fields in XML and ENVI headers
-* Also updated for underlying libraries.
+* Updated get the elevation filename from the metadata XML
 
 ## Installation
 
@@ -60,11 +59,11 @@ This version of the DSWE application requires the input products to be in the ES
 The following input data are required to generate the surface water extent products:
 * Surface Reflectance
 * CFmask
-* DEM
+* Elevation
 
 The Surface Reflectance and CFmask products can be generated using the software found in our [espa-surface-reflectance](https://github.com/USGS-EROS/espa-surface-reflectance) and [espa-cloud-masking](https://github.com/USGS-EROS/espa-cloud-masking) projects.  Or through our ondemand processing system [ESPA](https://espa.cr.usgs.gov), be sure to select the ENVI output format.
 
-The DEM is required to be in the same projection and physical data file size as the CFmask and Surface Reflectance products.
+The Elevation data is required to be in the same projection and physical data file size as the CFmask and Surface Reflectance products.
 
 This surface water extent product is <b>NOT</b> currently available in the [ESPA](https://espa.cr.usgs.gov) processing system.
 
