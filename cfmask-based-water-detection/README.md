@@ -56,7 +56,7 @@ See `cfmask_water_detection --help` for command line details when the above wrap
   - `$PREFIX/bin`
 
 ### Data Processing Requirements
-This version of the DSWE application requires the input products to be in the ESPA internal file format.
+This version of the water detection application requires the input products to be in the ESPA internal file format.
 
 The following input data are required to generate this surface water product:
 * Top of Atmosphere
