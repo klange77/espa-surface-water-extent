@@ -1,7 +1,7 @@
 ## ESPA Surface Water Extent - Release Notes
-Release Date: March 2016
+Release Date: May 2016
 
-See git tag [2016_Mar]
+See git tag [2016_May]
 
 This project contains application source code for producing Surface Water Extent products.
 
@@ -11,7 +11,7 @@ This project contains application source code for producing Surface Water Extent
 * Implemented in C
 * Only supports Landsat 4-7, as prototype products that are under evaluation
 * This software is based on an algorithm developed by John W. Jones, and Michael J. Starbuck
-* See folder <b>not-validated-prototype-dswe</b> for the Landsat 4, 5, and 7 version.
+* See [DSWE](not-validated-prototype-dswe) in <b>not-validated-prototype-dswe</b> for the Landsat 4, 5, and 7 version.
 
 ### CFmask Based Water Detection (Algorithm)
 * Implemented in C
@@ -22,13 +22,11 @@ This project contains application source code for producing Surface Water Extent
   Curtis E. Woodcock
   * Zhu, Z. and Woodcock, C. E., Object-based cloud and cloud shadow detection in Landsat imagery, Remote Sensing of Environment (2012), doi:10.1016/j.rse.2011.10.028 
   * More information from the algorithm developers can be found [here](https://github.com/prs021/fmask).
+* Also See [CFBWD](cfmask-based-water-detection) in <b>cfmask-based-water-detection</b>.
 
 
 ## Release Notes
-Please see the Wiki pages or Release Tags for notes related to past versions.
-
-- Added a CFmask based water detection algorithm.
-- Updated DSWE ENVI headers and XML
+- updated DSWE to get the elevation file information from the metadata XML.
 
 ## Installation Notes
 
