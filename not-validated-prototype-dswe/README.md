@@ -10,7 +10,8 @@ This application produces Surface Water Extent products for Landsat 4, 5, and 7.
 See the [TODO TODO TODO](http://landsat.usgs.gov/CDR_LSR.php) product guide for more information about the DSWE product.
 
 ## Release Notes
-* Updated get the elevation filename from the metadata XML
+- updated to get the elevation file information from the metadata XML
+- updated to add L8 support
 
 ## Installation
 

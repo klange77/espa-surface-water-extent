@@ -26,7 +26,8 @@ This project contains application source code for producing Surface Water Extent
 
 
 ## Release Notes
-- updated DSWE to get the elevation file information from the metadata XML.
+- updated DSWE to get the elevation file information from the metadata XML
+- updated DSWE to add L8 support
 
 ## Installation Notes
 
