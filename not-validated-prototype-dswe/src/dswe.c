@@ -405,6 +405,7 @@ main (int argc, char *argv[])
     /* Get the command line arguments */
     status = get_args (argc, argv,
                        &xml_filename,
+                       &xml_metadata,
                        &use_zeven_thorne_flag,
                        &use_toa_flag,
                        &include_tests_flag,
@@ -454,26 +455,6 @@ main (int argc, char *argv[])
             printf (" TRUE\n");
         else
             printf (" FALSE\n");
-    }
-
-    /* -------------------------------------------------------------------- */
-    /* Validate the input XML metadata file */
-    if (validate_xml_file (xml_filename) != SUCCESS)
-    {
-        /* Error messages already written */
-        return EXIT_FAILURE;
-    }
-
-    /* Initialize the metadata structure */
-    init_metadata_struct (&xml_metadata);
-
-    /* Parse the metadata file into our internal metadata structure; also
-       allocates space as needed for various pointers in the global and band
-       metadata */
-    if (parse_metadata (xml_filename, &xml_metadata) != SUCCESS)
-    {
-        /* Error messages already written */
-        return EXIT_FAILURE;
     }
 
     /* -------------------------------------------------------------------- */

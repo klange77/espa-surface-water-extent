@@ -6,10 +6,14 @@
 #include <stdbool.h>
 
 
+#include "espa_metadata.h"
+
+
 int
 get_args (int argc,                    /* I: number of cmd-line args */
           char *argv[],                /* I: string of cmd-line args */
-          char **xml_infile,           /* O: input XML filename */
+          char **xml_filename,         /* O: input XML filename */
+          Espa_internal_meta_t *xml_metadata, /* O: input metadata */
           bool *use_zeven_thorne_flag, /* O: use zeven thorne */
           bool *use_toa_flag,          /* O: process using TOA */
           bool *include_tests_flag,    /* O: include raw DSWE with output */

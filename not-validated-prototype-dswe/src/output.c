@@ -246,10 +246,11 @@ add_dswe_band_product
     bmeta = tmp_meta.band;
 
     snprintf (bmeta[0].short_name, sizeof (bmeta[0].short_name),
-              in_meta.band[src_index].short_name);
+              "%s", in_meta.band[src_index].short_name);
     bmeta[0].short_name[3] = '\0';
     strcat (bmeta[0].short_name, short_name);
-    snprintf (bmeta[0].product, sizeof (bmeta[0].product), product_name);
+    snprintf (bmeta[0].product, sizeof (bmeta[0].product),
+              "%s", product_name);
     snprintf (bmeta[0].source, sizeof (bmeta[0].source), "sr_refl");
     snprintf (bmeta[0].category, sizeof (bmeta[0].category), "qa");
     bmeta[0].nlines = in_meta.band[src_index].nlines;
@@ -260,16 +261,19 @@ add_dswe_band_product
     snprintf (bmeta[0].app_version, sizeof (bmeta[0].app_version),
               "dswe_%s", DSWE_VERSION);
     snprintf (bmeta[0].production_date, sizeof (bmeta[0].production_date),
-              production_date);
+              "%s", production_date);
     bmeta[0].data_type = ESPA_UINT8;
     bmeta[0].fill_value = DSWE_NO_DATA_VALUE;
     bmeta[0].valid_range[0] = min_range;
     bmeta[0].valid_range[1] = max_range;
-    snprintf (bmeta[0].name, sizeof (bmeta[0].name), band_name);
-    snprintf (bmeta[0].long_name, sizeof (bmeta[0].long_name), long_name);
+    snprintf (bmeta[0].name, sizeof (bmeta[0].name),
+              "%s", band_name);
+    snprintf (bmeta[0].long_name, sizeof (bmeta[0].long_name),
+              "%s", long_name);
     snprintf (bmeta[0].data_units, sizeof (bmeta[0].data_units),
               "quality/feature classification");
-    snprintf (bmeta[0].file_name, sizeof (bmeta[0].file_name), image_filename);
+    snprintf (bmeta[0].file_name, sizeof (bmeta[0].file_name),
+              "%s", image_filename);
 
     /* Figure out how many classes we have */
     if (max_range == 9)
@@ -326,7 +330,7 @@ add_dswe_band_product
     }
 
     /* Write the ENVI header */
-    snprintf (envi_file, sizeof(envi_file), bmeta[0].file_name);
+    snprintf (envi_file, sizeof(envi_file), "%s", bmeta[0].file_name);
     tmp_char = strchr (envi_file, '.');
     if (tmp_char == NULL)
     {
@@ -494,10 +498,11 @@ add_test_band_product
     bmeta = tmp_meta.band;
 
     snprintf (bmeta[0].short_name, sizeof (bmeta[0].short_name),
-              in_meta.band[src_index].short_name);
+              "%s", in_meta.band[src_index].short_name);
     bmeta[0].short_name[3] = '\0';
     strcat (bmeta[0].short_name, short_name);
-    snprintf (bmeta[0].product, sizeof (bmeta[0].product), product_name);
+    snprintf (bmeta[0].product, sizeof (bmeta[0].product),
+              "%s", product_name);
     snprintf (bmeta[0].source, sizeof (bmeta[0].source), "sr_refl");
     snprintf (bmeta[0].category, sizeof (bmeta[0].category), "qa");
     bmeta[0].nlines = in_meta.band[src_index].nlines;
@@ -508,16 +513,19 @@ add_test_band_product
     snprintf (bmeta[0].app_version, sizeof (bmeta[0].app_version),
               "dswe_%s", DSWE_VERSION);
     snprintf (bmeta[0].production_date, sizeof (bmeta[0].production_date),
-              production_date);
+              "%s", production_date);
     bmeta[0].data_type = ESPA_INT16;
     bmeta[0].fill_value = TESTS_NO_DATA_VALUE;
     bmeta[0].valid_range[0] = min_range;
     bmeta[0].valid_range[1] = max_range;
-    snprintf (bmeta[0].name, sizeof (bmeta[0].name), band_name);
-    snprintf (bmeta[0].long_name, sizeof (bmeta[0].long_name), long_name);
+    snprintf (bmeta[0].name, sizeof (bmeta[0].name),
+              "%s", band_name);
+    snprintf (bmeta[0].long_name, sizeof (bmeta[0].long_name),
+              "%s", long_name);
     snprintf (bmeta[0].data_units, sizeof (bmeta[0].data_units),
               "quality/feature classification");
-    snprintf (bmeta[0].file_name, sizeof (bmeta[0].file_name), image_filename);
+    snprintf (bmeta[0].file_name, sizeof (bmeta[0].file_name),
+              "%s", image_filename);
 
     /* Create the ENVI header file this band */
     if (create_envi_struct (&bmeta[0], &in_meta.global, &envi_hdr) != SUCCESS)
@@ -527,7 +535,7 @@ add_test_band_product
     }
 
     /* Write the ENVI header */
-    snprintf (envi_file, sizeof(envi_file), bmeta[0].file_name);
+    snprintf (envi_file, sizeof(envi_file), "%s", bmeta[0].file_name);
     tmp_char = strchr (envi_file, '.');
     if (tmp_char == NULL)
     {
@@ -695,10 +703,11 @@ add_ps_band_product
     bmeta = tmp_meta.band;
 
     snprintf (bmeta[0].short_name, sizeof (bmeta[0].short_name),
-              in_meta.band[src_index].short_name);
+              "%s", in_meta.band[src_index].short_name);
     bmeta[0].short_name[3] = '\0';
     strcat (bmeta[0].short_name, short_name);
-    snprintf (bmeta[0].product, sizeof (bmeta[0].product), product_name);
+    snprintf (bmeta[0].product, sizeof (bmeta[0].product),
+              "%s", product_name);
     snprintf (bmeta[0].source, sizeof (bmeta[0].source), "sr_refl");
     snprintf (bmeta[0].category, sizeof (bmeta[0].category), "image");
     bmeta[0].nlines = in_meta.band[src_index].nlines;
@@ -710,16 +719,19 @@ add_ps_band_product
     snprintf (bmeta[0].app_version, sizeof (bmeta[0].app_version),
               "dswe_%s", DSWE_VERSION);
     snprintf (bmeta[0].production_date, sizeof (bmeta[0].production_date),
-              production_date);
+              "%s", production_date);
     bmeta[0].data_type = ESPA_INT16;
     bmeta[0].fill_value = TESTS_NO_DATA_VALUE;
     bmeta[0].valid_range[0] = min_range;
     bmeta[0].valid_range[1] = max_range;
-    snprintf (bmeta[0].name, sizeof (bmeta[0].name), band_name);
-    snprintf (bmeta[0].long_name, sizeof (bmeta[0].long_name), long_name);
+    snprintf (bmeta[0].name, sizeof (bmeta[0].name),
+              "%s", band_name);
+    snprintf (bmeta[0].long_name, sizeof (bmeta[0].long_name),
+              "%s", long_name);
     snprintf (bmeta[0].data_units, sizeof (bmeta[0].data_units),
               "quality/feature classification");
-    snprintf (bmeta[0].file_name, sizeof (bmeta[0].file_name), image_filename);
+    snprintf (bmeta[0].file_name, sizeof (bmeta[0].file_name),
+              "%s", image_filename);
 
     /* Create the ENVI header file this band */
     if (create_envi_struct (&bmeta[0], &in_meta.global, &envi_hdr) != SUCCESS)
@@ -729,7 +741,7 @@ add_ps_band_product
     }
 
     /* Write the ENVI header */
-    snprintf (envi_file, sizeof(envi_file), bmeta[0].file_name);
+    snprintf (envi_file, sizeof(envi_file), "%s", bmeta[0].file_name);
     tmp_char = strchr (envi_file, '.');
     if (tmp_char == NULL)
     {

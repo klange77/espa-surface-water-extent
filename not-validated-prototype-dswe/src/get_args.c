@@ -9,35 +9,50 @@
 #include <limits.h>
 
 
+#include "espa_metadata.h"
+#include "parse_metadata.h"
+
+
 #include "const.h"
 #include "dswe.h"
 #include "utilities.h"
 #include "get_args.h"
 
 
-/* Default input parameter values */
-static float default_wigt = 0.0123;
-static float default_awgt = 0.0;
+/* Specify default parameter values */
+/* L4-7 defaults */
+static float wigt_l47_default = 0.0123;
+static float awgt_l47_default = 0.0;
+static float pswt_1_l47_default = -0.5;
+static float pswt_2_l47_default = -0.5;
+static int pswst_1_l47_default = 1000;
+static int pswnt_1_l47_default = 1500;
+static int pswst_2_l47_default = 1000;
+static int pswnt_2_l47_default = 2000;
+/* L8 defaults */
+static float wigt_l8_default = 0.1163;
+static float awgt_l8_default = 0.0;
+static float pswt_1_l8_default = -0.67;
+static float pswt_2_l8_default = -0.67;
+static int pswst_1_l8_default = 1000;
+static int pswnt_1_l8_default = 1500;
+static int pswst_2_l8_default = 1000;
+static int pswnt_2_l8_default = 2000;
 
-static float default_pswt_1 = -0.5;
-static float default_pswt_2 = -0.5;
+static float percent_slope_default = 6.0;
 
-static int default_pswnt_1 = 1500;
-static int default_pswst_1 = 1000;
-
-static int default_pswnt_2 = 2000;
-static int default_pswst_2 = 1000;
-
-static float default_percent_slope = 6.0;
+/* Parameter values should never be this, so use it to determine if a
+   parameter was specified or not on the command line before applying the
+   default value */
+#define NOT_SET -9999.0
 
 
 /*****************************************************************************
-MODULE:  version
+  NAME:  version
 
-PURPOSE:  Prints the version information for this application.
+  PURPOSE:  Prints the version information for this application.
 
-RETURN VALUE:
-Type = None
+  RETURN VALUE:  Type = None
 *****************************************************************************/
 void
 version ()
@@ -51,7 +66,7 @@ version ()
 
   PURPOSE:  Displays the help/usage to the terminal.
 
-  RETURN VALUE:  None
+  RETURN VALUE:  Type = None
 *****************************************************************************/
 void
 usage ()
@@ -67,42 +82,51 @@ usage ()
     printf ("where the following parameters are required:\n");
     printf ("    --xml: Name of the input XML file which contains the surface"
             " reflectance,\n"
-            "           and top of atmos files output from LEDAPS in raw binary"
-            "\n           (envi) format\n");
+            "           and top of atmos files output from LEDAPS in raw"
+            " binary\n"
+            "           (envi) format\n");
 
     printf ("where the following parameters are optional:\n");
     printf ("    --wigt: Modified Normalized Difference Wetness Index"
             " Threshold\n"
-            "            between 0.00 and 2.00 (default value is %0.3f)\n",
-            default_wigt);
+            "            between 0.00 and 2.00\n"
+            "            (Defaults - L4-7 %0.3f, L8 %0.3f)\n",
+            wigt_l47_default, wigt_l8_default);
     printf ("    --awgt: Automated Water Extent Shadow"
             " Threshold\n"
-            "            between -2.00 and 2.00 (default value is %0.2f)\n",
-            default_awgt);
+            "            between -2.00 and 2.00\n"
+            "            (Defaults - L4-7 %0.3f, L8 %0.3f)\n",
+            awgt_l47_default, awgt_l8_default);
 
     printf ("    --pswt_1: Partial Surface Water Test-1 Threshold\n"
-            "              between -2.00 and 2.00 (default value is %0.2f)\n",
-            default_pswt_1);
+            "              between -2.00 and 2.00\n"
+            "              (Defaults - L4-7 %0.3f, L8 %0.3f)\n",
+            pswt_1_l47_default, pswt_1_l8_default);
     printf ("    --pswt_2: Partial Surface Water Test-2 Threshold\n"
-            "              between -2.00 and 2.00 (default value is %0.2f)\n",
-            default_pswt_2);
+            "              between -2.00 and 2.00\n"
+            "              (Defaults - L4-7 %0.3f, L8 %0.3f)\n",
+            pswt_2_l47_default, pswt_2_l8_default);
 
     printf ("    --pswnt_1: Partial Surface Water Test-1 NIR Threshold\n"
-            "               between 0 and data maximum"
-            " (default value is %d)\n", default_pswnt_1);
+            "               between 0 and data maximum\n"
+            "               (Defaults - L4-7 %d, L8 %d)\n",
+            pswnt_1_l47_default, pswnt_1_l8_default);
     printf ("    --pswnt_2: Partial Surface Water Test-2 NIR Threshold\n"
-            "               between 0 and data maximum"
-            " (default value is %d)\n", default_pswnt_2);
+            "               between 0 and data maximum\n"
+            "               (Defaults - L4-7 %d, L8 %d)\n",
+            pswnt_2_l47_default, pswnt_2_l8_default);
 
     printf ("    --pswst_1: Partial Surface Water Test-1 SWIR1 Threshold\n"
-            "               between 0 and data maximum"
-            " (default value is %d)\n", default_pswst_1);
+            "               between 0 and data maximum\n"
+            "               (Defaults - L4-7 %d, L8 %d)\n",
+            pswst_1_l47_default, pswst_1_l8_default);
     printf ("    --pswst_2: Partial Surface Water Test-2 SWIR2 Threshold\n"
-            "               between 0 and data maximum"
-            " (default value is %d)\n", default_pswst_2);
+            "               between 0 and data maximum\n"
+            "               (Defaults - L4-7 %d, L8 %d)\n",
+            pswst_2_l47_default, pswst_2_l8_default);
 
     printf ("    --percent-slope: Threshold between 0.00 and 100.00"
-            " (default value is %0.1f)\n", default_percent_slope);
+            " (default value is %0.1f)\n", percent_slope_default);
 
     printf ("    --use_zeven_thorne: Should Zevenbergen&Thorne's slope"
             " algorithm be used?\n"
@@ -122,7 +146,7 @@ usage ()
     printf ("    --verbose: Should intermediate messages be printed? (default"
             " is false)\n\n");
 
-    printf ("    --help will print this usage statement\n\n");
+    printf ("    --help: Will print this usage statement\n\n");
     printf ("Example: dswe"
             " --xml LE70760172000175AGS00.xml\n");
 }
@@ -146,7 +170,8 @@ get_args
 (
     int argc,                    /* I: number of cmd-line args */
     char *argv[],                /* I: string of cmd-line args */
-    char **xml_infile,           /* O: input XML filename */
+    char **xml_filename,         /* O: input XML filename */
+    Espa_internal_meta_t *xml_metadata, /* O: input metadata */
     bool *use_zeven_thorne_flag, /* O: use zeven thorne */
     bool *use_toa_flag,          /* O: process using TOA */
     bool *include_tests_flag,    /* O: include raw DSWE with output */
@@ -217,16 +242,16 @@ get_args
         return ERROR;
     }
 
-    /* Assign the default values */
-    *wigt = default_wigt;
-    *awgt = default_awgt;
-    *pswt_1 = default_pswt_1;
-    *pswt_2 = default_pswt_2;
-    *percent_slope = default_percent_slope;
-    *pswnt_1 = default_pswnt_1;
-    *pswnt_2 = default_pswnt_2;
-    *pswst_1 = default_pswst_1;
-    *pswst_2 = default_pswst_2;
+    /* Initialize to the not set values */
+    *wigt = NOT_SET;
+    *awgt = NOT_SET;
+    *pswt_1 = NOT_SET;
+    *pswt_2 = NOT_SET;
+    *percent_slope = NOT_SET;
+    *pswnt_1 = NOT_SET;
+    *pswnt_2 = NOT_SET;
+    *pswst_1 = NOT_SET;
+    *pswst_2 = NOT_SET;
 
     /* loop through all the cmd-line options */
     opterr = 0; /* turn off getopt_long error msgs as we'll print our own */
@@ -257,7 +282,7 @@ get_args
             break;
 
         case 'x':
-            *xml_infile = strdup (optarg);
+            *xml_filename = strdup (optarg);
             break;
 
         case 'w':
@@ -328,9 +353,8 @@ get_args
     else
         *verbose_flag = false;
 
-    /* ---------- Validate the parameters ---------- */
     /* Make sure the XML was specified */
-    if (*xml_infile == NULL)
+    if (*xml_filename == NULL)
     {
         ERROR_MESSAGE ("XML input file is a required command line"
                        " argument\n\n", MODULE_NAME);
@@ -339,6 +363,84 @@ get_args
         return ERROR;
     }
 
+    /* Validate the input XML metadata file */
+    if (validate_xml_file (*xml_filename) != SUCCESS)
+    {
+        /* Error messages already written */
+        return ERROR;
+    }
+
+    /* Initialize the metadata structure */
+    init_metadata_struct (xml_metadata);
+
+    /* Parse the metadata file into our internal metadata structure; also
+       allocates space as needed for various pointers in the global and band
+       metadata */
+    if (parse_metadata (*xml_filename, xml_metadata) != SUCCESS)
+    {
+        /* Error messages already written */
+        return ERROR;
+    }
+
+    /* Assign the default values if not provided on the command line */
+    if (strcmp(xml_metadata->global.satellite, "LANDSAT_8") == 0)
+    {
+        if (*wigt == NOT_SET)
+            *wigt = wigt_l8_default;
+
+        if (*awgt == NOT_SET)
+            *awgt = awgt_l8_default;
+
+        if (*pswt_1 == NOT_SET)
+            *pswt_1 = pswt_1_l8_default;
+
+        if (*pswt_2 == NOT_SET)
+            *pswt_2 = pswt_2_l8_default;
+
+        if (*pswnt_1 == NOT_SET)
+            *pswnt_1 = pswnt_1_l8_default;
+
+        if (*pswnt_2 == NOT_SET)
+            *pswnt_2 = pswnt_2_l8_default;
+
+        if (*pswst_1 == NOT_SET)
+            *pswst_1 = pswst_1_l8_default;
+
+        if (*pswst_2 == NOT_SET)
+            *pswst_2 = pswst_2_l8_default;
+    }
+    else
+    {
+        if (*wigt == NOT_SET)
+            *wigt = wigt_l47_default;
+
+        if (*awgt == NOT_SET)
+            *awgt = awgt_l47_default;
+
+        if (*pswt_1 == NOT_SET)
+            *pswt_1 = pswt_1_l47_default;
+
+        if (*pswt_2 == NOT_SET)
+            *pswt_2 = pswt_2_l47_default;
+
+        if (*pswnt_1 == NOT_SET)
+            *pswnt_1 = pswnt_1_l47_default;
+
+        if (*pswnt_2 == NOT_SET)
+            *pswnt_2 = pswnt_2_l47_default;
+
+        if (*pswst_1 == NOT_SET)
+            *pswst_1 = pswst_1_l47_default;
+
+        if (*pswst_2 == NOT_SET)
+            *pswst_2 = pswst_2_l47_default;
+    }
+
+    if (*percent_slope == NOT_SET)
+        *percent_slope = percent_slope_default;
+
+
+    /* ---------- Validate the parameters ---------- */
     if ((*wigt < 0.0) || (*wigt > 2.0))
     {
         ERROR_MESSAGE ("WIGT is out of range\n\n", MODULE_NAME);
