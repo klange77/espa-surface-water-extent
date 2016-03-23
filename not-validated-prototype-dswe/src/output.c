@@ -20,7 +20,7 @@
 #define MAX_DATE_LEN 28
 
 
-/******************************************************************************
+/*****************************************************************************
   NAME:  write_u8bit_dswe_product
 
   PURPOSE:  Create the *.img file and the associated ENVI header.
@@ -30,7 +30,7 @@
       -------  ---------------------------------------------------------------
       SUCCESS  No errors were encountered.
       ERROR    An error was encountered.
-******************************************************************************/
+*****************************************************************************/
 int
 write_u8bit_dswe_product
 (
@@ -64,7 +64,7 @@ write_u8bit_dswe_product
 }
 
 
-/******************************************************************************
+/*****************************************************************************
   NAME:  write_16bit_dswe_product
 
   PURPOSE:  Create the *.img file and the associated ENVI header.
@@ -74,7 +74,7 @@ write_u8bit_dswe_product
       -------  ---------------------------------------------------------------
       SUCCESS  No errors were encountered.
       ERROR    An error was encountered.
-******************************************************************************/
+*****************************************************************************/
 int
 write_16bit_dswe_product
 (
@@ -108,7 +108,7 @@ write_16bit_dswe_product
 }
 
 
-/******************************************************************************
+/*****************************************************************************
   NAME:  add_dswe_band_product
 
   PURPOSE:  Create a new envi output file including envi header and add the
@@ -119,7 +119,7 @@ write_16bit_dswe_product
       -------  ---------------------------------------------------------------
       SUCCESS  No errors were encountered.
       ERROR    An error was encountered.
-******************************************************************************/
+*****************************************************************************/
 int
 add_dswe_band_product
 (
@@ -140,7 +140,7 @@ add_dswe_band_product
     int element_count;
     char scene_name[PATH_MAX];
     char image_filename[PATH_MAX];
-    char *tmp_char = NULL;
+    char *my_char = NULL;
     Espa_internal_meta_t in_meta;
     Espa_internal_meta_t tmp_meta;
     Espa_band_meta_t *bmeta = NULL; /* pointer to the band metadata array
@@ -151,6 +151,7 @@ add_dswe_band_product
     Envi_header_t envi_hdr;   /* output ENVI header information */
     char envi_file[PATH_MAX];
     int class_count;
+    char search_string[PATH_MAX];
 
     /* Initialize the input metadata structure */
     init_metadata_struct (&in_meta);
@@ -191,9 +192,11 @@ add_dswe_band_product
 
     /* Figure out the scene name */
     strcpy (scene_name, in_meta.band[src_index].file_name);
-    tmp_char = strchr (scene_name, '_');
-    if (tmp_char != NULL)
-        *tmp_char = '\0';
+    snprintf (search_string, sizeof(search_string), "_%s",
+              in_meta.band[src_index].name);
+    my_char = strstr(scene_name, search_string);
+    if (my_char != NULL)
+        *my_char = '\0';
 
     /* Get the current date/time (UTC) for the production date of each band */
     if (time (&tp) == -1)
@@ -207,7 +210,8 @@ add_dswe_band_product
         RETURN_ERROR ("converting time to UTC", MODULE_NAME, ERROR);
     }
 
-    if (strftime (production_date, MAX_DATE_LEN, "%Y-%m-%dT%H:%M:%SZ", tm) == 0)
+    if (strftime (production_date, MAX_DATE_LEN, "%Y-%m-%dT%H:%M:%SZ", tm)
+        == 0)
     {
         RETURN_ERROR ("formatting the production date/time", MODULE_NAME,
                       ERROR);
@@ -331,14 +335,14 @@ add_dswe_band_product
 
     /* Write the ENVI header */
     snprintf (envi_file, sizeof(envi_file), "%s", bmeta[0].file_name);
-    tmp_char = strchr (envi_file, '.');
-    if (tmp_char == NULL)
+    my_char = strchr (envi_file, '.');
+    if (my_char == NULL)
     {
         RETURN_ERROR ("Failed creating ENVI header filename", MODULE_NAME,
                       ERROR);
     }
 
-    sprintf (tmp_char, ".hdr");
+    sprintf (my_char, ".hdr");
     if (write_envi_hdr (envi_file, &envi_hdr) != SUCCESS)
     {
         RETURN_ERROR ("Failed writing ENVI header file", MODULE_NAME, ERROR);
@@ -359,7 +363,7 @@ add_dswe_band_product
 }
 
 
-/******************************************************************************
+/*****************************************************************************
   NAME:  add_test_band_product
 
   PURPOSE:  Create a new envi output file including envi header and add the
@@ -372,7 +376,7 @@ add_dswe_band_product
       -------  ---------------------------------------------------------------
       SUCCESS  No errors were encountered.
       ERROR    An error was encountered.
-******************************************************************************/
+*****************************************************************************/
 int
 add_test_band_product
 (
@@ -393,7 +397,7 @@ add_test_band_product
     int element_count;
     char scene_name[PATH_MAX];
     char image_filename[PATH_MAX];
-    char *tmp_char = NULL;
+    char *my_char = NULL;
     Espa_internal_meta_t in_meta;
     Espa_internal_meta_t tmp_meta;
     Espa_band_meta_t *bmeta = NULL; /* pointer to the band metadata array
@@ -403,6 +407,7 @@ add_test_band_product
     char production_date[MAX_DATE_LEN+1]; /* current date/time for production */
     Envi_header_t envi_hdr;   /* output ENVI header information */
     char envi_file[PATH_MAX];
+    char search_string[PATH_MAX];
 
     /* Initialize the input metadata structure */
     init_metadata_struct (&in_meta);
@@ -442,10 +447,13 @@ add_test_band_product
     }
 
     /* Figure out the scene name */
-    strcpy (scene_name, in_meta.band[src_index].file_name);
-    tmp_char = strchr (scene_name, '_');
-    if (tmp_char != NULL)
-        *tmp_char = '\0';
+    snprintf (scene_name, sizeof(scene_name), "%s",
+              in_meta.band[src_index].file_name);
+    snprintf (search_string, sizeof(search_string), "_%s",
+              in_meta.band[src_index].name);
+    my_char = strstr(scene_name, search_string);
+    if (my_char != NULL)
+        *my_char = '\0';
 
     /* Get the current date/time (UTC) for the production date of each band */
     if (time (&tp) == -1)
@@ -459,7 +467,8 @@ add_test_band_product
         RETURN_ERROR ("converting time to UTC", MODULE_NAME, ERROR);
     }
 
-    if (strftime (production_date, MAX_DATE_LEN, "%Y-%m-%dT%H:%M:%SZ", tm) == 0)
+    if (strftime (production_date, MAX_DATE_LEN, "%Y-%m-%dT%H:%M:%SZ", tm)
+        == 0)
     {
         RETURN_ERROR ("formatting the production date/time", MODULE_NAME,
                       ERROR);
@@ -536,14 +545,14 @@ add_test_band_product
 
     /* Write the ENVI header */
     snprintf (envi_file, sizeof(envi_file), "%s", bmeta[0].file_name);
-    tmp_char = strchr (envi_file, '.');
-    if (tmp_char == NULL)
+    my_char = strchr (envi_file, '.');
+    if (my_char == NULL)
     {
         RETURN_ERROR ("Failed creating ENVI header filename", MODULE_NAME,
                       ERROR);
     }
 
-    sprintf (tmp_char, ".hdr");
+    sprintf (my_char, ".hdr");
     if (write_envi_hdr (envi_file, &envi_hdr) != SUCCESS)
     {
         RETURN_ERROR ("Failed writing ENVI header file", MODULE_NAME, ERROR);
@@ -564,7 +573,7 @@ add_test_band_product
 }
 
 
-/******************************************************************************
+/*****************************************************************************
   NAME:  add_ps_band_product
 
   PURPOSE:  Create a new envi output file including envi header and add the
@@ -577,7 +586,7 @@ add_test_band_product
       -------  ---------------------------------------------------------------
       SUCCESS  No errors were encountered.
       ERROR    An error was encountered.
-******************************************************************************/
+*****************************************************************************/
 int
 add_ps_band_product
 (
@@ -598,7 +607,7 @@ add_ps_band_product
     int element_count;
     char scene_name[PATH_MAX];
     char image_filename[PATH_MAX];
-    char *tmp_char = NULL;
+    char *my_char = NULL;
     Espa_internal_meta_t in_meta;
     Espa_internal_meta_t tmp_meta;
     Espa_band_meta_t *bmeta = NULL; /* pointer to the band metadata array
@@ -608,6 +617,7 @@ add_ps_band_product
     char production_date[MAX_DATE_LEN+1]; /* current date/time for production */
     Envi_header_t envi_hdr;   /* output ENVI header information */
     char envi_file[PATH_MAX];
+    char search_string[PATH_MAX];
 
     /* Initialize the input metadata structure */
     init_metadata_struct (&in_meta);
@@ -648,9 +658,11 @@ add_ps_band_product
 
     /* Figure out the scene name */
     strcpy (scene_name, in_meta.band[src_index].file_name);
-    tmp_char = strchr (scene_name, '_');
-    if (tmp_char != NULL)
-        *tmp_char = '\0';
+    snprintf (search_string, sizeof(search_string), "_%s",
+              in_meta.band[src_index].name);
+    my_char = strstr(scene_name, search_string);
+    if (my_char != NULL)
+        *my_char = '\0';
 
     /* Get the current date/time (UTC) for the production date of each band */
     if (time (&tp) == -1)
@@ -664,7 +676,8 @@ add_ps_band_product
         RETURN_ERROR ("converting time to UTC", MODULE_NAME, ERROR);
     }
 
-    if (strftime (production_date, MAX_DATE_LEN, "%Y-%m-%dT%H:%M:%SZ", tm) == 0)
+    if (strftime (production_date, MAX_DATE_LEN, "%Y-%m-%dT%H:%M:%SZ", tm)
+        == 0)
     {
         RETURN_ERROR ("formatting the production date/time", MODULE_NAME,
                       ERROR);
@@ -742,14 +755,14 @@ add_ps_band_product
 
     /* Write the ENVI header */
     snprintf (envi_file, sizeof(envi_file), "%s", bmeta[0].file_name);
-    tmp_char = strchr (envi_file, '.');
-    if (tmp_char == NULL)
+    my_char = strchr (envi_file, '.');
+    if (my_char == NULL)
     {
         RETURN_ERROR ("Failed creating ENVI header filename", MODULE_NAME,
                       ERROR);
     }
 
-    sprintf (tmp_char, ".hdr");
+    sprintf (my_char, ".hdr");
     if (write_envi_hdr (envi_file, &envi_hdr) != SUCCESS)
     {
         RETURN_ERROR ("Failed writing ENVI header file", MODULE_NAME, ERROR);
