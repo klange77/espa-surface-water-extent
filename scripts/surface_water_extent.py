@@ -115,7 +115,7 @@ def get_science_application_name(satellite_sensor_code):
     '''Returns name of executable that needs to be called'''
 
     available = ['LT4', 'LT5', 'LE7', 'LC8',
-                 'LT04', 'LT05', 'LT07', 'LC08']
+                 'LT04', 'LT05', 'LE07', 'LC08']
 
     if satellite_sensor_code in available:
         return 'dswe'
