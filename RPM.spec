@@ -7,7 +7,7 @@
 # ----------------------------------------------------------------------------
 Name:		espa-surface-water-extent
 Version:	201605
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	ESPA Surface Water Extent Software
 
 Group:		ESPA
@@ -76,9 +76,11 @@ rm -rf %{buildroot}
 
 # ----------------------------------------------------------------------------
 %changelog
+* Wed Apr 27 2016 Ronald D Dilley <ronald.dilley.ctr@usgs.gov>
+- Updated for a recompile against a support library
+
 * Tue Apr 12 2016 Ronald D Dilley <rdilley@usgs.gov>
 - Updated for May 2016 release
-
 * Mon Mar 07 2016 Ronald D Dilley <rdilley@usgs.gov>
 - Updated release number for a recompile against a support library
 * Thu Mar 03 2016 Ronald D Dilley <rdilley@usgs.gov>
