@@ -4,7 +4,7 @@
 # Simple makefile for building and installing land-surface-temperature
 # applications.
 #-----------------------------------------------------------------------------
-.PHONY: check-environment all install clean all-script install-script clean-script all-dswe install-dswe clean-dswe all-cfwd install-cfwd clean-cfwd
+.PHONY: check-environment all install clean all-script install-script clean-script all-dswe install-dswe clean-dswe all-cfwd install-cfwd clean-cfwd rpms dswe-rpm
 
 include make.config
 
@@ -32,30 +32,36 @@ clean-script:
         (cd scripts; $(MAKE) clean);
 
 #-----------------------------------------------------------------------------
-all-dswe: all-script
+all-dswe:
 	echo "make all in not-validated-prototype-dswe"; \
         (cd $(DIR_DSWE); $(MAKE) all);
 
-install-dswe: check-environment install-script
+install-dswe: check-environment
 	echo "make install in not-validated-prototype-dswe"; \
         (cd $(DIR_DSWE); $(MAKE) install);
 
-clean-dswe: clean-script
+clean-dswe:
 	echo "make clean in not-validated-prototype-dswe"; \
         (cd $(DIR_DSWE); $(MAKE) clean);
 
 #-----------------------------------------------------------------------------
-all-cfwd: all-script
+all-cfwd:
 	echo "make all in cfmask-based-water-detection"; \
         (cd $(DIR_CFWD); $(MAKE) all);
 
-install-cfwd: check-environment install-script
+install-cfwd: check-environment
 	echo "make install in cfmask-based-water-detection"; \
         (cd $(DIR_CFWD); $(MAKE) install);
 
-clean-cfwd: clean-script
+clean-cfwd:
 	echo "make clean in cfmask-based-water-detection"; \
         (cd $(DIR_CFWD); $(MAKE) clean);
+
+#-----------------------------------------------------------------------------
+rpms: dswe-rpm
+
+dswe-rpm:
+	rpmbuild -bb --clean RPM_spec_files/RPM-DSWE.spec
 
 #-----------------------------------------------------------------------------
 check-environment:
