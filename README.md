@@ -1,7 +1,7 @@
 ## ESPA Surface Water Extent - Release Notes
-Release Date: May 2016
+Release Date: August 2016
 
-See git tag [2016_May]
+See git tag [2016_Aug]
 
 This project contains application source code for producing Surface Water Extent products.
 
@@ -9,25 +9,23 @@ This project contains application source code for producing Surface Water Extent
 
 ### DSWE - Dynamic Surface Water Extent (Algorithm)
 * Implemented in C
-* Only supports Landsat 4-7, as prototype products that are under evaluation
+* Supports Landsat 4-8, as prototype products that are under evaluation
 * This software is based on an algorithm developed by John W. Jones, and Michael J. Starbuck
-* See [DSWE](not-validated-prototype-dswe/README.md) in [not-validated-prototype-dswe](not-validated-prototype-dswe) for the Landsat 4, 5, and 7 version.
+* See [DSWE](not-validated-prototype-dswe/README.md) in [not-validated-prototype-dswe](not-validated-prototype-dswe) for more information
 
 ### CFmask Based Water Detection (Algorithm)
 * Implemented in C
-* Supports Landsat 4-7, as well as Landsat 8.
-* Implemented to support Level 2 Quality Band consistency with previous CFmask
-  products.
-* This software is based on the Matlab code developed by Zhe Zhu, and
-  Curtis E. Woodcock
+* Supports Landsat 4-8
+* Implemented to support Level 2 Quality Band consistency with previous CFmask products.
+* This software is based on the Matlab code developed by Zhe Zhu, and Curtis E. Woodcock
   * Zhu, Z. and Woodcock, C. E., Object-based cloud and cloud shadow detection in Landsat imagery, Remote Sensing of Environment (2012), doi:10.1016/j.rse.2011.10.028 
-  * More information from the algorithm developers can be found [here](https://github.com/prs021/fmask).
-* Also See [CFBWD](cfmask-based-water-detection/README.md) in [cfmask-based-water-detection](cfmask-based-water-detection).
+  * More information from the algorithm developers can be found [here](https://github.com/prs021/fmask)
+* Also See [CFBWD](cfmask-based-water-detection/README.md) in [cfmask-based-water-detection](cfmask-based-water-detection) for more information
 
 
 ## Release Notes
-- updated DSWE to get the elevation file information from the metadata XML
-- updated DSWE to add L8 support
+* Updated DSWE to get the elevation file information from the metadata XML
+* Updated DSWE to add L8 support
 
 ## Installation Notes
 
