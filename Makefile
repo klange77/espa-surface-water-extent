@@ -4,7 +4,7 @@
 # Simple makefile for building and installing land-surface-temperature
 # applications.
 #-----------------------------------------------------------------------------
-.PHONY: check-environment all install clean all-script install-script clean-script all-dswe install-dswe clean-dswe all-cfwd install-cfwd clean-cfwd rpms dswe-rpm
+.PHONY: check-environment all install clean all-script install-script clean-script all-dswe install-dswe clean-dswe all-cfbwd install-cfbwd clean-cfbwd rpms dswe-rpm cfbwd-rpm
 
 include make.config
 
@@ -12,11 +12,11 @@ DIR_DSWE = not-validated-prototype-dswe
 DIR_CFWD = cfmask-based-water-detection
 
 #-----------------------------------------------------------------------------
-all: all-script all-dswe all-cfwd
+all: all-script all-dswe all-cfbwd
 
-install: check-environment install-script install-dswe install-cfwd
+install: check-environment install-script install-dswe install-cfbwd
 
-clean: clean-script clean-dswe clean-cfwd
+clean: clean-script clean-dswe clean-cfbwd
 
 #-----------------------------------------------------------------------------
 all-script:
@@ -45,23 +45,26 @@ clean-dswe:
         (cd $(DIR_DSWE); $(MAKE) clean);
 
 #-----------------------------------------------------------------------------
-all-cfwd:
+all-cfbwd:
 	echo "make all in cfmask-based-water-detection"; \
         (cd $(DIR_CFWD); $(MAKE) all);
 
-install-cfwd: check-environment
+install-cfbwd: check-environment
 	echo "make install in cfmask-based-water-detection"; \
         (cd $(DIR_CFWD); $(MAKE) install);
 
-clean-cfwd:
+clean-cfbwd:
 	echo "make clean in cfmask-based-water-detection"; \
         (cd $(DIR_CFWD); $(MAKE) clean);
 
 #-----------------------------------------------------------------------------
-rpms: dswe-rpm
+rpms: dswe-rpm cfbwd-rpm
 
 dswe-rpm:
 	rpmbuild -bb --clean RPM_spec_files/RPM-DSWE.spec
+
+cfbwd-rpm:
+	rpmbuild -bb --clean RPM_spec_files/RPM-CFBWD.spec
 
 #-----------------------------------------------------------------------------
 check-environment:
