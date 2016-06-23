@@ -1,17 +1,16 @@
-## Dynamic Surface Water Extent Version 1.1.0 - Release Notes
+## Dynamic Surface Water Extent Version 1.1.1 - Release Notes
 
-Release Date: May 2016
+Release Date: August 2016
 
-See git tag [dswe-version_1.1.0]
+See git tag [dswe-version_1.1.1]
 
-This application produces Surface Water Extent products for Landsat 4, 5, and 7.
+This application produces Surface Water Extent products for Landsat 4, 5, 7, and 8.
 
 ## Product Descriptions
-See the [TODO TODO TODO](http://landsat.usgs.gov/CDR_LSR.php) product guide for more information about the DSWE product.
+See the [Not Available](http://landsat.usgs.gov/CDR_LSR.php) product guide for more information about the DSWE product.
 
 ## Release Notes
-- updated to get the elevation file information from the metadata XML
-- updated to add L8 support
+* Minor enhancements
 
 ## Installation
 
@@ -47,7 +46,7 @@ make install-dswe
 
 ## Usage
 See `surface_water_extent.py --help` for command line details.<br>
-See `surface_water_extent.py --xml <xml_file> --help` for command line details specific to the Landsat 4, 5, and 7 application.  When the XML file specified is for an Landsat 4, 5, or 7 scene.<br>
+See `surface_water_extent.py --xml <xml_file> --help` for command line details specific to the Landsat 4, 5, 7, and 8 application.  When the XML file specified is for an Landsat 4, 5, 7, or 8 scene.<br>
 See `dswe --help` for command line details when the above wrapper script is not called.
 
 ### Environment Variables
