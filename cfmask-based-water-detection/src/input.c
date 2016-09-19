@@ -65,7 +65,7 @@ GetXMLInput
     char red_band_name[30];
     char nir_band_name[30];
     char qa_product_name[30];
-    char l2qa_band_name[30];
+    char class_qa_band_name[30];
 
     /* Figure out the band names and product name to use */
     if ((strcmp(metadata->global.satellite, "LANDSAT_4") == 0)
@@ -87,9 +87,9 @@ GetXMLInput
 
     snprintf(toa_product_name, sizeof(toa_product_name), "toa_refl");
 
-    /* Level 2 QA Band information */
-    snprintf(qa_product_name, sizeof(qa_product_name), "l2qa");
-    snprintf(l2qa_band_name, sizeof(l2qa_band_name), "l2qa");
+    /* Class QA Band information */
+    snprintf(qa_product_name, sizeof(qa_product_name), "class_based_qa");
+    snprintf(class_qa_band_name, sizeof(class_qa_band_name), "class_based_qa");
 
     /* Scan the metadata searching for the bands to open */
     for (index = 0; index < metadata->nbands; index++)
@@ -147,24 +147,24 @@ GetXMLInput
 
         if (strcmp(metadata->band[index].product, qa_product_name) == 0)
         {
-            if (strcmp(metadata->band[index].name, l2qa_band_name) == 0)
+            if (strcmp(metadata->band[index].name, class_qa_band_name) == 0)
             {
                 open_band(metadata->band[index].file_name, input_data,
-                          I_BAND_L2QA);
+                          I_BAND_CLASS_QA);
                 if (metadata->band[index].data_type != ESPA_UINT8)
                 {
                     snprintf(msg, sizeof(msg),
                              "%s incompatable data type expecting UINT8",
-                             l2qa_band_name);
+                             class_qa_band_name);
                     RETURN_ERROR(msg, MODULE_NAME, ERROR);
                 }
 
                 /* Grab the fill value for this band */
-                input_data->fill_value[I_BAND_L2QA] =
+                input_data->fill_value[I_BAND_CLASS_QA] =
                     metadata->band[index].fill_value;
 
                 /* Grab the metadata index value for this band */
-                input_data->meta_index[I_BAND_L2QA] = index;
+                input_data->meta_index[I_BAND_CLASS_QA] = index;
             }
         }
     }
@@ -314,7 +314,7 @@ read_bands_into_memory
     Input_Data_t *input_data,
     int16_t *band_red,
     int16_t *band_nir,
-    uint8_t *band_l2qa,
+    uint8_t *band_class_qa,
     int pixel_count
 )
 {
@@ -338,11 +338,11 @@ read_bands_into_memory
         return ERROR;
     }
 
-    count = fread(band_l2qa, sizeof(uint8_t), pixel_count,
-                  input_data->band_fd[I_BAND_L2QA]);
+    count = fread(band_class_qa, sizeof(uint8_t), pixel_count,
+                  input_data->band_fd[I_BAND_CLASS_QA]);
     if (count != pixel_count)
     {
-        ERROR_MESSAGE("Failed reading L2 QA band data", MODULE_NAME);
+        ERROR_MESSAGE("Failed reading Class QA band data", MODULE_NAME);
 
         return ERROR;
     }
