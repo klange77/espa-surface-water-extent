@@ -1,23 +1,6 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
-#if 0
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <getopt.h>
-#include <error.h>
-#include <string.h>
-
-#include "error_handler.h"
-#include "espa_metadata.h"
-#include "parse_metadata.h"
-#include "write_metadata.h"
-#include "envi_header.h"
-#include "espa_geoloc.h"
-#include "raw_binary_io.h"
-#endif
 #include "espa_metadata.h"
 #include "parse_metadata.h"
 #include "write_metadata.h"
@@ -29,21 +12,6 @@
 #include "utilities.h"
 #include "get_args.h"
 #include "input.h"
-#if 0
-#include "output.h"
-
-
-#define CFMASK_CLOUD_SHADOW 2
-#define CFMASK_SNOW 3
-#define CFMASK_CLOUD 4
-
-
-#define DSWE_NOT_WATER 0
-#define DSWE_WATER_HIGH_CONFIDENCE 1
-#define DSWE_WATER_MODERATE_CONFIDENCE 2
-#define DSWE_PARTIAL_SURFACE_WATER_PIXEL 3
-#define DSWE_CLOUD_CLOUD_SHADOW_SNOW 9
-#endif
 
 
 /*****************************************************************************
