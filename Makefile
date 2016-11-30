@@ -4,7 +4,7 @@
 # Simple makefile for building and installing land-surface-temperature
 # applications.
 #-----------------------------------------------------------------------------
-.PHONY: check-environment all install clean all-script install-script clean-script all-dswe install-dswe clean-dswe all-cfbwd install-cfbwd clean-cfbwd rpms dswe-rpm cfbwd-rpm
+.PHONY: check-environment all install clean all-script install-script clean-script all-dswe install-dswe clean-dswe all-cfbwd install-cfbwd clean-cfbwd
 
 include make.config
 
@@ -56,15 +56,6 @@ install-cfbwd: check-environment
 clean-cfbwd:
 	echo "make clean in cfmask-based-water-detection"; \
         (cd $(DIR_CFWD); $(MAKE) clean);
-
-#-----------------------------------------------------------------------------
-rpms: dswe-rpm cfbwd-rpm
-
-dswe-rpm:
-	rpmbuild -bb --clean RPM_spec_files/RPM-DSWE.spec
-
-cfbwd-rpm:
-	rpmbuild -bb --clean RPM_spec_files/RPM-CFBWD.spec
 
 #-----------------------------------------------------------------------------
 check-environment:
