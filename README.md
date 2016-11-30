@@ -1,7 +1,7 @@
 ## ESPA Surface Water Extent - Release Notes
-Release Date: August 2016
+Release Date: January 2017
 
-See git tag [2016_Aug]
+See git tag [2017_Jan]
 
 This project contains application source code for producing Surface Water Extent products.
 
@@ -24,7 +24,8 @@ This project contains application source code for producing Surface Water Extent
 
 
 ## Release Notes
-* Updated DSWE to support collection based filenames
+* Updated DSWE version numbers
+* Updated CFBWD for terminology and naming
 
 ## Installation Notes
 

@@ -1,8 +1,8 @@
-## Dynamic Surface Water Extent Version 1.1.1 - Release Notes
+## Dynamic Surface Water Extent Version 1.1.2 - Release Notes
 
-Release Date: August 2016
+Release Date: January 2017
 
-See git tag [dswe-version_1.1.1]
+See git tag [dswe-version_1.1.2]
 
 This application produces Surface Water Extent products for Landsat 4, 5, 7, and 8.
 
@@ -10,7 +10,7 @@ This application produces Surface Water Extent products for Landsat 4, 5, 7, and
 See the [Not Available](http://landsat.usgs.gov/CDR_LSR.php) product guide for more information about the DSWE product.
 
 ## Release Notes
-* Updated DSWE to support collection based filenames
+* Fixing version numbers
 
 ## Installation
 
