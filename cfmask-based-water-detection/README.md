@@ -1,5 +1,5 @@
 
-## CFmask Based Water Detection Version 1.0.1 - Release Notes
+## CFmask Based Water Detection Version 1.1.0 - Release Notes
 
 Release Date: January 2017
 
