@@ -39,7 +39,7 @@ usage ()
     version();
 
     printf("CFmask based Water Detection\n"
-           "Determines and adds Water Extent to the Class QA Band.\n\n");
+           "Determines and adds Water Extent to the QA Band.\n\n");
     printf("usage: cfmask_water_detection"
            " --xml <input_xml_filename> [--help]\n\n");
     printf ("where the following parameters are required:\n");

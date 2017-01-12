@@ -3,21 +3,21 @@
 
 Release Date: January 2017
 
-See git tag [cfbwd-version_1.0.1]
+See git tag [cfbwd-version_1.1.0]
 
-This application adds water flags to the Level 2 Class Based QA Band for Landsat 4, 5, 7, and 8.
+This application adds water flags to the Level 2 bit-packed QA Band for Landsat 4, 5, 7, and 8.
 
 ## Product Descriptions
 This is not an officially supported product.  It is a temporary implementation for downstream processing.
-See the [TODO TODO TODO](http://landsat.usgs.gov/CDR_LSR.php) product guide for more information about the Level 2 Class Based QA product.
+See the [TODO TODO TODO](http://landsat.usgs.gov/CDR_LSR.php) product guide for more information about the Level 2 bit-packed QA product.
 
 ## Release Notes
-* Updated mainly for terminology and naming.
+* Switch from class-based to bit-packed QA band format 
 
 ## Installation
 
 ### Dependencies
-* ESPA raw binary libraries, tools, and it's dependencies, found here [espa-product-formatter](https://github.com/USGS-EROS/espa-product-formatter)
+* ESPA raw binary libraries, tools, and its dependencies, found here [espa-product-formatter](https://github.com/USGS-EROS/espa-product-formatter)
 
 ### Environment Variables
 * Required for building this software

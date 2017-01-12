@@ -26,15 +26,15 @@ free_band_memory
 (
     int16_t *band_red,
     int16_t *band_nir,
-    uint8_t *band_class_qa
+    uint16_t *band_pixel_qa
 )
 {
     free (band_red);
     band_red = NULL;
     free (band_nir);
     band_nir = NULL;
-    free (band_class_qa);
-    band_class_qa = NULL;
+    free (band_pixel_qa);
+    band_pixel_qa = NULL;
 }
 
 
@@ -55,7 +55,7 @@ allocate_band_memory
 (
     int16_t **band_red,
     int16_t **band_nir,
-    uint8_t **band_class_qa,
+    uint16_t **band_pixel_qa,
     int pixel_count
 )
 {
@@ -65,7 +65,7 @@ allocate_band_memory
         ERROR_MESSAGE("Failed allocating memory for RED band", MODULE_NAME);
 
         /* Free allocated memory */
-        free_band_memory(*band_red, *band_nir, *band_class_qa);
+        free_band_memory(*band_red, *band_nir, *band_pixel_qa);
         return ERROR;
     }
 
@@ -75,18 +75,18 @@ allocate_band_memory
         ERROR_MESSAGE("Failed allocating memory for NIR band", MODULE_NAME);
 
         /* Free allocated memory */
-        free_band_memory(*band_red, *band_nir, *band_class_qa);
+        free_band_memory(*band_red, *band_nir, *band_pixel_qa);
         return ERROR;
     }
 
-    *band_class_qa = calloc(pixel_count, sizeof(uint8_t));
-    if (*band_class_qa == NULL)
+    *band_pixel_qa = calloc(pixel_count, sizeof(uint16_t));
+    if (*band_pixel_qa == NULL)
     {
         ERROR_MESSAGE("Failed allocating memory for CFMASK band",
                       MODULE_NAME);
 
         /* Free allocated memory */
-        free_band_memory(*band_red, *band_nir, *band_class_qa);
+        free_band_memory(*band_red, *band_nir, *band_pixel_qa);
         return ERROR;
     }
 
@@ -95,7 +95,7 @@ allocate_band_memory
 
 
 /******************************************************************************
-  NAME:  write_u8bit_data
+  NAME:  write_u16bit_data
 
   PURPOSE:  Create the *.img file and the associated ENVI header.
 
@@ -106,11 +106,11 @@ allocate_band_memory
       ERROR    An error was encountered.
 ******************************************************************************/
 int
-write_u8bit_data
+write_u16bit_data
 (
     char *output_filename,
     int element_count,
-    uint8_t *data
+    uint16_t *data
 )
 {
     FILE *fd = NULL;
@@ -124,7 +124,7 @@ write_u8bit_data
         RETURN_ERROR(msg, MODULE_NAME, ERROR);
     }
 
-    if (write_raw_binary(fd, 1, element_count, sizeof(uint8_t),
+    if (write_raw_binary(fd, 1, element_count, sizeof(uint16_t),
                          data) != SUCCESS)
     {
         snprintf(msg, sizeof(msg), "Failed writing file %s", output_filename);
@@ -171,13 +171,12 @@ main (int argc, char *argv[])
     /* Band data */
     int16_t *band_red = NULL;  /* TM TOA_Band3,  OLI TOA_Band4 */
     int16_t *band_nir = NULL;  /* TM TOA_Band4,  OLI TOA_Band5 */
-    uint8_t *band_class_qa = NULL; /* Class QA Band */
+    uint16_t *band_pixel_qa = NULL; /* Class QA Band */
 
     float ndvi;
 
     int16_t red_fill_value;
     int16_t nir_fill_value;
-    uint8_t class_qa_fill_value;
 
     /* Other variables */
     int pixel_index;
@@ -248,7 +247,7 @@ main (int argc, char *argv[])
     }
 
     /* Allocate memory buffers for input and temp processing */
-    if (allocate_band_memory(&band_red, &band_nir, &band_class_qa,
+    if (allocate_band_memory(&band_red, &band_nir, &band_pixel_qa,
                              pixel_count) != SUCCESS)
     {
         ERROR_MESSAGE ("Failed reading bands into memory", MODULE_NAME);
@@ -264,14 +263,14 @@ main (int argc, char *argv[])
     /* -------------------------------------------------------------------- */
     /* Read the input files into the buffers */
     if (read_bands_into_memory(input_data, band_red, band_nir,
-                               band_class_qa, pixel_count) != SUCCESS)
+                               band_pixel_qa, pixel_count) != SUCCESS)
     {
         ERROR_MESSAGE("Failed reading bands into memory", MODULE_NAME);
 
         /* Cleanup memory */
         free_metadata(&xml_metadata);
         free(input_data);
-        free_band_memory(band_red, band_nir, band_class_qa);
+        free_band_memory(band_red, band_nir, band_pixel_qa);
         free(xml_filename);
 
         return EXIT_FAILURE;
@@ -279,7 +278,6 @@ main (int argc, char *argv[])
 
     red_fill_value = input_data->fill_value[I_BAND_RED];
     nir_fill_value = input_data->fill_value[I_BAND_NIR];
-    class_qa_fill_value = input_data->fill_value[I_BAND_CLASS_QA];
 
     int total_image_pixels = 0;
     int total_clear_pixels = 0;
@@ -291,9 +289,16 @@ main (int argc, char *argv[])
         /* If any of the input is fill, make the output fill */
         if (band_red[pixel_index] == red_fill_value ||
             band_nir[pixel_index] == nir_fill_value ||
-            band_class_qa[pixel_index] == class_qa_fill_value)
+            pixel_qa_is_fill(band_pixel_qa[pixel_index]))
         {
-            band_class_qa[pixel_index] = class_qa_fill_value;
+            /* Unset the other bits (in case they are set), and set the fill 
+               bit. */
+            band_pixel_qa[pixel_index] &= ~(1 << L2QA_CLEAR);
+            band_pixel_qa[pixel_index] &= ~(1 << L2QA_WATER);
+            band_pixel_qa[pixel_index] &= ~(1 << L2QA_CLD_SHADOW);
+            band_pixel_qa[pixel_index] &= ~(1 << L2QA_SNOW);
+            band_pixel_qa[pixel_index] &= ~(1 << L2QA_CLOUD);
+            band_pixel_qa[pixel_index] |= (1 << L2QA_FILL);
             continue;
         }
 
@@ -301,7 +306,7 @@ main (int argc, char *argv[])
         total_image_pixels++;
 
         /* Only need to process clear pixels */
-        if (band_class_qa[pixel_index] != CLASS_QA_CLEAR_PIXEL)
+        if (!pixel_qa_is_clear(band_pixel_qa[pixel_index]))
         {
             continue;
         }
@@ -322,14 +327,16 @@ main (int argc, char *argv[])
         if ((ndvi < 0.01 && band_nir[pixel_index] < 1100)
             || (ndvi < 0.1 && ndvi > 0.0 && band_nir[pixel_index] < 500))
         {
-            band_class_qa[pixel_index] = CLASS_QA_WATER_PIXEL;
+            /* Unset the clear bit, and set the water bit */
+            band_pixel_qa[pixel_index] &= ~(1 << L2QA_CLEAR);
+            band_pixel_qa[pixel_index] |= (1 << L2QA_WATER);
 
             /* Update the counts */
             total_clear_pixels--;
             total_water_pixels++;
         }
 
-        /* Let the use know where we are in the processing */
+        /* Let the user know where we are in the processing */
         if (pixel_index%99999 == 0)
         {
             printf("\rProcessed data element %d", pixel_index);
@@ -355,20 +362,20 @@ main (int argc, char *argv[])
     int cover_index = 0;
     for (cover_index = 0;
          cover_index <
-             xml_metadata.band[input_data->meta_index[I_BAND_CLASS_QA]].ncover;
+             xml_metadata.band[input_data->meta_index[I_BAND_QA]].ncover;
          cover_index++)
     {
-        if (strcmp(xml_metadata.band[input_data->meta_index[I_BAND_CLASS_QA]]
+        if (strcmp(xml_metadata.band[input_data->meta_index[I_BAND_QA]]
                    .percent_cover[cover_index].description, "clear") == 0)
         {
-            xml_metadata.band[input_data->meta_index[I_BAND_CLASS_QA]]
+            xml_metadata.band[input_data->meta_index[I_BAND_QA]]
                 .percent_cover[cover_index].percent = percent_clear;
             continue;
         }
-        if (strcmp(xml_metadata.band[input_data->meta_index[I_BAND_CLASS_QA]]
+        if (strcmp(xml_metadata.band[input_data->meta_index[I_BAND_QA]]
                    .percent_cover[cover_index].description, "water") == 0)
         {
-            xml_metadata.band[input_data->meta_index[I_BAND_CLASS_QA]]
+            xml_metadata.band[input_data->meta_index[I_BAND_QA]]
                 .percent_cover[cover_index].percent = percent_water;
             continue;
         }
@@ -382,7 +389,7 @@ main (int argc, char *argv[])
         /* Cleanup memory */
         free_metadata(&xml_metadata);
         free(input_data);
-        free_band_memory(band_red, band_nir, band_class_qa);
+        free_band_memory(band_red, band_nir, band_pixel_qa);
         free(xml_filename);
 
         return EXIT_FAILURE;
@@ -390,23 +397,23 @@ main (int argc, char *argv[])
 
     /* Write the L2 QA Band data to temp file on disk */
     snprintf(temp_filename, sizeof(temp_filename), "temp_%s",
-             input_data->band_name[I_BAND_CLASS_QA]);
+             input_data->band_name[I_BAND_QA]);
 
-    if (write_u8bit_data(temp_filename, pixel_count, band_class_qa) != SUCCESS)
+    if (write_u16bit_data(temp_filename, pixel_count, band_pixel_qa) != SUCCESS)
     {
         ERROR_MESSAGE("Failed writing L2 QA band data", MODULE_NAME);
 
         /* Cleanup memory */
         free_metadata(&xml_metadata);
         free(input_data);
-        free_band_memory(band_red, band_nir, band_class_qa);
+        free_band_memory(band_red, band_nir, band_pixel_qa);
         free(xml_filename);
 
         return EXIT_FAILURE;
     }
 
     /* Rename the file over-writing the L2 QA Band filename */
-    if (rename(temp_filename, input_data->band_name[I_BAND_CLASS_QA]) == -1)
+    if (rename(temp_filename, input_data->band_name[I_BAND_QA]) == -1)
     {
         ERROR_MESSAGE("Failed over-writing L2 QA band data with new results",
                       MODULE_NAME);
@@ -414,7 +421,7 @@ main (int argc, char *argv[])
         /* Cleanup memory */
         free_metadata(&xml_metadata);
         free(input_data);
-        free_band_memory(band_red, band_nir, band_class_qa);
+        free_band_memory(band_red, band_nir, band_pixel_qa);
         free(xml_filename);
 
         return EXIT_FAILURE;
@@ -436,7 +443,7 @@ main (int argc, char *argv[])
     input_data = NULL;
 
     /* Cleanup all the input band memory */
-    free_band_memory(band_red, band_nir, band_class_qa);
+    free_band_memory(band_red, band_nir, band_pixel_qa);
 
     /* Free remaining allocated memory */
     free(xml_filename);

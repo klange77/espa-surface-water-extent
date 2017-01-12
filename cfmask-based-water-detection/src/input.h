@@ -42,7 +42,7 @@ read_bands_into_memory
     Input_Data_t *input_data, /* I: input data record */
     int16_t *band_red,        /* I: pointer to allocated memory */
     int16_t *band_nir,        /* I: pointer to allocated memory */
-    uint8_t *band_class_qa,   /* I: pointer to allocated memory */
+    uint16_t *band_pixel_qa,  /* I: pointer to allocated memory */
     int pixel_count           /* I: how many pixel are to be read in */
 );
 
