@@ -272,26 +272,26 @@ GetXMLInput
             }
         }
 
-        /* Search for the CFMASK band */
-        if (!strcmp (metadata->band[index].product, "cfmask"))
+        /* Search for the Pixel QA band */
+        if (!strcmp (metadata->band[index].product, "level2_qa"))
         {
-            if (!strcmp (metadata->band[index].name, "cfmask"))
+            if (!strcmp (metadata->band[index].name, "pixel_qa"))
             {
                 open_band (metadata->band[index].file_name, input_data,
-                           I_BAND_CFMASK);
+                           I_BAND_PIXELQA);
 
-                if (metadata->band[index].data_type != ESPA_UINT8)
+                if (metadata->band[index].data_type != ESPA_UINT16)
                 {
-                    RETURN_ERROR("cfmask incompatable data type expecting"
-                                 " UINT8", MODULE_NAME, ERROR);
+                    RETURN_ERROR("pixel_qa incompatable data type expecting"
+                                 " UINT16", MODULE_NAME, ERROR);
                 }
 
-                /* Default to a no-op since CFMASK doesn't have a scale
+                /* Default to a no-op since Pixel QA doesn't have a scale
                    factor */
-                input_data->scale_factor[I_BAND_CFMASK] = 1.0;
+                input_data->scale_factor[I_BAND_PIXELQA] = 1.0;
 
                 /* Grab the fill value for this band */
-                input_data->fill_value[I_BAND_CFMASK] =
+                input_data->fill_value[I_BAND_PIXELQA] =
                     metadata->band[index].fill_value;
             }
         }
@@ -470,7 +470,7 @@ read_bands_into_memory
     int16_t *band_swir1,
     int16_t *band_swir2,
     int16_t *band_elevation,
-    uint8_t *band_cfmask,
+    uint16_t *band_pixelqa,
     int pixel_count
 )
 {
@@ -539,11 +539,11 @@ read_bands_into_memory
         return ERROR;
     }
 
-    count = fread (band_cfmask, sizeof (uint8_t), pixel_count,
-                   input_data->band_fd[I_BAND_CFMASK]);
+    count = fread (band_pixelqa, sizeof (uint16_t), pixel_count,
+                   input_data->band_fd[I_BAND_PIXEL_QA]);
     if (count != pixel_count)
     {
-        ERROR_MESSAGE ("Failed reading CFMASK band data", MODULE_NAME);
+        ERROR_MESSAGE ("Failed reading Pixel QA band data", MODULE_NAME);
 
         return ERROR;
     }

@@ -24,9 +24,9 @@
 #include "build_slope_band.h"
 
 
-#define CFMASK_CLOUD_SHADOW 2
-#define CFMASK_SNOW 3
-#define CFMASK_CLOUD 4
+#define PIXELQA_CLOUD_SHADOW_BIT_MASK (1<<3)
+#define PIXELQA_SNOW_BIT_MASK (1<<4)
+#define PIXELQA_CLOUD_BIT_MASK (1<<5)
 
 
 #define DSWE_NOT_WATER 0
@@ -53,7 +53,7 @@ free_band_memory
     int16_t *band_swir1,
     int16_t *band_swir2,
     int16_t *band_elevation,
-    uint8_t *band_cfmask,
+    uint16_t *band_pixelqa,
     float *band_ps,
     int16_t *band_dswe_diag,
     uint8_t *band_dswe_raw,
@@ -68,7 +68,7 @@ free_band_memory
     free (band_swir1);
     free (band_swir2);
     free (band_elevation);
-    free (band_cfmask);
+    free (band_pixelqa);
     free (band_ps);
     free (band_dswe_diag);
     free (band_dswe_raw);
@@ -100,7 +100,7 @@ allocate_band_memory
     int16_t **band_swir1,
     int16_t **band_swir2,
     int16_t **band_elevation,
-    uint8_t **band_cfmask,
+    uint16_t **band_pixelqa,
     float **band_ps,
     int16_t **band_dswe_diag,
     uint8_t **band_dswe_raw,
@@ -126,7 +126,7 @@ allocate_band_memory
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_elevation,
-                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_pixelqa, *band_ps, *band_dswe_diag,
                           *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
@@ -139,7 +139,7 @@ allocate_band_memory
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_elevation,
-                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_pixelqa, *band_ps, *band_dswe_diag,
                           *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
@@ -152,7 +152,7 @@ allocate_band_memory
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_elevation,
-                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_pixelqa, *band_ps, *band_dswe_diag,
                           *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
@@ -165,7 +165,7 @@ allocate_band_memory
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_elevation,
-                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_pixelqa, *band_ps, *band_dswe_diag,
                           *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
@@ -179,7 +179,7 @@ allocate_band_memory
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_elevation,
-                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_pixelqa, *band_ps, *band_dswe_diag,
                           *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
@@ -193,21 +193,21 @@ allocate_band_memory
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_elevation,
-                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_pixelqa, *band_ps, *band_dswe_diag,
                           *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
 
-    *band_cfmask = calloc (pixel_count, sizeof (uint8_t));
-    if (*band_cfmask == NULL)
+    *band_pixelqa = calloc (pixel_count, sizeof (uint16_t));
+    if (*band_pixelqa == NULL)
     {
-        ERROR_MESSAGE ("Failed allocating memory for CFMASK band",
+        ERROR_MESSAGE ("Failed allocating memory for Pixel QA band",
                        MODULE_NAME);
 
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_elevation,
-                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_pixelqa, *band_ps, *band_dswe_diag,
                           *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
@@ -221,7 +221,7 @@ allocate_band_memory
         /* Free allocated memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_elevation,
-                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_pixelqa, *band_ps, *band_dswe_diag,
                           *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
@@ -237,7 +237,7 @@ allocate_band_memory
             /* Cleanup memory */
             free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                               *band_swir1, *band_swir2, *band_elevation,
-                              *band_cfmask, *band_ps, *band_dswe_diag,
+                              *band_pixelqa, *band_ps, *band_dswe_diag,
                               *band_dswe_raw, *band_dswe_ccss,
                               *band_dswe_psccss);
             return ERROR;
@@ -253,7 +253,7 @@ allocate_band_memory
         /* Cleanup memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_elevation,
-                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_pixelqa, *band_ps, *band_dswe_diag,
                           *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
@@ -267,7 +267,7 @@ allocate_band_memory
         /* Cleanup memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_elevation,
-                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_pixelqa, *band_ps, *band_dswe_diag,
                           *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
@@ -281,7 +281,7 @@ allocate_band_memory
         /* Cleanup memory */
         free_band_memory (*band_blue, *band_green, *band_red, *band_nir,
                           *band_swir1, *band_swir2, *band_elevation,
-                          *band_cfmask, *band_ps, *band_dswe_diag,
+                          *band_pixelqa, *band_ps, *band_dswe_diag,
                           *band_dswe_raw, *band_dswe_ccss, *band_dswe_psccss);
         return ERROR;
     }
@@ -347,7 +347,7 @@ main (int argc, char *argv[])
     int16_t *band_swir1 = NULL; /* TM SR_Band5,  OLI SR_Band6 */
     int16_t *band_swir2 = NULL; /* TM SR_Band7,  OLI SR_Band7 */
     int16_t *band_elevation = NULL; /* Contains the elevation band */
-    uint8_t *band_cfmask = NULL; /* CFMASK */
+    uint16_t *band_pixelqa = NULL;  /* Pixel QA */
     float *band_ps = NULL;       /* Contains the generated percent slope */
     int16_t *band_dswe_diag = NULL;   /* Output Raw DSWE tests band data */
     uint8_t *band_dswe_raw = NULL;    /* Output Raw DSWE band data */
@@ -385,7 +385,7 @@ main (int argc, char *argv[])
     int16_t nir_fill_value;
     int16_t swir1_fill_value;
     int16_t swir2_fill_value;
-    uint8_t cfmask_fill_value;
+    uint16_t pixelqa_fill_value;
 
     int16_t raw_dswe_value;
     uint8_t raw_ccss_dswe_value;
@@ -480,7 +480,7 @@ main (int argc, char *argv[])
     /* Allocate memory buffers for input and temp processing */
     if (allocate_band_memory (include_tests_flag, &band_blue, &band_green,
                               &band_red, &band_nir, &band_swir1, &band_swir2,
-                              &band_elevation, &band_cfmask, &band_ps,
+                              &band_elevation, &band_pixelqa, &band_ps,
                               &band_dswe_diag, &band_dswe_raw,
                               &band_dswe_ccss, &band_dswe_psccss,
                               pixel_count)
@@ -495,16 +495,16 @@ main (int argc, char *argv[])
     /* Read the input files into the buffers */
     if (read_bands_into_memory (input_data, band_blue, band_green, band_red,
                                 band_nir, band_swir1, band_swir2,
-                                band_elevation, band_cfmask, pixel_count)
+                                band_elevation, band_pixelqa, pixel_count)
         != SUCCESS)
     {
         ERROR_MESSAGE ("Failed reading bands into memory", MODULE_NAME);
 
         /* Cleanup memory */
         free_band_memory (band_blue, band_green, band_red, band_nir,
-                          band_swir1, band_swir2, band_elevation, band_cfmask,
-                          band_ps, band_dswe_diag, band_dswe_raw,
-                          band_dswe_ccss, band_dswe_psccss);
+                          band_swir1, band_swir2, band_elevation,
+                          band_pixelqa, band_ps, band_dswe_diag,
+                          band_dswe_raw, band_dswe_ccss, band_dswe_psccss);
         free (xml_filename);
         free (input_data);
 
@@ -535,7 +535,7 @@ main (int argc, char *argv[])
     nir_fill_value = input_data->fill_value[I_BAND_NIR];
     swir1_fill_value = input_data->fill_value[I_BAND_SWIR1];
     swir2_fill_value = input_data->fill_value[I_BAND_SWIR2];
-    cfmask_fill_value = input_data->fill_value[I_BAND_CFMASK];
+    pixelqa_fill_value = input_data->fill_value[I_BAND_PIXELQA];
 
     /* Free memory no longer needed */
     free (input_data);
@@ -562,7 +562,7 @@ main (int argc, char *argv[])
             band_nir[index] == nir_fill_value ||
             band_swir1[index] == swir1_fill_value ||
             band_swir2[index] == swir2_fill_value ||
-            band_cfmask[index] == cfmask_fill_value)
+            band_pixelqa[index] == pixelqa_fill_value)
         {
             if (include_tests_flag)
             {
@@ -727,33 +727,33 @@ main (int argc, char *argv[])
             raw_ps_ccss_dswe_value = DSWE_NOT_WATER;
         }
 
-        /* Apply the CFMASK Cloud constraint to both the
+        /* Apply the Pixel QA Cloud constraint to both the
            Cloud, Cloud Shadow, and Snow output
            and the
            Percent Slope, Cloud, Cloud Shadow, and Snow output */
-        if (band_cfmask[index] == CFMASK_CLOUD)
+        if (band_pixelqa[index] & PIXELQA_CLOUD_BIT_MASK)
         {
             /* classified as 11999 in prototype code using 9 due to recode */
             raw_ccss_dswe_value = DSWE_CLOUD_CLOUD_SHADOW_SNOW;
             raw_ps_ccss_dswe_value = DSWE_CLOUD_CLOUD_SHADOW_SNOW;
         }
 
-        /* Apply the CFMASK Cloud Shadow constraint to both the
+        /* Apply the Pixel QA Cloud Shadow constraint to both the
            Cloud, Cloud Shadow, and Snow output
            and the
            Percent Slope, Cloud, Cloud Shadow, and Snow output */
-        if (band_cfmask[index] == CFMASK_CLOUD_SHADOW)
+        if (band_pixelqa[index] & PIXELQA_CLOUD_SHADOW_BIT_MASK)
         {
             /* classified as 11999 in prototype code using 9 due to recode */
             raw_ccss_dswe_value = DSWE_CLOUD_CLOUD_SHADOW_SNOW;
             raw_ps_ccss_dswe_value = DSWE_CLOUD_CLOUD_SHADOW_SNOW;
         }
 
-        /* Apply the CFMASK Snow constraint to both the
+        /* Apply the Pixel QA Snow constraint to both the
            Cloud, Cloud Shadow, and Snow output
            and the
            Percent Slope, Cloud, Cloud Shadow, and Snow output */
-        if (band_cfmask[index] == CFMASK_SNOW)
+        if (band_pixelqa[index] & PIXELQA_SNOW_BIT_MASK)
         {
             /* classified as 11999 in prototype code using 9 due to recode */
             raw_ccss_dswe_value = DSWE_CLOUD_CLOUD_SHADOW_SNOW;
@@ -872,7 +872,7 @@ main (int argc, char *argv[])
 
     /* Cleanup all the input band memory */
     free_band_memory (band_blue, band_green, band_red, band_nir, band_swir1,
-                      band_swir2, band_elevation, band_cfmask, band_ps,
+                      band_swir2, band_elevation, band_pixelqa, band_ps,
                       band_dswe_diag, band_dswe_raw, band_dswe_ccss,
                       band_dswe_psccss);
     band_blue = NULL;
@@ -882,7 +882,7 @@ main (int argc, char *argv[])
     band_swir1 = NULL;
     band_swir2 = NULL;
     band_elevation = NULL;
-    band_cfmask = NULL;
+    band_pixelqa = NULL;
     band_ps = NULL;
     band_dswe_diag = NULL;
     band_dswe_raw = NULL;

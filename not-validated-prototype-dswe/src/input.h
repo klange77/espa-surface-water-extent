@@ -50,7 +50,7 @@ read_bands_into_memory
     int16_t *band_swir1,      /* I: pointer to allocated memory */
     int16_t *band_swir2,      /* I: pointer to allocated memory */
     int16_t *band_elevation,  /* I: pointer to allocated memory */
-    uint8_t *band_cfmask,     /* I: pointer to allocated memory */
+    uint16_t *band_pixelqa,   /* I: pointer to allocated memory */
     int pixel_count           /* I: how many pixel are to be read in */
 );
 
