@@ -540,7 +540,7 @@ read_bands_into_memory
     }
 
     count = fread (band_pixelqa, sizeof (uint16_t), pixel_count,
-                   input_data->band_fd[I_BAND_PIXEL_QA]);
+                   input_data->band_fd[I_BAND_PIXELQA]);
     if (count != pixel_count)
     {
         ERROR_MESSAGE ("Failed reading Pixel QA band data", MODULE_NAME);
