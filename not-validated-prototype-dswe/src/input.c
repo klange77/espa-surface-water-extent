@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <math.h>
 
 #include "dswe.h"
 #include "utilities.h"
@@ -142,7 +143,7 @@ GetXMLInput
                 if (metadata->band[index].data_type != ESPA_INT16)
                 {
                     snprintf (msg, sizeof (msg),
-                              "%s incompatable data type expecting INT16",
+                              "%s incompatible data type expecting INT16",
                               blue_band_name);
                     RETURN_ERROR(msg, MODULE_NAME, ERROR);
                 }
@@ -173,7 +174,7 @@ GetXMLInput
                 if (metadata->band[index].data_type != ESPA_INT16)
                 {
                     snprintf (msg, sizeof (msg),
-                              "%s incompatable data type expecting INT16",
+                              "%s incompatible data type expecting INT16",
                               green_band_name);
                     RETURN_ERROR(msg, MODULE_NAME, ERROR);
                 }
@@ -194,7 +195,7 @@ GetXMLInput
                 if (metadata->band[index].data_type != ESPA_INT16)
                 {
                     snprintf (msg, sizeof (msg),
-                              "%s incompatable data type expecting INT16",
+                              "%s incompatible data type expecting INT16",
                               red_band_name);
                     RETURN_ERROR(msg, MODULE_NAME, ERROR);
                 }
@@ -215,7 +216,7 @@ GetXMLInput
                 if (metadata->band[index].data_type != ESPA_INT16)
                 {
                     snprintf (msg, sizeof (msg),
-                              "%s incompatable data type expecting INT16",
+                              "%s incompatible data type expecting INT16",
                               nir_band_name);
                     RETURN_ERROR(msg, MODULE_NAME, ERROR);
                 }
@@ -236,7 +237,7 @@ GetXMLInput
                 if (metadata->band[index].data_type != ESPA_INT16)
                 {
                     snprintf (msg, sizeof (msg),
-                              "%s incompatable data type expecting INT16",
+                              "%s incompatible data type expecting INT16",
                               swir1_band_name);
                     RETURN_ERROR(msg, MODULE_NAME, ERROR);
                 }
@@ -257,7 +258,7 @@ GetXMLInput
                 if (metadata->band[index].data_type != ESPA_INT16)
                 {
                     snprintf (msg, sizeof (msg),
-                              "%s incompatable data type expecting INT16",
+                              "%s incompatible data type expecting INT16",
                               swir2_band_name);
                     RETURN_ERROR(msg, MODULE_NAME, ERROR);
                 }
@@ -282,7 +283,7 @@ GetXMLInput
 
                 if (metadata->band[index].data_type != ESPA_UINT16)
                 {
-                    RETURN_ERROR("pixel_qa incompatable data type expecting"
+                    RETURN_ERROR("pixel_qa incompatible data type expecting"
                                  " UINT16", MODULE_NAME, ERROR);
                 }
 
@@ -306,7 +307,7 @@ GetXMLInput
 
                 if (metadata->band[index].data_type != ESPA_INT16)
                 {
-                    RETURN_ERROR("elevation incompatable data type expecting"
+                    RETURN_ERROR("elevation incompatible data type expecting"
                                  " INT16", MODULE_NAME, ERROR);
                 }
 
@@ -320,6 +321,24 @@ GetXMLInput
             }
         }
     }
+
+    /* Get the solar zenith angle from the global metadata */
+    if (metadata->global.solar_zenith < -90.0 
+     || metadata->global.solar_zenith > 90.0)
+    {
+        RETURN_ERROR ("solar zenith angle out of range", MODULE_NAME, ERROR);
+    }
+    input_data->solar_elevation = 90.0 - metadata->global.solar_zenith;
+    input_data->solar_elevation *= RAD;   /* convert to radians */
+
+    /* Get the solar azimuth angle from the global metadata */
+    if (metadata->global.solar_azimuth < -360.0 
+     || metadata->global.solar_azimuth > 360.0)
+    {
+        RETURN_ERROR ("solar azimuth angle out of range", MODULE_NAME, ERROR);
+    }
+    input_data->solar_azimuth = metadata->global.solar_azimuth;
+    input_data->solar_azimuth *= RAD;    /* convert to radians */
 
     /* Verify all the bands have something (all are required for DSWE) */
     for (index = 0; index < MAX_INPUT_BANDS; index++)

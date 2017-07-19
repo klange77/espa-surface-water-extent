@@ -23,9 +23,9 @@
 
     1. Algorithm is based on Lambert's cosine law using Horn's algorithm for
        calculating the slope of the current point.  The other option is to use
-       Zevenbergen and Thorn's algorithm.  The litterature suggests
-       Zevenbergen and Thorne to be more suited to smooth landscapes, where-as
-       Horn's formula to perform better on rougher terrain.
+       Zevenbergen and Thorn's algorithm.  The literature suggests
+       Zevenbergen and Thorne is more suited to smooth landscapes, and Horn's
+       formula performs better on rougher terrain.
 
     2. Input and output arrays are 1D arrays of size 3 lines x 3 samples where
        the 3x3 indices are and the current pixel being processed is 4.
@@ -96,7 +96,7 @@ Date        Programmer       Reason
                              Thorne, 1987)
 
 NOTES:
-  1. Algorithm is based on Zevenbergen and Thorn's algorithm.  The litterature 
+  1. Algorithm is based on Zevenbergen and Thorn's algorithm.  The literature 
      suggests Zevenbergen and Thorne to be more suited to smooth landscapes, 
      whereas Horn's formula to perform better on rougher terrain.
   2. Input and output arrays are 1D arrays of size 3 lines x 3 samples where
@@ -159,7 +159,7 @@ void build_slope_band
                                 meters */
     double ns_resolution, /* I: north/south resolution of the elevation data
                                 in meters */
-    bool use_zeven_thorne_flag, /* I: wether or not to use this algorithm
+    bool use_zeven_thorne_flag, /* I: whether or not to use this algorithm
                                       for the percent slope calculation */
     float *band_ps        /* O: the percent slope band generated from the
                                 DEM */
@@ -181,8 +181,8 @@ void build_slope_band
             /* Don't process the first and last lines and first and last
                samples of the DEM since we can't determine what the preceding
                and following values are */
-            if ((line > 1) && (line < num_lines-1)
-                && (sample > 1) && (sample < num_samples-1))
+            if ((line > 0) && (line < num_lines-1)
+                && (sample > 0) && (sample < num_samples-1))
             {
                 /* Fill in the 3x3 elevation window surrounding the current
                    pixel

@@ -2,9 +2,14 @@
 #ifndef CONST_H
 #define CONST_H
 
-
 #include "espa_common.h"
 
+#define DSWE_NOT_WATER 0
+#define DSWE_WATER_HIGH_CONFIDENCE 1
+#define DSWE_WATER_MODERATE_CONFIDENCE 2
+#define DSWE_POTENTIAL_WETLAND 3
+#define DSWE_LOW_CONFIDENCE_WATER_OR_WETLAND 4
+#define DSWE_CLOUD_CLOUD_SHADOW_SNOW 9
 
 #define RAW_DIAG_PRODUCT_NAME "dswe"
 #define RAW_DIAG_BAND_NAME "dswe_diag"
@@ -16,21 +21,25 @@
 #define PS_SHORT_NAME "PERCENT_SLOPE"
 #define PS_LONG_NAME "dynamic surface water extent: percent slope"
 
+#define HS_PRODUCT_NAME "dswe"
+#define HS_BAND_NAME "hillshade"
+#define HS_SHORT_NAME "HILLSHADE"
+#define HS_LONG_NAME "dynamic surface water extent: hillshade"
+
 #define RAW_PRODUCT_NAME "dswe"
 #define RAW_BAND_NAME "dswe_raw"
 #define RAW_SHORT_NAME "DSWE_RAW"
 #define RAW_LONG_NAME "dynamic surface water extent: raw"
 
-#define SC_PRODUCT_NAME "dswe"
-#define SC_BAND_NAME "dswe_ccss"
-#define SC_SHORT_NAME "DSWE_CCSS"
-#define SC_LONG_NAME "dynamic surface water extent: filtered by: cloud - cloud shadow - snow"
-
 #define PS_SC_PRODUCT_NAME "dswe"
-#define PS_SC_BAND_NAME "dswe_psccss"
-#define PS_SC_SHORT_NAME "DSWE_PSCCSS"
-#define PS_SC_LONG_NAME "dynamic surface water extent: filtered by: percent slope - cloud - cloud shadow - snow"
+#define PS_SC_BAND_NAME "dswe_pshsccss"
+#define PS_SC_SHORT_NAME "DSWE_PSHSCCSS"
+#define PS_SC_LONG_NAME "dynamic surface water extent: filtered by: percent slope - hillshade - cloud - cloud shadow - snow"
 
+#define MASK_PRODUCT_NAME "dswe"
+#define MASK_BAND_NAME "dswe_mask"
+#define MASK_SHORT_NAME "DSWE_MASK"
+#define MASK_LONG_NAME "dynamic surface water extent: mask including percent slope - hillshade - cloud - cloud shadow - snow"
 
 /* These are used in arrays, and they are position dependent */
 typedef enum
@@ -50,5 +59,18 @@ typedef enum
 #define DSWE_NO_DATA_VALUE 255
 #define TESTS_NO_DATA_VALUE -9999
 
+#ifndef RAD
+#define RAD (M_PI / 180.0)
+#endif
+
+/* Define values contributed to the output mask from different sources. Some 
+   CFMASK definitions are used because the definitions of some of the output
+   mask values are based on the CFMASK.  Pixel QA, not CFMASK, is used as a
+   mask input. */
+#define MASK_SHADOW 2
+#define MASK_SNOW   3
+#define MASK_CLOUD  4
+#define MASK_PS    10
+#define MASK_HS    20
 
 #endif /* CONST_H */

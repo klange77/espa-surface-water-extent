@@ -18,15 +18,27 @@ get_args (int argc,                    /* I: number of cmd-line args */
           bool *use_toa_flag,          /* O: process using TOA */
           bool *include_tests_flag,    /* O: include raw DSWE with output */
           bool *include_ps_flag,       /* O: include ps with output */
+          bool *include_hs_flag,       /* O: include hillshade with output */
           float *wigt,                 /* O: tolerance value */
           float *awgt,                 /* O: tolerance value */
-          float *pswt_1,               /* O: tolerance value */
-          float *pswt_2,               /* O: tolerance value */
-          float *percent_slope,        /* O: slope tolerance */
-          int *pswnt_1,                /* O: tolerance value */
-          int *pswnt_2,                /* O: tolerance value */
-          int *pswst_1,                /* O: tolerance value */
-          int *pswst_2,                /* O: tolerance value */
+          float *pswt_1_mndwi,         /* O: tolerance value */
+          int *pswt_1_nir,             /* O: tolerance value */
+          int *pswt_1_swir1,           /* O: tolerance value */
+          float *pswt_1_ndvi,          /* O: tolerance value */
+          float *pswt_2_mndwi,         /* O: tolerance value */
+          int *pswt_2_blue,            /* O: tolerance value */
+          int *pswt_2_nir,             /* O: tolerance value */
+          int *pswt_2_swir1,           /* O: tolerance value */
+          int *pswt_2_swir2,           /* O: tolerance value */
+          float *percent_slope_high,   /* O: slope tolerance for high confidence
+                                             water */
+          float *percent_slope_moderate, /* O: slope tolerance for moderate
+                                             confidence water */
+          float *percent_slope_wetland, /* O: slope tolerance for potential 
+                                             wetland */
+          float *percent_slope_low,    /* O: slope tolerance for low confidence
+                                          water or wetland */
+          int *hillshade,              /* O: hillshade tolerance value */ 
           bool * verbose_flag);        /* O: verbose messaging */
 
 

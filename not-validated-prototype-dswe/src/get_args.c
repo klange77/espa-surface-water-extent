@@ -21,25 +21,35 @@
 
 /* Specify default parameter values */
 /* L4-7 defaults */
-static float wigt_l47_default = 0.0123;
+static float wigt_l47_default = 0.124;
 static float awgt_l47_default = 0.0;
-static float pswt_1_l47_default = -0.5;
-static float pswt_2_l47_default = -0.5;
-static int pswst_1_l47_default = 1000;
-static int pswnt_1_l47_default = 1500;
-static int pswst_2_l47_default = 1000;
-static int pswnt_2_l47_default = 2000;
+static float pswt_1_mndwi_l47_default = -0.44;
+static int pswt_1_nir_l47_default = 1500;
+static int pswt_1_swir1_l47_default = 900;
+static float pswt_1_ndvi_l47_default = 0.7;
+static float pswt_2_mndwi_l47_default = -0.5;
+static int pswt_2_blue_l47_default = 1000;
+static int pswt_2_nir_l47_default = 2500;
+static int pswt_2_swir1_l47_default = 3000;
+static int pswt_2_swir2_l47_default = 1000;
 /* L8 defaults */
-static float wigt_l8_default = 0.1163;
+static float wigt_l8_default = 0.124;
 static float awgt_l8_default = 0.0;
-static float pswt_1_l8_default = -0.67;
-static float pswt_2_l8_default = -0.67;
-static int pswst_1_l8_default = 1000;
-static int pswnt_1_l8_default = 1500;
-static int pswst_2_l8_default = 1000;
-static int pswnt_2_l8_default = 2000;
+static float pswt_1_mndwi_l8_default = -0.44;
+static int pswt_1_nir_l8_default = 1500;
+static int pswt_1_swir1_l8_default = 900;
+static float pswt_1_ndvi_l8_default = 0.7;
+static float pswt_2_mndwi_l8_default = -0.5;
+static int pswt_2_blue_l8_default = 1000;
+static int pswt_2_nir_l8_default = 2500;
+static int pswt_2_swir1_l8_default = 3000;
+static int pswt_2_swir2_l8_default = 1000;
 
-static float percent_slope_default = 6.0;
+static float percent_slope_high_default = 30;
+static float percent_slope_moderate_default = 30;
+static float percent_slope_wetland_default = 20;
+static float percent_slope_low_default = 10;
+static int hillshade_default = 110;
 
 /* Parameter values should never be this, so use it to determine if a
    parameter was specified or not on the command line before applying the
@@ -81,53 +91,83 @@ usage ()
             " --xml <input_xml_filename> [--help]\n\n");
     printf ("where the following parameters are required:\n");
     printf ("    --xml: Name of the input XML file which contains the surface"
-            " reflectance,\n"
-            "           and top of atmos files output from LEDAPS in raw"
+            " reflectance\n"
+            "           and top of atmosphere files output from LEDAPS in raw"
             " binary\n"
             "           (envi) format\n");
 
     printf ("where the following parameters are optional:\n");
-    printf ("    --wigt: Modified Normalized Difference Wetness Index"
+    printf ("    --wigt: Modified Normalized Difference Wetness Index (MNDWI)"
             " Threshold\n"
             "            between 0.00 and 2.00\n"
             "            (Defaults - L4-7 %0.3f, L8 %0.3f)\n",
             wigt_l47_default, wigt_l8_default);
-    printf ("    --awgt: Automated Water Extent Shadow"
-            " Threshold\n"
+    printf ("    --awgt: Automated Water Extent Shadow Threshold\n"
             "            between -2.00 and 2.00\n"
             "            (Defaults - L4-7 %0.3f, L8 %0.3f)\n",
             awgt_l47_default, awgt_l8_default);
 
-    printf ("    --pswt_1: Partial Surface Water Test-1 Threshold\n"
-            "              between -2.00 and 2.00\n"
-            "              (Defaults - L4-7 %0.3f, L8 %0.3f)\n",
-            pswt_1_l47_default, pswt_1_l8_default);
-    printf ("    --pswt_2: Partial Surface Water Test-2 Threshold\n"
-            "              between -2.00 and 2.00\n"
-            "              (Defaults - L4-7 %0.3f, L8 %0.3f)\n",
-            pswt_2_l47_default, pswt_2_l8_default);
+    printf ("    --pswt_1_mndwi: Partial Surface Water Test-1 MNDWI Threshold\n"
+            "                    between -2.00 and 2.00\n"
+            "                    (Defaults - L4-7 %0.3f, L8 %0.3f)\n",
+            pswt_1_mndwi_l47_default, pswt_1_mndwi_l8_default);
+    printf ("    --pswt_1_nir: Partial Surface Water Test-1 NIR Threshold\n"
+            "                  between 0 and data maximum\n"
+            "                  (Defaults - L4-7 %d, L8 %d)\n",
+            pswt_1_nir_l47_default, pswt_1_nir_l8_default);
+    printf ("    --pswt_1_swir1: Partial Surface Water Test-1 SWIR1 Threshold\n"
+            "                    between 0 and data maximum\n"
+            "                    (Defaults - L4-7 %d, L8 %d)\n",
+            pswt_1_swir1_l47_default, pswt_1_swir1_l8_default);
+    printf ("    --pswt_1_ndvi: Partial Surface Water Test-1 NDVI Threshold\n"
+            "                   between 0 and data maximum\n"
+            "                   (Defaults - L4-7 %0.3f, L8 %0.3f)\n",
+            pswt_1_ndvi_l47_default, pswt_1_ndvi_l8_default);
 
-    printf ("    --pswnt_1: Partial Surface Water Test-1 NIR Threshold\n"
-            "               between 0 and data maximum\n"
-            "               (Defaults - L4-7 %d, L8 %d)\n",
-            pswnt_1_l47_default, pswnt_1_l8_default);
-    printf ("    --pswnt_2: Partial Surface Water Test-2 NIR Threshold\n"
-            "               between 0 and data maximum\n"
-            "               (Defaults - L4-7 %d, L8 %d)\n",
-            pswnt_2_l47_default, pswnt_2_l8_default);
+    printf ("    --pswt_2_mndwi: Partial Surface Water Test-2 MNDWI Threshold\n"
+            "                    between -2.00 and 2.00\n"
+            "                    (Defaults - L4-7 %0.3f, L8 %0.3f)\n",
+            pswt_2_mndwi_l47_default, pswt_2_mndwi_l8_default);
+    printf ("    --pswt_2_blue: Partial Surface Water Test-2 Blue Threshold\n"
+            "                   between -2.00 and 2.00\n"
+            "                   (Defaults - L4-7 %d, L8 %d)\n",
+            pswt_2_blue_l47_default, pswt_2_blue_l8_default);
+    printf ("    --pswt_2_nir: Partial Surface Water Test-2 NIR Threshold\n"
+            "                  between 0 and data maximum\n"
+            "                  (Defaults - L4-7 %d, L8 %d)\n",
+            pswt_2_nir_l47_default, pswt_2_nir_l8_default);
+    printf ("    --pswt_2_swir1: Partial Surface Water Test-1 SWIR1 Threshold\n"
+            "                    between 0 and data maximum\n"
+            "                    (Defaults - L4-7 %d, L8 %d)\n",
+            pswt_1_swir1_l47_default, pswt_1_swir1_l8_default);
+    printf ("    --pswt_2_swir2: Partial Surface Water Test-2 SWIR2 Threshold\n"
+            "                    between 0 and data maximum\n"
+            "                    (Defaults - L4-7 %d, L8 %d)\n",
+            pswt_2_swir2_l47_default, pswt_2_swir2_l8_default);
+// RRRR TBD don't really know what the ranges should be on the new ones
 
-    printf ("    --pswst_1: Partial Surface Water Test-1 SWIR1 Threshold\n"
-            "               between 0 and data maximum\n"
-            "               (Defaults - L4-7 %d, L8 %d)\n",
-            pswst_1_l47_default, pswst_1_l8_default);
-    printf ("    --pswst_2: Partial Surface Water Test-2 SWIR2 Threshold\n"
-            "               between 0 and data maximum\n"
-            "               (Defaults - L4-7 %d, L8 %d)\n",
-            pswst_2_l47_default, pswst_2_l8_default);
+    printf ("    --percent-slope-high: Threshold between 0.00 and 100.00\n"
+            "                          (default - %0.1f)\n", 
+                                       percent_slope_high_default);
+    printf ("    --percent-slope-moderate: Threshold between 0.00 and 100.00\n"
+            "                              (default - %0.1f)\n", 
+                                           percent_slope_moderate_default);
+    printf ("    --percent-slope-wetland: Threshold between 0.00 and 100.00\n"
+            "                             (default - %0.1f)\n", 
+                                          percent_slope_wetland_default);
+    printf ("    --percent-slope-low: Threshold between 0.00 and 100.00\n"
+            "                         (default - %0.1f)\n", 
+                                      percent_slope_low_default);
+    printf ("    --hillshade: Threshold between 0 and 255\n"
+            "                 (default - %d)\n", hillshade_default);
 
-    printf ("    --percent-slope: Threshold between 0.00 and 100.00"
-            " (default value is %0.1f)\n", percent_slope_default);
-
+    printf ("    --include-tests: Should the diagnostic band be included in"
+            " output?\n"
+            "                  (default is false)\n");
+    printf ("    --include-ps: Should percent slope be included in output?\n"
+            "                  (default is false)\n");
+    printf ("    --include-hs: Should hillshade be included in output?\n"
+            "                  (default is false)\n");
     printf ("    --use_zeven_thorne: Should Zevenbergen&Thorne's slope"
             " algorithm be used?\n"
             "                        (default is false, meaning Horn's slope"
@@ -140,15 +180,16 @@ usage ()
             " Surface Reflectance\n"
             "               (default is false, meaning Surface Reflectance"
             " will be used)\n"
-            "               Also default parameters are taylored to Surface"
+            "               Also default parameters are tailored to Surface"
             " Reflectance.\n");
 
     printf ("    --verbose: Should intermediate messages be printed? (default"
-            " is false)\n\n");
+            " is false)\n");
+    printf ("    --version: Display application version number\n\n");
 
-    printf ("    --help: Will print this usage statement\n\n");
+    printf ("    --help: prints this usage statement\n\n");
     printf ("Example: dswe"
-            " --xml LE70760172000175AGS00.xml\n");
+            " --xml LT04_L1TP_035027_19890712_20161001_01_T1.xml\n");
 }
 
 
@@ -175,17 +216,28 @@ get_args
     bool *use_zeven_thorne_flag, /* O: use zeven thorne */
     bool *use_toa_flag,          /* O: process using TOA */
     bool *include_tests_flag,    /* O: include raw DSWE with output */
-    bool *include_ps_flag,       /* O: include ps with output */
+    bool *include_ps_flag,       /* O: include percent slope with output */
+    bool *include_hs_flag,       /* O: include hillshade with output */
     float *wigt,                 /* O: tolerance value */
     float *awgt,                 /* O: tolerance value */
-    float *pswt_1,               /* O: tolerance value */
-    float *pswt_2,               /* O: tolerance value */
-    float *percent_slope,        /* O: slope tolerance */
-    int *pswnt_1,                /* O: tolerance value */
-    int *pswnt_2,                /* O: tolerance value */
-    int *pswst_1,                /* O: tolerance value */
-    int *pswst_2,                /* O: tolerance value */
-    bool * verbose_flag          /* O: verbose messaging */
+    float *pswt_1_mndwi,         /* O: tolerance value */
+    int *pswt_1_nir,             /* O: tolerance value */
+    int *pswt_1_swir1,           /* O: tolerance value */
+    float *pswt_1_ndvi,          /* O: tolerance value */
+    float *pswt_2_mndwi,         /* O: tolerance value */
+    int *pswt_2_blue,            /* O: tolerance value */
+    int *pswt_2_nir,             /* O: tolerance value */
+    int *pswt_2_swir1,           /* O: tolerance value */
+    int *pswt_2_swir2,           /* O: tolerance value */
+    float *percent_slope_high,   /* O: slope tolerance for high confidence 
+                                       water */
+    float *percent_slope_moderate, /* O: slope tolerance for moderate 
+                                       confidence water */
+    float *percent_slope_wetland, /* O: slope tolerance for potential wetland */
+    float *percent_slope_low,    /* O: slope tolerance for low confidence 
+                                       water or wetland */
+    int *hillshade,              /* O: hillshade tolerance value */ 
+    bool *verbose_flag           /* O: verbose messaging */
 )
 {
     int c;
@@ -196,6 +248,7 @@ get_args
     int tmp_verbose_flag = false;
     int tmp_include_tests_flag = false;
     int tmp_include_ps_flag = false;
+    int tmp_include_hs_flag = false;
 
     struct option long_options[] = {
         /* These options set a flag */
@@ -204,6 +257,7 @@ get_args
 
         {"include-tests", no_argument, &tmp_include_tests_flag, true},
         {"include-ps", no_argument, &tmp_include_ps_flag, true},
+        {"include-hs", no_argument, &tmp_include_hs_flag, true},
 
         /* These options provide values */
         {"xml", required_argument, 0, 'x'},
@@ -211,16 +265,22 @@ get_args
         {"wigt", required_argument, 0, 'w'},
         {"awgt", required_argument, 0, 'a'},
 
-        {"pswt_1", required_argument, 0, 'p'},
-        {"pswt_2", required_argument, 0, 'q'},
+        {"pswt-1-mndwi", required_argument, 0, 'z'},
+        {"pswt-1-nir", required_argument, 0, 'n'},
+        {"pswt-1-swir", required_argument, 0, 'r'},
+        {"pswt-1-ndvi", required_argument, 0, 'y'},
 
-        {"pswnt_1", required_argument, 0, 'n'},
-        {"pswnt_2", required_argument, 0, 'o'},
+        {"pswt-2-mndwi", required_argument, 0, 'q'},
+        {"pswnt-2-blue", required_argument, 0, 'b'},
+        {"pswnt-2-nir", required_argument, 0, 'i'},
+        {"pswst-2-swir1", required_argument, 0, '1'},
+        {"pswst-2-swir2", required_argument, 0, '2'},
 
-        {"pswst_1", required_argument, 0, 'r'},
-        {"pswst_2", required_argument, 0, 's'},
-
-        {"percent-slope", required_argument, 0, 't'},
+        {"percent-slope-high", required_argument, 0, 'g'},
+        {"percent-slope-moderate", required_argument, 0, 'm'},
+        {"percent-slope-wetland", required_argument, 0, 'd'},
+        {"percent-slope-low", required_argument, 0, 'l'},
+        {"hillshade", required_argument, 0, 's'},
 
         /* Special options */
         {"verbose", no_argument, &tmp_verbose_flag, true},
@@ -245,13 +305,20 @@ get_args
     /* Initialize to the not set values */
     *wigt = NOT_SET;
     *awgt = NOT_SET;
-    *pswt_1 = NOT_SET;
-    *pswt_2 = NOT_SET;
-    *percent_slope = NOT_SET;
-    *pswnt_1 = NOT_SET;
-    *pswnt_2 = NOT_SET;
-    *pswst_1 = NOT_SET;
-    *pswst_2 = NOT_SET;
+    *pswt_1_mndwi = NOT_SET;
+    *pswt_1_nir = NOT_SET;
+    *pswt_1_swir1 = NOT_SET;
+    *pswt_1_ndvi = NOT_SET;
+    *pswt_2_mndwi = NOT_SET;
+    *pswt_2_blue = NOT_SET;
+    *pswt_2_nir = NOT_SET;
+    *pswt_2_swir1 = NOT_SET;
+    *pswt_2_swir2 = NOT_SET;
+    *percent_slope_high = NOT_SET;
+    *percent_slope_moderate = NOT_SET;
+    *percent_slope_wetland = NOT_SET;
+    *percent_slope_low = NOT_SET;
+    *hillshade = NOT_SET;
 
     /* loop through all the cmd-line options */
     opterr = 0; /* turn off getopt_long error msgs as we'll print our own */
@@ -292,30 +359,52 @@ get_args
             *awgt = atof (optarg);
             break;
 
-        case 'p':
-            *pswt_1 = atof (optarg);
+        case 'z':
+            *pswt_1_mndwi = atof (optarg);
             break;
-        case 'q':
-            *pswt_2 = atof (optarg);
-            break;
-
         case 'n':
-            *pswnt_1 = atoi (optarg);
+            *pswt_1_nir = atof (optarg);
             break;
-        case 'o':
-            *pswnt_2 = atoi (optarg);
-            break;
-
         case 'r':
-            *pswst_1 = atoi (optarg);
+            *pswt_1_swir1 = atoi (optarg);
             break;
-        case 's':
-            *pswst_2 = atoi (optarg);
+        case 'y':
+            *pswt_1_ndvi = atof (optarg);
             break;
 
-        case 't':
-            *percent_slope = atof (optarg);
+        case 'q':
+            *pswt_2_mndwi = atof (optarg);
             break;
+        case 'b':
+            *pswt_2_blue = atoi (optarg);
+            break;
+        case 'i':
+            *pswt_2_nir = atoi (optarg);
+            break;
+        case '1':
+            *pswt_2_swir1 = atoi (optarg);
+            break;
+        case '2':
+            *pswt_2_swir2 = atoi (optarg);
+            break;
+
+        case 'g':
+            *percent_slope_high = atof (optarg);
+            break;
+        case 'm':
+            *percent_slope_moderate = atof (optarg);
+            break;
+        case 'd':
+            *percent_slope_wetland = atof (optarg);
+            break;
+        case 'l':
+            *percent_slope_low = atof (optarg);
+            break;
+
+        case 's':
+            *hillshade = atoi (optarg);
+            break;
+
         case '?':
         default:
             snprintf (msg, sizeof (msg),
@@ -347,6 +436,11 @@ get_args
         *include_ps_flag = true;
     else
         *include_ps_flag = false;
+
+    if (tmp_include_hs_flag)
+        *include_hs_flag = true;
+    else
+        *include_hs_flag = false;
 
     if (tmp_verbose_flag)
         *verbose_flag = true;
@@ -391,23 +485,32 @@ get_args
         if (*awgt == NOT_SET)
             *awgt = awgt_l8_default;
 
-        if (*pswt_1 == NOT_SET)
-            *pswt_1 = pswt_1_l8_default;
+        if (*pswt_1_mndwi == NOT_SET)
+            *pswt_1_mndwi = pswt_1_mndwi_l8_default;
 
-        if (*pswt_2 == NOT_SET)
-            *pswt_2 = pswt_2_l8_default;
+        if (*pswt_1_nir == NOT_SET)
+            *pswt_1_nir = pswt_1_nir_l8_default;
 
-        if (*pswnt_1 == NOT_SET)
-            *pswnt_1 = pswnt_1_l8_default;
+        if (*pswt_1_swir1 == NOT_SET)
+            *pswt_1_swir1 = pswt_1_swir1_l8_default;
 
-        if (*pswnt_2 == NOT_SET)
-            *pswnt_2 = pswnt_2_l8_default;
+        if (*pswt_1_ndvi == NOT_SET)
+            *pswt_1_ndvi = pswt_1_ndvi_l8_default;
 
-        if (*pswst_1 == NOT_SET)
-            *pswst_1 = pswst_1_l8_default;
+        if (*pswt_2_mndwi == NOT_SET)
+            *pswt_2_mndwi = pswt_2_mndwi_l8_default;
 
-        if (*pswst_2 == NOT_SET)
-            *pswst_2 = pswst_2_l8_default;
+        if (*pswt_2_blue == NOT_SET)
+            *pswt_2_blue = pswt_2_blue_l8_default;
+
+        if (*pswt_2_nir == NOT_SET)
+            *pswt_2_nir = pswt_2_nir_l8_default;
+
+        if (*pswt_2_swir1 == NOT_SET)
+            *pswt_2_swir1 = pswt_2_swir1_l8_default;
+
+        if (*pswt_2_swir2 == NOT_SET)
+            *pswt_2_swir2 = pswt_2_swir2_l8_default;
     }
     else
     {
@@ -417,27 +520,45 @@ get_args
         if (*awgt == NOT_SET)
             *awgt = awgt_l47_default;
 
-        if (*pswt_1 == NOT_SET)
-            *pswt_1 = pswt_1_l47_default;
+        if (*pswt_1_mndwi == NOT_SET)
+            *pswt_1_mndwi = pswt_1_mndwi_l47_default;
 
-        if (*pswt_2 == NOT_SET)
-            *pswt_2 = pswt_2_l47_default;
+        if (*pswt_1_nir == NOT_SET)
+            *pswt_1_nir = pswt_1_nir_l47_default;
 
-        if (*pswnt_1 == NOT_SET)
-            *pswnt_1 = pswnt_1_l47_default;
+        if (*pswt_1_swir1 == NOT_SET)
+            *pswt_1_swir1 = pswt_1_swir1_l47_default;
 
-        if (*pswnt_2 == NOT_SET)
-            *pswnt_2 = pswnt_2_l47_default;
+        if (*pswt_1_ndvi == NOT_SET)
+            *pswt_1_ndvi = pswt_1_ndvi_l47_default;
 
-        if (*pswst_1 == NOT_SET)
-            *pswst_1 = pswst_1_l47_default;
+        if (*pswt_2_mndwi == NOT_SET)
+            *pswt_2_mndwi = pswt_2_mndwi_l47_default;
 
-        if (*pswst_2 == NOT_SET)
-            *pswst_2 = pswst_2_l47_default;
+        if (*pswt_2_blue == NOT_SET)
+            *pswt_2_blue = pswt_2_blue_l47_default;
+
+        if (*pswt_2_nir == NOT_SET)
+            *pswt_2_nir = pswt_2_nir_l47_default;
+
+        if (*pswt_2_swir1 == NOT_SET)
+            *pswt_2_swir1 = pswt_2_swir1_l47_default;
+
+        if (*pswt_2_swir2 == NOT_SET)
+            *pswt_2_swir2 = pswt_2_swir2_l47_default;
     }
 
-    if (*percent_slope == NOT_SET)
-        *percent_slope = percent_slope_default;
+    if (*percent_slope_high == NOT_SET)
+        *percent_slope_high = percent_slope_high_default;
+    if (*percent_slope_moderate == NOT_SET)
+        *percent_slope_moderate = percent_slope_moderate_default;
+    if (*percent_slope_wetland == NOT_SET)
+        *percent_slope_wetland = percent_slope_wetland_default;
+    if (*percent_slope_low == NOT_SET)
+        *percent_slope_low = percent_slope_low_default;
+
+    if (*hillshade == NOT_SET)
+        *hillshade = hillshade_default;
 
 
     /* ---------- Validate the parameters ---------- */
@@ -457,61 +578,107 @@ get_args
         return ERROR;
     }
 
-    if ((*pswt_1 < -2.0) || (*pswt_1 > 2.0))
+    if ((*pswt_1_mndwi < -2.0) || (*pswt_1_mndwi > 2.0))
     {
-        ERROR_MESSAGE ("PSWT_1 is out of range\n\n", MODULE_NAME);
+        ERROR_MESSAGE ("PSWT_1_MNDWI is out of range\n\n", MODULE_NAME);
 
         usage ();
         return ERROR;
     }
 
-    if ((*pswt_2 < -2.0) || (*pswt_2 > 2.0))
+    if (*pswt_1_nir < 0)
     {
-        ERROR_MESSAGE ("PSWT_2 is out of range\n\n", MODULE_NAME);
+        ERROR_MESSAGE ("PSWT_1_NIR is out of range\n\n", MODULE_NAME);
 
         usage ();
         return ERROR;
     }
 
-    /* Only checking the low side here */
-    if (*pswnt_1 < 0)
+    if (*pswt_1_swir1 < 0)
     {
-        ERROR_MESSAGE ("PSWNT_1 is out of range\n\n", MODULE_NAME);
+        ERROR_MESSAGE ("PSWT_1_SWIR1 is out of range\n\n", MODULE_NAME);
 
         usage ();
         return ERROR;
     }
 
-    /* Only checking the low side here */
-    if (*pswnt_2 < 0)
+    if ((*pswt_2_mndwi < -2.0) || (*pswt_2_mndwi > 2.0))
     {
-        ERROR_MESSAGE ("PSWNT_2 is out of range\n\n", MODULE_NAME);
+        ERROR_MESSAGE ("PSWT_2_MNDWI is out of range\n\n", MODULE_NAME);
 
         usage ();
         return ERROR;
     }
 
-    /* Only checking the low side here */
-    if (*pswst_1 < 0)
+    if (*pswt_2_blue < 0)
     {
-        ERROR_MESSAGE ("PSWST_1 is out of range\n\n", MODULE_NAME);
+        ERROR_MESSAGE ("PSWT_2_BLUE is out of range\n\n", MODULE_NAME);
 
         usage ();
         return ERROR;
     }
 
-    /* Only checking the low side here */
-    if (*pswst_2 < 0)
+    if (*pswt_2_nir < 0)
     {
-        ERROR_MESSAGE ("PSWST_2 is out of range\n\n", MODULE_NAME);
+        ERROR_MESSAGE ("PSWT_2_NIR is out of range\n\n", MODULE_NAME);
 
         usage ();
         return ERROR;
     }
 
-    if ((*percent_slope < 0.0) || (*percent_slope > 100.0))
+    if (*pswt_2_swir1 < 0)
     {
-        ERROR_MESSAGE ("Percent Slope is out of range\n\n", MODULE_NAME);
+        ERROR_MESSAGE ("PSWT_2_SWIR1 is out of range\n\n", MODULE_NAME);
+
+        usage ();
+        return ERROR;
+    }
+
+    if (*pswt_2_swir2 < 0)
+    {
+        ERROR_MESSAGE ("PSWT_2_SWIR2 is out of range\n\n", MODULE_NAME);
+
+        usage ();
+        return ERROR;
+    }
+
+    if ((*percent_slope_high < 0.0) || (*percent_slope_high > 100.0))
+    {
+        ERROR_MESSAGE ("Percent Slope high is out of range\n\n", MODULE_NAME);
+
+        usage ();
+        return ERROR;
+    }
+
+    if ((*percent_slope_moderate < 0.0) || (*percent_slope_moderate > 100.0))
+    {
+        ERROR_MESSAGE ("Percent Slope moderate is out of range\n\n", 
+            MODULE_NAME);
+
+        usage ();
+        return ERROR;
+    }
+
+    if ((*percent_slope_wetland < 0.0) || (*percent_slope_wetland > 100.0))
+    {
+        ERROR_MESSAGE ("Percent Slope wetland is out of range\n\n", 
+            MODULE_NAME);
+
+        usage ();
+        return ERROR;
+    }
+
+    if ((*percent_slope_low < 0.0) || (*percent_slope_low > 100.0))
+    {
+        ERROR_MESSAGE ("Percent Slope low is out of range\n\n", MODULE_NAME);
+
+        usage ();
+        return ERROR;
+    }
+
+    if ((*hillshade < 0) || (*hillshade > 255))
+    {
+        ERROR_MESSAGE ("Hillshade threshold is out of range\n\n", MODULE_NAME);
 
         usage ();
         return ERROR;

@@ -16,7 +16,7 @@ RM = rm -f
 EXTRA = -Wall $(EXTRA_OPTIONS)
 
 # Define the include files
-INC = build_slope_band.h const.h dswe.h get_args.h input.h output.h utilities.h
+INC = build_slope_band.h build_hillshade_band.h const.h dswe.h get_args.h input.h output.h utilities.h
 
 # Define the source code and object files
 SRC = \
@@ -25,6 +25,7 @@ SRC = \
       input.c             \
       output.c            \
       build_slope_band.c  \
+      build_hillshade_band.c  \
       dswe.c
 OBJ = $(SRC:.c=.o)
 
