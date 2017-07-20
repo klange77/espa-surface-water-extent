@@ -120,7 +120,7 @@ usage ()
             "                    (Defaults - L4-7 %d, L8 %d)\n",
             pswt_1_swir1_l47_default, pswt_1_swir1_l8_default);
     printf ("    --pswt_1_ndvi: Partial Surface Water Test-1 NDVI Threshold\n"
-            "                   between 0 and data maximum\n"
+            "                   between 0.00 and 2.00\n"
             "                   (Defaults - L4-7 %0.3f, L8 %0.3f)\n",
             pswt_1_ndvi_l47_default, pswt_1_ndvi_l8_default);
 
@@ -129,7 +129,7 @@ usage ()
             "                    (Defaults - L4-7 %0.3f, L8 %0.3f)\n",
             pswt_2_mndwi_l47_default, pswt_2_mndwi_l8_default);
     printf ("    --pswt_2_blue: Partial Surface Water Test-2 Blue Threshold\n"
-            "                   between -2.00 and 2.00\n"
+            "                   between 0 and data maximum\n"
             "                   (Defaults - L4-7 %d, L8 %d)\n",
             pswt_2_blue_l47_default, pswt_2_blue_l8_default);
     printf ("    --pswt_2_nir: Partial Surface Water Test-2 NIR Threshold\n"
@@ -144,29 +144,28 @@ usage ()
             "                    between 0 and data maximum\n"
             "                    (Defaults - L4-7 %d, L8 %d)\n",
             pswt_2_swir2_l47_default, pswt_2_swir2_l8_default);
-// RRRR TBD don't really know what the ranges should be on the new ones
 
-    printf ("    --percent-slope-high: Threshold between 0.00 and 100.00\n"
+    printf ("    --percent_slope_high: Threshold between 0.00 and 100.00\n"
             "                          (default - %0.1f)\n", 
                                        percent_slope_high_default);
-    printf ("    --percent-slope-moderate: Threshold between 0.00 and 100.00\n"
+    printf ("    --percent_slope_moderate: Threshold between 0.00 and 100.00\n"
             "                              (default - %0.1f)\n", 
                                            percent_slope_moderate_default);
-    printf ("    --percent-slope-wetland: Threshold between 0.00 and 100.00\n"
+    printf ("    --percent_slope_wetland: Threshold between 0.00 and 100.00\n"
             "                             (default - %0.1f)\n", 
                                           percent_slope_wetland_default);
-    printf ("    --percent-slope-low: Threshold between 0.00 and 100.00\n"
+    printf ("    --percent_slope_low: Threshold between 0.00 and 100.00\n"
             "                         (default - %0.1f)\n", 
                                       percent_slope_low_default);
     printf ("    --hillshade: Threshold between 0 and 255\n"
             "                 (default - %d)\n", hillshade_default);
 
-    printf ("    --include-tests: Should the diagnostic band be included in"
+    printf ("    --include_tests: Should the diagnostic band be included in"
             " output?\n"
             "                  (default is false)\n");
-    printf ("    --include-ps: Should percent slope be included in output?\n"
+    printf ("    --include_ps: Should percent slope be included in output?\n"
             "                  (default is false)\n");
-    printf ("    --include-hs: Should hillshade be included in output?\n"
+    printf ("    --include_hs: Should hillshade be included in output?\n"
             "                  (default is false)\n");
     printf ("    --use_zeven_thorne: Should Zevenbergen&Thorne's slope"
             " algorithm be used?\n"
@@ -176,7 +175,7 @@ usage ()
             "                        Output using zeven_thorne has *NOT* been"
             " validated.\n");
 
-    printf ("    --use-toa: Should Top of Atmosphere be used instead of"
+    printf ("    --use_toa: Should Top of Atmosphere be used instead of"
             " Surface Reflectance\n"
             "               (default is false, meaning Surface Reflectance"
             " will be used)\n"
@@ -252,12 +251,12 @@ get_args
 
     struct option long_options[] = {
         /* These options set a flag */
-        {"use-zeven-thorne", no_argument, &tmp_zeven_thorne_flag, true},
-        {"use-toa", no_argument, &tmp_toa_flag, true},
+        {"use_zeven_thorne", no_argument, &tmp_zeven_thorne_flag, true},
+        {"use_toa", no_argument, &tmp_toa_flag, true},
 
-        {"include-tests", no_argument, &tmp_include_tests_flag, true},
-        {"include-ps", no_argument, &tmp_include_ps_flag, true},
-        {"include-hs", no_argument, &tmp_include_hs_flag, true},
+        {"include_tests", no_argument, &tmp_include_tests_flag, true},
+        {"include_ps", no_argument, &tmp_include_ps_flag, true},
+        {"include_hs", no_argument, &tmp_include_hs_flag, true},
 
         /* These options provide values */
         {"xml", required_argument, 0, 'x'},
@@ -265,21 +264,21 @@ get_args
         {"wigt", required_argument, 0, 'w'},
         {"awgt", required_argument, 0, 'a'},
 
-        {"pswt-1-mndwi", required_argument, 0, 'z'},
-        {"pswt-1-nir", required_argument, 0, 'n'},
-        {"pswt-1-swir", required_argument, 0, 'r'},
-        {"pswt-1-ndvi", required_argument, 0, 'y'},
+        {"pswt_1_mndwi", required_argument, 0, 'z'},
+        {"pswt_1_nir", required_argument, 0, 'n'},
+        {"pswt_1_swir1", required_argument, 0, 'r'},
+        {"pswt_1_ndvi", required_argument, 0, 'y'},
 
-        {"pswt-2-mndwi", required_argument, 0, 'q'},
-        {"pswnt-2-blue", required_argument, 0, 'b'},
-        {"pswnt-2-nir", required_argument, 0, 'i'},
-        {"pswst-2-swir1", required_argument, 0, '1'},
-        {"pswst-2-swir2", required_argument, 0, '2'},
+        {"pswt_2_mndwi", required_argument, 0, 'q'},
+        {"pswt_2_blue", required_argument, 0, 'b'},
+        {"pswt_2_nir", required_argument, 0, 'i'},
+        {"pswt_2_swir1", required_argument, 0, '1'},
+        {"pswt_2_swir2", required_argument, 0, '2'},
 
-        {"percent-slope-high", required_argument, 0, 'g'},
-        {"percent-slope-moderate", required_argument, 0, 'm'},
-        {"percent-slope-wetland", required_argument, 0, 'd'},
-        {"percent-slope-low", required_argument, 0, 'l'},
+        {"percent_slope_high", required_argument, 0, 'g'},
+        {"percent_slope_moderate", required_argument, 0, 'm'},
+        {"percent_slope_wetland", required_argument, 0, 'd'},
+        {"percent_slope_low", required_argument, 0, 'l'},
         {"hillshade", required_argument, 0, 's'},
 
         /* Special options */
@@ -601,6 +600,15 @@ get_args
         usage ();
         return ERROR;
     }
+
+    if ((*pswt_1_ndvi < 0.0) || (*pswt_1_ndvi > 2.0))
+    {
+        ERROR_MESSAGE ("PSWT_1_NDVI is out of range\n\n", MODULE_NAME);
+
+        usage ();
+        return ERROR;
+    }
+
 
     if ((*pswt_2_mndwi < -2.0) || (*pswt_2_mndwi > 2.0))
     {

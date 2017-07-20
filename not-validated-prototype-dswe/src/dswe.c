@@ -510,16 +510,34 @@ main (int argc, char *argv[])
         printf ("    Percent Slope Moderate: %0.1f\n", percent_slope_moderate);
         printf ("     Percent Slope Wetland: %0.1f\n", percent_slope_wetland);
         printf ("         Percent Slope Low: %0.1f\n", percent_slope_low);
-        printf ("                 Hillshade: %d\n", hillshade);
+        printf ("       Hillshade Threshold: %d\n", hillshade);
 
-        printf (" Use Zeven Thorne:");
+        printf ("          Use Zeven Thorne:");
         if (use_zeven_thorne_flag)
             printf (" TRUE\n");
         else
             printf (" FALSE\n");
 
-        printf (" Use Top Of Atmos:");
+        printf ("          Use Top Of Atmos:");
         if (use_toa_flag)
+            printf (" TRUE\n");
+        else
+            printf (" FALSE\n");
+
+        printf (" Make Diagnostic Test Band:");
+        if (include_tests_flag)
+            printf (" TRUE\n");
+        else
+            printf (" FALSE\n");
+
+        printf ("   Make Percent Slope Band:");
+        if (include_ps_flag)
+            printf (" TRUE\n");
+        else
+            printf (" FALSE\n");
+
+        printf ("       Make Hillshade Band:");
+        if (include_hs_flag)
             printf (" TRUE\n");
         else
             printf (" FALSE\n");
@@ -592,12 +610,11 @@ main (int argc, char *argv[])
                       input_data->x_pixel_size, input_data->y_pixel_size,
                       use_zeven_thorne_flag, band_ps);
 
-    /* RRRR Can these be partly combined to reduce code and/or steps?
-       e.g.: maybe the outside loop can be combined */
-    build_hillshade_band(band_elevation, input_data->lines, input_data->samples,
-                      input_data->x_pixel_size, input_data->y_pixel_size,
-                      input_data->solar_elevation, input_data->solar_azimuth, 
-                      band_hillshade);
+    /* -------------------------------------------------------------------- */
+    build_hillshade_band (band_elevation, input_data->lines, 
+                      input_data->samples, input_data->x_pixel_size, 
+                      input_data->y_pixel_size, input_data->solar_elevation, 
+                      input_data->solar_azimuth, band_hillshade);
 
     /* -------------------------------------------------------------------- */
     blue_fill_value = input_data->fill_value[I_BAND_BLUE];
@@ -624,7 +641,7 @@ main (int argc, char *argv[])
     /* Process through each data element and populate the dswe band memory */
     if (verbose_flag)
     {
-        printf ("Pixel Count = %d\n", pixel_count);
+        printf ("               Pixel Count: %d\n", pixel_count);
     }
     for (index = 0; index < pixel_count; index++)
     {

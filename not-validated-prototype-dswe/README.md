@@ -1,4 +1,4 @@
-## Dynamic Surface Water Extent Version 1.1.3 - Release Notes
+## Dynamic Surface Water Extent Version 2.0 - Release Notes
 
 Release Date: August 2017
 
