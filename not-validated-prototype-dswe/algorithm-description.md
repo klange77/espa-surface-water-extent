@@ -46,7 +46,7 @@ Algorithm Description - Overview:
 
     The second band represents the Raw DSWE with filtering applied for 
     Percent Slope, Hillshade, Cloud, Cloud Shadow, and Snow (recoded values 0, 
-    1, 2, 3, 9, and 255).
+    1, 2, 3, 4, 9, and 255).
 
     Percent-Slope is utilized to remove locations where the terrain is too
     sloped to hold water.  Any values that meet this criteria are recoded to
@@ -145,7 +145,7 @@ Algorithm Description - Detailed:
               ranges from 0 to 2.0 and is defaulted to a value of 0.7.
 
             if (mndwi > -0.44
-                && SWIR1 < 9000
+                && SWIR1 < 900
                 && NIR < 1500
                 && NDVI < 0.7) set the thousands digit  (Example 01000)
 

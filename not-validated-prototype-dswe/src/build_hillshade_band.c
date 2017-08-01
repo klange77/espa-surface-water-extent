@@ -95,7 +95,7 @@ float hillshade
 
 
 /******************************************************************************
- * MODULE:  shaded_relief
+ * MODULE:  build_hillshade_band
  *
  * PURPOSE:  Computes the shaded relief based on the DEM
  *
@@ -153,47 +153,43 @@ void build_hillshade_band
     double elevation_window[9]; /* 3x3 window of elevation values surrounding 
                               the current pixel */
 
-    for (line = 0; line < num_lines; line++)
+    /* Don't process the first and last lines and first and last
+       samples of the DEM since we can't determine what the preceding
+       and following values are */
+    for (line = 1; line < num_lines - 1; line++)
     {
-        for (sample = 0; sample < num_samples; sample++)
+        for (sample = 1; sample < num_samples - 1; sample++)
         {
             output_pixel = line * num_samples + sample;
 
-            /* Don't process the first and last lines and first and last
-               samples of the DEM since we can't determine what the preceding
-               and following values are */
-            if ((line > 0) && (line < num_lines - 1)
-                && (sample > 0) && (sample < num_samples - 1))
+            /* Fill in the 3x3 elevation window surrounding the current 
+               pixel */
+            current_pixel = output_pixel - num_samples - 1;
+            elevation_window[0] = dem[current_pixel];
+            elevation_window[1] = dem[current_pixel + 1];
+            elevation_window[2] = dem[current_pixel + 2];
+            current_pixel += num_samples; 
+            elevation_window[3] = dem[current_pixel];
+            elevation_window[4] = dem[current_pixel + 1];
+            elevation_window[5] = dem[current_pixel + 2];
+            current_pixel += num_samples; 
+            elevation_window[6] = dem[current_pixel];
+            elevation_window[7] = dem[current_pixel + 1];
+            elevation_window[8] = dem[current_pixel + 2];
+
+            /* Compute the shaded relief for the current pixel */
+            shade = hillshade (elevation_window, ew_resolution, 
+                ns_resolution, sun_elevation, solar_azimuth);
+
+            /* Scale the shaded relief values from 0.0 to 1.0 to 0 to 255 */
+            if (shade <= 0.0)
             {
-                /* Fill in the 3x3 elevation window surrounding the current 
-                   pixel */
-                current_pixel = output_pixel - num_samples - 1;
-                elevation_window[0] = dem[current_pixel];
-                elevation_window[1] = dem[current_pixel + 1];
-                elevation_window[2] = dem[current_pixel + 2];
-                current_pixel += num_samples; 
-                elevation_window[3] = dem[current_pixel];
-                elevation_window[4] = dem[current_pixel + 1];
-                elevation_window[5] = dem[current_pixel + 2];
-                current_pixel += num_samples; 
-                elevation_window[6] = dem[current_pixel];
-                elevation_window[7] = dem[current_pixel + 1];
-                elevation_window[8] = dem[current_pixel + 2];
-
-                /* Compute the shaded relief for the current pixel */
-                shade = hillshade (elevation_window, ew_resolution, 
-                    ns_resolution, sun_elevation, solar_azimuth);
-
-                /* Scale the shaded relief values from 0.0 to 1.0 to 0 to 255 */
-                if (shade <= 0.0)
-                {
-                    shaded_relief[output_pixel] = 0;
-                }
-                else
-                {
-                    shaded_relief[output_pixel] = (uint8_t) 
-                        (round(254.0 * shade) + 1.0);
-                }
+                shaded_relief[output_pixel] = 0;
+            }
+            else
+            {
+                shaded_relief[output_pixel] = (uint8_t) 
+                    (round(254.0 * shade) + 1.0);
             }
         }
     }

@@ -438,8 +438,12 @@ main (int argc, char *argv[])
     uint16_t pixelqa_fill_value;
 
     int16_t raw_dswe_value;
-    uint8_t raw_ps_hs_ccss_dswe_value;
-    uint8_t mask_value;
+    uint8_t raw_ps_hs_ccss_dswe_value; /* Raw DSWE value, but set to 
+                                   DSWE_NOT_WATER if percent slope or hillshade
+                                   apply, and DSWE_CLOUD_CLOUD_SHADOW_SNOW if
+                                   one or more of those is set in the QA band */
+    uint8_t mask_value;         /* Tracks whether a pixel is masked due to snow,
+                                   shadow, cloud, slope, and/or hillshade */                       
 
     float pswt_1_nir_float;     /* Float version of tolerance value */
     float pswt_1_swir1_float;   /* Float version of tolerance value */
@@ -734,11 +738,11 @@ main (int argc, char *argv[])
         /* Determine if hillshade exceeds threshold */
         if (band_hillshade[index] > hillshade)
         {
-            hillshade_flag = 1;
+            hillshade_flag = true;
         }
         else
         {
-            hillshade_flag = 0;
+            hillshade_flag = false;
         }
 
         /* Recode the value to fit an 8bit output product */
@@ -809,10 +813,9 @@ main (int argc, char *argv[])
            output to the Raw DSWE value */
         raw_ps_hs_ccss_dswe_value = raw_dswe_value;
 
-        /* Initialize the mask value based on some bits in the pixel QA.  The
-           mask band values are based on some of the CFMASK values.  Note that
-           even if shadow, snow, and cloud are all set, they are still under 
-           the slope value, so they can be distinguished. */
+        /* Initialize the mask value based on some bits in the pixel QA.  Note 
+           that even if shadow, snow, and cloud are all set, they are still 
+           under the slope value, so they can be distinguished. */
         mask_value = 0;
         if (band_pixelqa[index] & PIXELQA_CLOUD_SHADOW_BIT_MASK)
         {
@@ -866,32 +869,15 @@ main (int argc, char *argv[])
            Cloud Shadow, and Snow output.  Also update the mask output. */
         if (!hillshade_flag)
         {
-            raw_ps_hs_ccss_dswe_value = 0;
+            raw_ps_hs_ccss_dswe_value = DSWE_NOT_WATER;
             mask_value += MASK_HS;
         }
 
-        /* Apply the Pixel QA Cloud constraint to both the
-           Cloud, Cloud Shadow, and Snow output and the 
-           Percent Slope, Cloud, Cloud Shadow, and Snow output */
-        if (band_pixelqa[index] & PIXELQA_CLOUD_BIT_MASK)
-        {
-            /* classified as 11999 in prototype code using 9 due to recode */
-            raw_ps_hs_ccss_dswe_value = DSWE_CLOUD_CLOUD_SHADOW_SNOW;
-        }
-
-        /* Apply the Pixel QA Cloud Shadow constraint to both the
-           Cloud, Cloud Shadow, and Snow output and the
-           Percent Slope, Cloud, Cloud Shadow, and Snow output */
-        if (band_pixelqa[index] & PIXELQA_CLOUD_SHADOW_BIT_MASK)
-        {
-            /* classified as 11999 in prototype code using 9 due to recode */
-            raw_ps_hs_ccss_dswe_value = DSWE_CLOUD_CLOUD_SHADOW_SNOW;
-        }
-
-        /* Apply the Pixel QA Snow constraint to both the
-           Cloud, Cloud Shadow, and Snow output and the
-           Percent Slope, Cloud, Cloud Shadow, and Snow output */
-        if (band_pixelqa[index] & PIXELQA_SNOW_BIT_MASK)
+        /* Apply the Pixel QA Cloud constraint to the Percent Slope, Hillshade,
+           Cloud, Cloud Shadow, and Snow output */
+        if ((band_pixelqa[index] & PIXELQA_CLOUD_BIT_MASK)
+             || (band_pixelqa[index] & PIXELQA_CLOUD_SHADOW_BIT_MASK)
+             || (band_pixelqa[index] & PIXELQA_SNOW_BIT_MASK))
         {
             /* classified as 11999 in prototype code using 9 due to recode */
             raw_ps_hs_ccss_dswe_value = DSWE_CLOUD_CLOUD_SHADOW_SNOW;
@@ -1016,8 +1002,6 @@ main (int argc, char *argv[])
             return EXIT_FAILURE;
         }
     }
-
-    /* CLEANUP & EXIT ----------------------------------------------------- */
 
     /* CLEANUP & EXIT ----------------------------------------------------- */
 

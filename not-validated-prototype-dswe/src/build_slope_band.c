@@ -172,57 +172,48 @@ void build_slope_band
     double elevation_window[9];
     double slope;
 
-    for (line = 0; line < num_lines; line++)
+    /* Don't process the first and last lines and first and last samples of
+       the DEM since we can't determine what the preceding and following 
+       values are */
+    for (line = 1; line < num_lines - 1; line++)
     {
-        for (sample = 0; sample < num_samples; sample++)
+        for (sample = 1; sample < num_samples - 1; sample++)
         {
             output_pixel = line * num_samples + sample;
 
-            /* Don't process the first and last lines and first and last
-               samples of the DEM since we can't determine what the preceding
-               and following values are */
-            if ((line > 0) && (line < num_lines-1)
-                && (sample > 0) && (sample < num_samples-1))
-            {
-                /* Fill in the 3x3 elevation window surrounding the current
-                   pixel
-                                    [0, 1, 2,
-                                     3, 4, 5,
-                                     6, 7, 8]
-                 */
-                /* TOP row [0, 1, 2] */
-                current_pixel = output_pixel - num_samples - 1;  // [0]
-                elevation_window[0] = band_dem[current_pixel];   // [0]
-                elevation_window[1] = band_dem[current_pixel+1]; // [1]
-                elevation_window[2] = band_dem[current_pixel+2]; // [2]
+            /* Fill in the 3x3 elevation window surrounding the current
+               pixel
+                                [0, 1, 2,
+                                 3, 4, 5,
+                                 6, 7, 8]
+             */
+            /* TOP row [0, 1, 2] */
+            current_pixel = output_pixel - num_samples - 1;  // [0]
+            elevation_window[0] = band_dem[current_pixel];   // [0]
+            elevation_window[1] = band_dem[current_pixel+1]; // [1]
+            elevation_window[2] = band_dem[current_pixel+2]; // [2]
 
-                /* MIDDLE row [3, 4, 5] */
-                current_pixel += num_samples;                    // [3]
-                elevation_window[3] = band_dem[current_pixel];   // [3]
-                elevation_window[4] = band_dem[current_pixel+1]; // [4]
-                elevation_window[5] = band_dem[current_pixel+2]; // [5]
+            /* MIDDLE row [3, 4, 5] */
+            current_pixel += num_samples;                    // [3]
+            elevation_window[3] = band_dem[current_pixel];   // [3]
+            elevation_window[4] = band_dem[current_pixel+1]; // [4]
+            elevation_window[5] = band_dem[current_pixel+2]; // [5]
 
-                /* BOTTOM row [6, 7, 8] */
-                current_pixel += num_samples;                    // [6]
-                elevation_window[6] = band_dem[current_pixel];   // [6]
-                elevation_window[7] = band_dem[current_pixel+1]; // [7]
-                elevation_window[8] = band_dem[current_pixel+2]; // [8]
+            /* BOTTOM row [6, 7, 8] */
+            current_pixel += num_samples;                    // [6]
+            elevation_window[6] = band_dem[current_pixel];   // [6]
+            elevation_window[7] = band_dem[current_pixel+1]; // [7]
+            elevation_window[8] = band_dem[current_pixel+2]; // [8]
 
-                if (use_zeven_thorne_flag)
-                    slope = calculate_slope_zevenbergen_thorne(
-                                elevation_window, ew_resolution, ns_resolution);
-                else
-                    slope = calculate_slope_horn(elevation_window,
-                                                 ew_resolution, ns_resolution);
-
-                /* Convert from a 0.0 - 1.0 value to a 0.0 - 100.0 value */
-                band_ps[output_pixel] = 100.0 * slope;
-            }
+            if (use_zeven_thorne_flag)
+                slope = calculate_slope_zevenbergen_thorne(
+                            elevation_window, ew_resolution, ns_resolution);
             else
-            {
-                /* Default the first and last to 0.0 */
-                band_ps[output_pixel] = 0.0F;
-            }
+                slope = calculate_slope_horn(elevation_window,
+                                             ew_resolution, ns_resolution);
+
+            /* Convert from a 0.0 - 1.0 value to a 0.0 - 100.0 value */
+            band_ps[output_pixel] = 100.0 * slope;
         }
     }
 }
