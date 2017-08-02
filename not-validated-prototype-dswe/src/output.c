@@ -308,7 +308,14 @@ add_dswe_band_product
     {
         snprintf (bmeta[0].source, sizeof (bmeta[0].source), "sr_refl");
     }
-    snprintf (bmeta[0].category, sizeof (bmeta[0].category), "qa");
+    if (!strcmp (band_name, HS_BAND_NAME)) 
+    {
+        snprintf (bmeta[0].category, sizeof (bmeta[0].category), "image");
+    }
+    else
+    {
+        snprintf (bmeta[0].category, sizeof (bmeta[0].category), "qa");
+    }
     bmeta[0].nlines = in_meta.band[src_index].nlines;
     bmeta[0].nsamps = in_meta.band[src_index].nsamps;
     bmeta[0].pixel_size[0] = in_meta.band[src_index].pixel_size[0];
