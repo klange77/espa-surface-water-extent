@@ -109,6 +109,50 @@ write_16bit_dswe_product
 
 
 /*****************************************************************************
+  NAME:  write_float_dswe_product
+
+  PURPOSE:  Create the *.img file and the associated ENVI header.
+
+  RETURN VALUE:  Type = int
+      Value    Description
+      -------  ---------------------------------------------------------------
+      SUCCESS  No errors were encountered.
+      ERROR    An error was encountered.
+*****************************************************************************/
+int
+write_float_dswe_product
+(
+    char *output_filename,
+    int element_count,
+    float *data
+)
+{
+    FILE *fd = NULL;
+    char msg[512];
+
+    fd = fopen(output_filename, "w");
+    if (fd == NULL)
+    {
+        snprintf (msg, sizeof (msg), "Failed creating file %s",
+                  output_filename);
+        RETURN_ERROR (msg, MODULE_NAME, ERROR);
+    }
+
+    if (write_raw_binary(fd, 1, element_count, sizeof (float), data)
+        != SUCCESS)
+    {
+        snprintf (msg, sizeof (msg), "Failed writing file %s",
+                  output_filename);
+        RETURN_ERROR (msg, MODULE_NAME, ERROR);
+    }
+
+    fclose(fd);
+
+    return SUCCESS;
+}
+
+
+/*****************************************************************************
   NAME:  add_dswe_band_product
 
   PURPOSE:  Create a new envi output file including envi header and add the
@@ -131,6 +175,7 @@ add_dswe_band_product
     char *long_name,
     int min_range,
     int max_range,
+    int add_class,
     uint8_t *data
 )
 {
@@ -251,12 +296,26 @@ add_dswe_band_product
 
     snprintf (bmeta[0].short_name, sizeof (bmeta[0].short_name),
               "%s", in_meta.band[src_index].short_name);
-    bmeta[0].short_name[3] = '\0';
+    bmeta[0].short_name[4] = '\0';
     strcat (bmeta[0].short_name, short_name);
     snprintf (bmeta[0].product, sizeof (bmeta[0].product),
               "%s", product_name);
-    snprintf (bmeta[0].source, sizeof (bmeta[0].source), "sr_refl");
-    snprintf (bmeta[0].category, sizeof (bmeta[0].category), "qa");
+    if (use_toa_flag)
+    {
+        snprintf (bmeta[0].source, sizeof (bmeta[0].source), "toa_refl");
+    }
+    else
+    {
+        snprintf (bmeta[0].source, sizeof (bmeta[0].source), "sr_refl");
+    }
+    if (!strcmp (band_name, HS_BAND_NAME)) 
+    {
+        snprintf (bmeta[0].category, sizeof (bmeta[0].category), "image");
+    }
+    else
+    {
+        snprintf (bmeta[0].category, sizeof (bmeta[0].category), "qa");
+    }
     bmeta[0].nlines = in_meta.band[src_index].nlines;
     bmeta[0].nsamps = in_meta.band[src_index].nsamps;
     bmeta[0].pixel_size[0] = in_meta.band[src_index].pixel_size[0];
@@ -279,52 +338,60 @@ add_dswe_band_product
     snprintf (bmeta[0].file_name, sizeof (bmeta[0].file_name),
               "%s", image_filename);
 
-    /* Figure out how many classes we have */
-    if (max_range == 9)
+    if (add_class)
     {
-        class_count = 6;
-    }
-    else
-    {
-        class_count = 5;
-    }
+        /* Figure out how many classes we have */
+        if (max_range == DSWE_CLOUD_CLOUD_SHADOW_SNOW)
+        {
+            class_count = 7;
+        }
+        else
+        {
+            class_count = 6;
+        }
 
-    /* Set up class values information */
-    if (allocate_class_metadata (&bmeta[0], class_count) != SUCCESS)
-        RETURN_ERROR ("allocating dswe classes", MODULE_NAME, ERROR);
+        /* Set up class values information */
+        if (allocate_class_metadata (&bmeta[0], class_count) != SUCCESS)
+            RETURN_ERROR ("allocating dswe classes", MODULE_NAME, ERROR);
 
-    bmeta[0].class_values[0].class = 0;
-    snprintf (bmeta[0].class_values[0].description,
-              sizeof (bmeta[0].class_values[0].description),
-              "not water");
+        bmeta[0].class_values[0].class = DSWE_NOT_WATER;
+        snprintf (bmeta[0].class_values[0].description,
+                  sizeof (bmeta[0].class_values[0].description),
+                  "not water");
 
-    bmeta[0].class_values[1].class = 1;
-    snprintf (bmeta[0].class_values[1].description,
-              sizeof (bmeta[0].class_values[1].description),
-              "water - high confidence");
+        bmeta[0].class_values[1].class = DSWE_WATER_HIGH_CONFIDENCE;
+        snprintf (bmeta[0].class_values[1].description,
+                  sizeof (bmeta[0].class_values[1].description),
+                  "water - high confidence");
 
-    bmeta[0].class_values[2].class = 2;
-    snprintf (bmeta[0].class_values[2].description,
-              sizeof (bmeta[0].class_values[2].description),
-              "water - moderate confidence");
+        bmeta[0].class_values[2].class = DSWE_WATER_MODERATE_CONFIDENCE;
+        snprintf (bmeta[0].class_values[2].description,
+                  sizeof (bmeta[0].class_values[2].description),
+                  "water - moderate confidence");
 
-    bmeta[0].class_values[3].class = 3;
-    snprintf (bmeta[0].class_values[3].description,
-              sizeof (bmeta[0].class_values[3].description),
-              "partial surface water pixel");
+        bmeta[0].class_values[3].class = DSWE_POTENTIAL_WETLAND;
+        snprintf (bmeta[0].class_values[3].description,
+                  sizeof (bmeta[0].class_values[3].description),
+                  "potential wetland");
 
-    if (class_count == 6)
-    {
-        bmeta[0].class_values[4].class = 9;
+        bmeta[0].class_values[4].class = DSWE_LOW_CONFIDENCE_WATER_OR_WETLAND;
         snprintf (bmeta[0].class_values[4].description,
                   sizeof (bmeta[0].class_values[4].description),
-                  "cloud, cloud shadow, and snow");
-    }
+                  "water or wetland - low confidence");
 
-    bmeta[0].class_values[class_count-1].class = DSWE_NO_DATA_VALUE;
-    snprintf (bmeta[0].class_values[class_count-1].description,
-              sizeof (bmeta[0].class_values[class_count-1].description),
-              "fill");
+        if (class_count == 7)
+        {
+            bmeta[0].class_values[5].class = DSWE_CLOUD_CLOUD_SHADOW_SNOW;
+            snprintf (bmeta[0].class_values[5].description,
+                      sizeof (bmeta[0].class_values[5].description),
+                      "cloud, cloud shadow, and snow");
+        }
+
+        bmeta[0].class_values[class_count-1].class = DSWE_NO_DATA_VALUE;
+        snprintf (bmeta[0].class_values[class_count-1].description,
+                  sizeof (bmeta[0].class_values[class_count-1].description),
+                  "fill");
+    }
 
     /* Create the ENVI header file this band */
     if (create_envi_struct (&bmeta[0], &in_meta.global, &envi_hdr) != SUCCESS)
@@ -352,8 +419,7 @@ add_dswe_band_product
     if (append_metadata (1, bmeta, xml_filename)
         != SUCCESS)
     {
-        RETURN_ERROR ("Appending spectral index bands to XML file",
-                       MODULE_NAME, ERROR);
+        RETURN_ERROR ("Appending DSWE band to XML file", MODULE_NAME, ERROR);
     }
 
     free_metadata (&in_meta);
@@ -508,11 +574,18 @@ add_test_band_product
 
     snprintf (bmeta[0].short_name, sizeof (bmeta[0].short_name),
               "%s", in_meta.band[src_index].short_name);
-    bmeta[0].short_name[3] = '\0';
+    bmeta[0].short_name[4] = '\0';
     strcat (bmeta[0].short_name, short_name);
     snprintf (bmeta[0].product, sizeof (bmeta[0].product),
               "%s", product_name);
-    snprintf (bmeta[0].source, sizeof (bmeta[0].source), "sr_refl");
+    if (use_toa_flag)
+    {
+        snprintf (bmeta[0].source, sizeof (bmeta[0].source), "toa_refl");
+    }
+    else
+    {
+        snprintf (bmeta[0].source, sizeof (bmeta[0].source), "sr_refl");
+    }
     snprintf (bmeta[0].category, sizeof (bmeta[0].category), "qa");
     bmeta[0].nlines = in_meta.band[src_index].nlines;
     bmeta[0].nsamps = in_meta.band[src_index].nsamps;
@@ -558,12 +631,12 @@ add_test_band_product
         RETURN_ERROR ("Failed writing ENVI header file", MODULE_NAME, ERROR);
     }
 
-    /* Append the DSWE band to the XML file */
+    /* Append the DSWE test band to the XML file */
     if (append_metadata (1, bmeta, xml_filename)
         != SUCCESS)
     {
-        RETURN_ERROR ("Appending spectral index bands to XML file",
-                       MODULE_NAME, ERROR);
+        RETURN_ERROR ("Appending DSWE test band to XML file", MODULE_NAME, 
+                      ERROR);
     }
 
     free_metadata (&in_meta);
@@ -598,7 +671,7 @@ add_ps_band_product
     char *long_name,
     int min_range,
     int max_range,
-    int16_t *data
+    float *data
 )
 {
     int count;
@@ -696,7 +769,7 @@ add_ps_band_product
                     in_meta.band[src_index].nsamps;
 
     /* First write out the ENVI band and header files */
-    if (write_16bit_dswe_product (image_filename, element_count, data)
+    if (write_float_dswe_product (image_filename, element_count, data)
         != SUCCESS)
     {
         RETURN_ERROR ("Failed creating output ENVI files", MODULE_NAME,
@@ -717,11 +790,18 @@ add_ps_band_product
 
     snprintf (bmeta[0].short_name, sizeof (bmeta[0].short_name),
               "%s", in_meta.band[src_index].short_name);
-    bmeta[0].short_name[3] = '\0';
+    bmeta[0].short_name[4] = '\0';
     strcat (bmeta[0].short_name, short_name);
     snprintf (bmeta[0].product, sizeof (bmeta[0].product),
               "%s", product_name);
-    snprintf (bmeta[0].source, sizeof (bmeta[0].source), "sr_refl");
+    if (use_toa_flag)
+    {
+        snprintf (bmeta[0].source, sizeof (bmeta[0].source), "toa_refl");
+    }
+    else
+    {
+        snprintf (bmeta[0].source, sizeof (bmeta[0].source), "sr_refl");
+    }
     snprintf (bmeta[0].category, sizeof (bmeta[0].category), "image");
     bmeta[0].nlines = in_meta.band[src_index].nlines;
     bmeta[0].nsamps = in_meta.band[src_index].nsamps;
@@ -733,7 +813,7 @@ add_ps_band_product
               "dswe_%s", DSWE_VERSION);
     snprintf (bmeta[0].production_date, sizeof (bmeta[0].production_date),
               "%s", production_date);
-    bmeta[0].data_type = ESPA_INT16;
+    bmeta[0].data_type = ESPA_FLOAT32;
     bmeta[0].fill_value = TESTS_NO_DATA_VALUE;
     bmeta[0].valid_range[0] = min_range;
     bmeta[0].valid_range[1] = max_range;
@@ -768,11 +848,11 @@ add_ps_band_product
         RETURN_ERROR ("Failed writing ENVI header file", MODULE_NAME, ERROR);
     }
 
-    /* Append the DSWE band to the XML file */
+    /* Append the percent slope DSWE band to the XML file */
     if (append_metadata (1, bmeta, xml_filename)
         != SUCCESS)
     {
-        RETURN_ERROR ("Appending spectral index bands to XML file",
+        RETURN_ERROR ("Appending percent slope DSWE band to XML file",
                        MODULE_NAME, ERROR);
     }
 

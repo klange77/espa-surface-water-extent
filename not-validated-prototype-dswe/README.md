@@ -1,22 +1,25 @@
-## Dynamic Surface Water Extent Version 1.1.3 - Release Notes
+## Dynamic Surface Water Extent Version 2.0 - Release Notes
 
-Release Date: March 2017
+Release Date: August 2017
 
-See git tag [dswe-v1.1.3]
+See git tag [dswe-v2.0]
 
 This application produces Surface Water Extent products for Landsat 4, 5, 7, and 8.
 
 ## Product Descriptions
-See the [Not Available](http://landsat.usgs.gov/CDR_LSR.php) product guide for more information about the DSWE product.
+See the [Dynamic Surface Water Extent Product Guide](https://remotesensing.usgs.gov/ecv/document/provisional_dswe_README_v10.pdf) for more information about the DSWE product.
 
 ## Release Notes
 * Updated version numbers
-* Updated to use collection based inputs only
+* Signficant algorithm update to create and use hillshade band, create new
+  mask output with pixel QA, percent slope filter, and hillshade filter 
+  information, update threshold types and values, update filters, and update
+  recoding values 
 
 ## Installation
 
 ### Dependencies
-* ESPA raw binary libraries, tools, and it's dependencies, found here [espa-product-formatter](https://github.com/USGS-EROS/espa-product-formatter)
+* ESPA raw binary libraries, tools, and its dependencies, found here [espa-product-formatter](https://github.com/USGS-EROS/espa-product-formatter)
 
 ### Environment Variables
 * Required for building this software
@@ -59,12 +62,13 @@ This version of the DSWE application requires the input products to be in the ES
 
 The following input data are required to generate the surface water extent products:
 * Surface Reflectance
-* CFmask
+* Product Formatter 
+* Pixel QA 
 * Elevation
 
-The Surface Reflectance and CFmask products can be generated using the software found in our [espa-surface-reflectance](https://github.com/USGS-EROS/espa-surface-reflectance) and [espa-cloud-masking](https://github.com/USGS-EROS/espa-cloud-masking) projects.  Or through our ondemand processing system [ESPA](https://espa.cr.usgs.gov), be sure to select the ENVI output format.
+The Surface Reflectance, Product Formatter, and Pixel QA products can be generated using the software found in our [espa-surface-reflectance](https://github.com/USGS-EROS/espa-surface-reflectance), [espa-product-formatter](https://github.com/USGS-EROS/espa-product-formatter), and [espa-cloud-masking](https://github.com/USGS-EROS/espa-cloud-masking) projects.  They can also be generated through our ondemand processing system [ESPA](https://espa.cr.usgs.gov).  If using that system, be sure to select the ENVI output format.
 
-The Elevation data is required to be in the same projection and physical data file size as the CFmask and Surface Reflectance products.
+The Elevation data is required to be in the same projection and physical data file size as the Pixel QA and Surface Reflectance products.
 
 This surface water extent product is <b>NOT</b> currently available in the [ESPA](https://espa.cr.usgs.gov) processing system.
 
@@ -75,6 +79,6 @@ After compiling the [espa-product-formatter](https://github.com/USGS-EROS/espa-p
 This project is provided by the US Geological Survey (USGS) Earth Resources
 Observation and Science (EROS) Land Satellite Data Systems (LSDS) Science
 Research and Development (LSRD) Project. For questions regarding products
-produced by this source code, please contact the Landsat Contact Us page and
-specify USGS CDR/ECV in the "Regarding" section.
-https://landsat.usgs.gov/contactus.php
+produced by this source code, please contact the Landsat Contact page and
+specify USGS CDR/ECV in the "Subject" section.
+https://landsat.usgs.gov/contact

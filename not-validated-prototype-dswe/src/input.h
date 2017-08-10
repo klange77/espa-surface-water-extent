@@ -15,6 +15,8 @@ typedef struct
 {
     int lines;
     int samples;
+    float solar_elevation;               /* Solar zenith angle */
+    float solar_azimuth;                 /* Solar azimuth angle */
     double x_pixel_size;
     double y_pixel_size;
     char *band_name[MAX_INPUT_BANDS];    /* Name of the input image files */

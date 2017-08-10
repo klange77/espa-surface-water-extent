@@ -148,8 +148,9 @@ def main():
     cmd.extend(sys.argv[1:])
     # TODO - For the time being we will always do this
     #        They were placed here to be easily removed later
-    cmd.append('--include-tests')
-    cmd.append('--include-ps')
+    cmd.append('--include_tests')
+    cmd.append('--include_ps')
+    cmd.append('--include_hs')
 
     # Convert the list to a string
     cmd_string = ' '.join(cmd)

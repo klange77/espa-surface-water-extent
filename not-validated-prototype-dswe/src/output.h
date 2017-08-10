@@ -22,6 +22,7 @@ add_dswe_band_product
     char *long_name,
     int min_range,
     int max_range,
+    int add_class,
     uint8_t *data
 );
 
@@ -52,7 +53,7 @@ add_ps_band_product
     char *long_name,
     int min_range,
     int max_range,
-    int16_t *data
+    float *data
 );
 
 
