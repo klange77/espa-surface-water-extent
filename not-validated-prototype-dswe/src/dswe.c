@@ -6,6 +6,7 @@
 #include <getopt.h>
 #include <error.h>
 #include <string.h>
+#include <float.h>
 
 #include "error_handler.h"
 #include "espa_metadata.h"
@@ -813,21 +814,19 @@ main (int argc, char *argv[])
            output to the Raw DSWE value */
         raw_ps_hs_ccss_dswe_value = raw_dswe_value;
 
-        /* Initialize the mask value based on some bits in the pixel QA.  Note 
-           that even if shadow, snow, and cloud are all set, they are still 
-           under the slope value, so they can be distinguished. */
+        /* Initialize the mask value based on some bits in the pixel QA. */ 
         mask_value = 0;
         if (band_pixelqa[index] & PIXELQA_CLOUD_SHADOW_BIT_MASK)
         {
-            mask_value += MASK_SHADOW;
+            mask_value |= (1 << MASK_SHADOW);
         }
         if (band_pixelqa[index] & PIXELQA_SNOW_BIT_MASK)
         {
-            mask_value += MASK_SNOW;
+            mask_value |= (1 << MASK_SNOW);
         }
         if (band_pixelqa[index] & PIXELQA_CLOUD_BIT_MASK)
         {
-            mask_value += MASK_CLOUD;
+            mask_value |= (1 << MASK_CLOUD);
         }
 
         /* Apply the Percent Slope constraint to the Percent Slope, Cloud,
@@ -837,7 +836,7 @@ main (int argc, char *argv[])
             if (band_ps[index] >= percent_slope_moderate)
             {
                 raw_ps_hs_ccss_dswe_value = DSWE_NOT_WATER;
-                mask_value += MASK_PS;
+                mask_value |= (1 << MASK_PS);
             }
         }
         else if (raw_dswe_value == DSWE_POTENTIAL_WETLAND)
@@ -845,7 +844,7 @@ main (int argc, char *argv[])
             if (band_ps[index] >= percent_slope_wetland)
             {
                 raw_ps_hs_ccss_dswe_value = DSWE_NOT_WATER;
-                mask_value += MASK_PS;
+                mask_value |= (1 << MASK_PS);
             }
         }
         else if (raw_dswe_value == DSWE_LOW_CONFIDENCE_WATER_OR_WETLAND)
@@ -853,7 +852,7 @@ main (int argc, char *argv[])
             if (band_ps[index] >= percent_slope_low)
             {
                 raw_ps_hs_ccss_dswe_value = DSWE_NOT_WATER;
-                mask_value += MASK_PS;
+                mask_value |= (1 << MASK_PS);
             }
         }
         else if (raw_dswe_value == DSWE_WATER_HIGH_CONFIDENCE)
@@ -861,7 +860,7 @@ main (int argc, char *argv[])
             if (band_ps[index] >= percent_slope_high)
             {
                 raw_ps_hs_ccss_dswe_value = DSWE_NOT_WATER;
-                mask_value += MASK_PS;
+                mask_value |= (1 << MASK_PS);
             }
         }
 
@@ -870,7 +869,7 @@ main (int argc, char *argv[])
         if (!hillshade_flag)
         {
             raw_ps_hs_ccss_dswe_value = DSWE_NOT_WATER;
-            mask_value += MASK_HS;
+            mask_value |= (1 << MASK_HS);
         }
 
         /* Apply the Pixel QA Cloud constraint to the Percent Slope, Hillshade,
@@ -936,9 +935,8 @@ main (int argc, char *argv[])
 
     if (add_dswe_band_product (xml_filename, use_toa_flag,
                                MASK_PRODUCT_NAME, MASK_BAND_NAME,
-                               MASK_SHORT_NAME, MASK_LONG_NAME, 0,
-                               MASK_SHADOW + MASK_SNOW + MASK_CLOUD 
-                               + MASK_PS + MASK_HS, 0, band_mask)
+                               MASK_SHORT_NAME, MASK_LONG_NAME, 0, 31,
+                               0, band_mask)
         != SUCCESS)
     {
         ERROR_MESSAGE ("Failed adding DSWE mask band", MODULE_NAME);
@@ -972,7 +970,7 @@ main (int argc, char *argv[])
         if (add_ps_band_product (xml_filename, use_toa_flag,
                                  PS_PRODUCT_NAME, PS_BAND_NAME,
                                  PS_SHORT_NAME, PS_LONG_NAME,
-                                 0, 100, band_ps)
+                                 0, FLT_MAX, band_ps)
             != SUCCESS)
         {
             ERROR_MESSAGE ("Failed adding DSWE PERCENT-SLOPE band product",
@@ -990,7 +988,7 @@ main (int argc, char *argv[])
         if (add_dswe_band_product (xml_filename, use_toa_flag,
                                    HS_PRODUCT_NAME, HS_BAND_NAME,
                                    HS_SHORT_NAME, HS_LONG_NAME,
-                                   0, 100, 0, band_hillshade)
+                                   0, 255, 0, band_hillshade)
             != SUCCESS)
         {
             ERROR_MESSAGE ("Failed adding DSWE hillshade band product",

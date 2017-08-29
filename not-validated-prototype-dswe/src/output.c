@@ -670,7 +670,7 @@ add_ps_band_product
     char *short_name,
     char *long_name,
     int min_range,
-    int max_range,
+    float max_range,
     float *data
 )
 {
@@ -807,7 +807,6 @@ add_ps_band_product
     bmeta[0].nsamps = in_meta.band[src_index].nsamps;
     bmeta[0].pixel_size[0] = in_meta.band[src_index].pixel_size[0];
     bmeta[0].pixel_size[1] = in_meta.band[src_index].pixel_size[1];
-    bmeta[0].scale_factor = 0.01;
     snprintf (bmeta[0].pixel_units, sizeof (bmeta[0].pixel_units), "meters");
     snprintf (bmeta[0].app_version, sizeof (bmeta[0].app_version),
               "dswe_%s", DSWE_VERSION);

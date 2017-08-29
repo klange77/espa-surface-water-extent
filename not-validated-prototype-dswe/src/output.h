@@ -52,7 +52,7 @@ add_ps_band_product
     char *short_name,
     char *long_name,
     int min_range,
-    int max_range,
+    float max_range,
     float *data
 );
 
