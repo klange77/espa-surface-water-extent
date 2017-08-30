@@ -23,6 +23,7 @@ add_dswe_band_product
     int min_range,
     int max_range,
     int add_class,
+    int add_bitmap,
     uint8_t *data
 );
 

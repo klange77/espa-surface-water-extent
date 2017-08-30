@@ -905,7 +905,7 @@ main (int argc, char *argv[])
     if (add_dswe_band_product (xml_filename, use_toa_flag,
                                RAW_PRODUCT_NAME, RAW_BAND_NAME,
                                RAW_SHORT_NAME, RAW_LONG_NAME, DSWE_NOT_WATER,
-                               DSWE_LOW_CONFIDENCE_WATER_OR_WETLAND, 1,
+                               DSWE_LOW_CONFIDENCE_WATER_OR_WETLAND, 1, 0,
                                band_dswe_raw)
         != SUCCESS)
     {
@@ -921,7 +921,7 @@ main (int argc, char *argv[])
                                PS_SC_PRODUCT_NAME, PS_SC_BAND_NAME,
                                PS_SC_SHORT_NAME, PS_SC_LONG_NAME,
                                DSWE_NOT_WATER, DSWE_CLOUD_CLOUD_SHADOW_SNOW,
-                               1, band_dswe_pshsccss)
+                               1, 0, band_dswe_pshsccss)
         != SUCCESS)
     {
         ERROR_MESSAGE ("Failed adding DSWE PERCENT-SLOPE SHADOW CLOUD band"
@@ -936,7 +936,7 @@ main (int argc, char *argv[])
     if (add_dswe_band_product (xml_filename, use_toa_flag,
                                MASK_PRODUCT_NAME, MASK_BAND_NAME,
                                MASK_SHORT_NAME, MASK_LONG_NAME, 0, 31,
-                               0, band_mask)
+                               0, 1, band_mask)
         != SUCCESS)
     {
         ERROR_MESSAGE ("Failed adding DSWE mask band", MODULE_NAME);
@@ -988,7 +988,7 @@ main (int argc, char *argv[])
         if (add_dswe_band_product (xml_filename, use_toa_flag,
                                    HS_PRODUCT_NAME, HS_BAND_NAME,
                                    HS_SHORT_NAME, HS_LONG_NAME,
-                                   0, 255, 0, band_hillshade)
+                                   0, 255, 0, 0, band_hillshade)
             != SUCCESS)
         {
             ERROR_MESSAGE ("Failed adding DSWE hillshade band product",
