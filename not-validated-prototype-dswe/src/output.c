@@ -176,6 +176,7 @@ add_dswe_band_product
     int min_range,
     int max_range,
     int add_class,
+    int add_bitmap,
     uint8_t *data
 )
 {
@@ -196,6 +197,7 @@ add_dswe_band_product
     Envi_header_t envi_hdr;   /* output ENVI header information */
     char envi_file[PATH_MAX];
     int class_count;
+    int bit_count;            /* number of bits in the bitmap */
     char search_string[PATH_MAX];
 
     /* Initialize the input metadata structure */
@@ -379,6 +381,7 @@ add_dswe_band_product
                   sizeof (bmeta[0].class_values[4].description),
                   "water or wetland - low confidence");
 
+        /* The pshsccss band has the classes the raw band has, plus this */
         if (class_count == 7)
         {
             bmeta[0].class_values[5].class = DSWE_CLOUD_CLOUD_SHADOW_SNOW;
@@ -391,6 +394,22 @@ add_dswe_band_product
         snprintf (bmeta[0].class_values[class_count-1].description,
                   sizeof (bmeta[0].class_values[class_count-1].description),
                   "fill");
+    }
+
+    /* This is for the mask band */
+    if (add_bitmap)
+    {
+        bit_count = 5;
+
+        /* Set up bit values information */
+        if (allocate_bitmap_metadata (&bmeta[0], bit_count) != SUCCESS)
+            RETURN_ERROR ("allocating dswe mask bitmap", MODULE_NAME, ERROR);
+
+        snprintf (bmeta[0].bitmap_description[0], STR_SIZE, "shadow");
+        snprintf (bmeta[0].bitmap_description[1], STR_SIZE, "snow");
+        snprintf (bmeta[0].bitmap_description[2], STR_SIZE, "cloud");
+        snprintf (bmeta[0].bitmap_description[3], STR_SIZE, "percent slope");
+        snprintf (bmeta[0].bitmap_description[4], STR_SIZE, "hillshade");
     }
 
     /* Create the ENVI header file this band */
@@ -670,7 +689,7 @@ add_ps_band_product
     char *short_name,
     char *long_name,
     int min_range,
-    int max_range,
+    float max_range,
     float *data
 )
 {
@@ -807,7 +826,6 @@ add_ps_band_product
     bmeta[0].nsamps = in_meta.band[src_index].nsamps;
     bmeta[0].pixel_size[0] = in_meta.band[src_index].pixel_size[0];
     bmeta[0].pixel_size[1] = in_meta.band[src_index].pixel_size[1];
-    bmeta[0].scale_factor = 0.01;
     snprintf (bmeta[0].pixel_units, sizeof (bmeta[0].pixel_units), "meters");
     snprintf (bmeta[0].app_version, sizeof (bmeta[0].app_version),
               "dswe_%s", DSWE_VERSION);

@@ -63,14 +63,11 @@ typedef enum
 #define RAD (M_PI / 180.0)
 #endif
 
-/* Define values contributed to the output mask from different sources. Some 
-   CFMASK definitions are used because the definitions of some of the output
-   mask values are based on the CFMASK.  Pixel QA, not CFMASK, is used as a
-   mask input. */
-#define MASK_SHADOW 2
-#define MASK_SNOW   3
-#define MASK_CLOUD  4
-#define MASK_PS    10
-#define MASK_HS    20
+/* Define bit values contributed to the output mask from different sources */
+#define MASK_SHADOW 0
+#define MASK_SNOW   1
+#define MASK_CLOUD  2
+#define MASK_PS     3
+#define MASK_HS     4
 
 #endif /* CONST_H */

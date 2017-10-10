@@ -14,9 +14,9 @@
            terrain slope for the current 3x3 window.
 
   RETURN VALUE: Type = float
-      Value    Description
-      -----------  -----------------------------------------------------------
-      0.0 - 100.0  Represents the percent slope for the current pixel area
+      Value          Description
+      -------------  -------------------------------------------------------
+      0.0 - MAX_FLT  Represents the percent slope for the current pixel area
 
   NOTES:
     Original Development (based on GDALHillshade algorithm in GDALDEM v1.9.2)
@@ -212,7 +212,8 @@ void build_slope_band
                 slope = calculate_slope_horn(elevation_window,
                                              ew_resolution, ns_resolution);
 
-            /* Convert from a 0.0 - 1.0 value to a 0.0 - 100.0 value */
+            /* Multiply by 100 to make it a percentage.  It could be greater
+               than 100% after this since 1.0 is a 45 degree slope */
             band_ps[output_pixel] = 100.0 * slope;
         }
     }

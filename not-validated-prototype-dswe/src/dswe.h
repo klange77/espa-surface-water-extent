@@ -4,7 +4,7 @@
 
 
 #define DSWE_APP_NAME "dswe"
-#define DSWE_VERSION "2.0"
+#define DSWE_VERSION "2.1"
 
 
 #define MODULE_NAME "DSWE"

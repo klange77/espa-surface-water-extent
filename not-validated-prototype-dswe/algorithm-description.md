@@ -53,18 +53,17 @@ Algorithm Description - Overview:
     a value of 0.  Similarly, any locations where the terrain is too shaded
     is recoded to a value of 0.
 
-    The third band is a mask band with the following mask values:
+    The third band is a bitmapped mask band with the following mask bit values:
 
-    0 - No mask applied
-    2 - Cloud shadow mask applied
-    3 - Snow mask applied
-    4 - Cloud mask applied
-    10 - Percent slope mask applied
-    20 - Hillshade mask applied
+    0 - Cloud shadow mask applied
+    1 - Snow mask applied
+    2 - Cloud mask applied
+    3 - Percent slope mask applied
+    4 - Hillshade mask applied
 
-    Multiple mask reasons can apply for each pixel in the mask band.  Mask
-    values are added.  For example, a pixel masked for both snow and hillshade 
-    will have a value of 23. 
+    Multiple mask reasons can apply for each pixel in the mask band.  For 
+    example, a pixel masked for cloud shadow, percent slope, and hillshade
+    will have a value of 25 (2^0 + 2^3 + 2^4 = 1 + 8 + 16 = 25).
 
 ==============================================================================
 Algorithm Description - Inputs:
@@ -269,21 +268,21 @@ Algorithm Description - Detailed:
          2) Add the contribution of the pixel QA mask values as follows:
 
             if (pixel QA cloud shadow bit is set)
-                mask_output = mask_output + 2 
+                set mask shadow bit (0) 
             if (pixel QA snow bit is set)
-                mask_output = mask_output + 3 
+                set mask snow bit (1) 
             if (pixel QA cloud bit is set)
-                mask_output = mask_output + 4 
+                set mask cloud bit (2) 
 
          3) Add the contribution of the percent slope mask values as follows:
 
             if (any percent slope test caused the Raw DSWE to be recoded to 0)
-                mask_output = mask_output + 10 
+                set mask percent slope bit (3) 
                 
          4) Add the contribution of the hillshade mask values as follows:
 
             if (the hillshade test caused the Raw DSWE to be recoded to 0)
-                mask_output = mask_output + 20 
+                set mask hillshade bit (4) 
 
          5) Output the Mask 
 
