@@ -12,6 +12,8 @@ See the [Dynamic Surface Water Extent Product Guide](https://remotesensing.usgs.
 ## Release Notes
 * Updated version numbers
 * Update percent slope and hillshade thresholds 
+* Changed "raw" band filename to "intrpd"
+* Renamed "not-validate-prototype-dswe" directory to "dswe"
 
 ## Installation
 

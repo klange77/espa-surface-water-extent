@@ -11,7 +11,7 @@ This project contains application source code for producing Surface Water Extent
 * Implemented in C
 * Supports Landsat 4-8, as prototype products that are under evaluation
 * This software is based on an algorithm developed by John W. Jones, and Michael J. Starbuck
-* See [DSWE](not-validated-prototype-dswe/README.md) in [not-validated-prototype-dswe](not-validated-prototype-dswe) for more information
+* See [DSWE](dswe/README.md) in [dswe](dswe) for more information
 
 ### CFmask Based Water Detection (Algorithm)
 * Implemented in C

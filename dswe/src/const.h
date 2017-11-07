@@ -11,10 +11,10 @@
 #define DSWE_LOW_CONFIDENCE_WATER_OR_WETLAND 4
 #define DSWE_CLOUD_CLOUD_SHADOW_SNOW 9
 
-#define RAW_DIAG_PRODUCT_NAME "dswe"
-#define RAW_DIAG_BAND_NAME "dswe_diag"
-#define RAW_DIAG_SHORT_NAME "DSWE_DIAG"
-#define RAW_DIAG_LONG_NAME "dynamic surface water extent: raw diagnostic tests"
+#define DIAG_PRODUCT_NAME "dswe"
+#define DIAG_BAND_NAME "dswe_diag"
+#define DIAG_SHORT_NAME "DSWE_DIAG"
+#define DIAG_LONG_NAME "dynamic surface water extent: diagnostic tests"
 
 #define PS_PRODUCT_NAME "dswe"
 #define PS_BAND_NAME "percent_slope"
@@ -26,10 +26,10 @@
 #define HS_SHORT_NAME "HILLSHADE"
 #define HS_LONG_NAME "dynamic surface water extent: hillshade"
 
-#define RAW_PRODUCT_NAME "dswe"
-#define RAW_BAND_NAME "dswe_raw"
-#define RAW_SHORT_NAME "DSWE_RAW"
-#define RAW_LONG_NAME "dynamic surface water extent: raw"
+#define INTERPRETED_PRODUCT_NAME "dswe"
+#define INTERPRETED_BAND_NAME "dswe_intrpd"
+#define INTERPRETED_SHORT_NAME "DSWE_INTRPD"
+#define INTERPRETED_LONG_NAME "dynamic surface water extent: interpreted"
 
 #define PS_SC_PRODUCT_NAME "dswe"
 #define PS_SC_BAND_NAME "dswe_pshsccss"
