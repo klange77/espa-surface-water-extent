@@ -1,7 +1,7 @@
 ## ESPA Surface Water Extent - Release Notes
-Release Date: March 2017
+Release Date: November 2017
 
-See git tag [espa-v2.17.0]
+See git tag [espa-v2.25.0]
 
 This project contains application source code for producing Surface Water Extent products.
 
@@ -11,7 +11,7 @@ This project contains application source code for producing Surface Water Extent
 * Implemented in C
 * Supports Landsat 4-8, as prototype products that are under evaluation
 * This software is based on an algorithm developed by John W. Jones, and Michael J. Starbuck
-* See [DSWE](not-validated-prototype-dswe/README.md) in [not-validated-prototype-dswe](not-validated-prototype-dswe) for more information
+* See [DSWE](dswe/README.md) in [dswe](dswe) for more information
 
 ### CFmask Based Water Detection (Algorithm)
 * Implemented in C
@@ -24,8 +24,8 @@ This project contains application source code for producing Surface Water Extent
 
 
 ## Release Notes
-* Updated DSWE version numbers
-* Updated DSWE to use collection based inputs
+* Updated version numbers
+* Updated "not-validated-prototype-dswe" directory to "dswe" 
 
 ## Installation Notes
 

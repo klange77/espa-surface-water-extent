@@ -381,7 +381,8 @@ add_dswe_band_product
                   sizeof (bmeta[0].class_values[4].description),
                   "water or wetland - low confidence");
 
-        /* The pshsccss band has the classes the raw band has, plus this */
+        /* The pshsccss band has the classes the interpreted band has, plus 
+           this */
         if (class_count == 7)
         {
             bmeta[0].class_values[5].class = DSWE_CLOUD_CLOUD_SHADOW_SNOW;
@@ -454,7 +455,7 @@ add_dswe_band_product
   PURPOSE:  Create a new envi output file including envi header and add the
             associated information to the XML metadata file.
 
-  NOTE: Only for the Raw "test" DSWE band output.
+  NOTE: Only for the "test" DSWE band output.
 
   RETURN VALUE:  Type = int
       Value    Description

@@ -45,11 +45,11 @@ static int pswt_2_nir_l8_default = 2500;
 static int pswt_2_swir1_l8_default = 3000;
 static int pswt_2_swir2_l8_default = 1000;
 
-static float percent_slope_high_default = 30;
-static float percent_slope_moderate_default = 30;
-static float percent_slope_wetland_default = 20;
+static float percent_slope_high_default = 12;
+static float percent_slope_moderate_default = 12;
+static float percent_slope_wetland_default = 10;
 static float percent_slope_low_default = 10;
-static int hillshade_default = 110;
+static int hillshade_default = 10;
 
 /* Parameter values should never be this, so use it to determine if a
    parameter was specified or not on the command line before applying the

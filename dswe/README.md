@@ -1,8 +1,8 @@
-## Dynamic Surface Water Extent Version 2.1 - Release Notes
+## Dynamic Surface Water Extent Version 2.2.0 - Release Notes
 
-Release Date: October 2017
+Release Date: November 2017
 
-See git tag [dswe-v2.1]
+See git tag [dswe-v2.2.0]
 
 This application produces Surface Water Extent products for Landsat 4, 5, 7, and 8.
 
@@ -11,9 +11,9 @@ See the [Dynamic Surface Water Extent Product Guide](https://remotesensing.usgs.
 
 ## Release Notes
 * Updated version numbers
-* Update mask to be bitmapped
-* Update valid range and remove scaling for percent slope and hillshade
-  metadata 
+* Update percent slope and hillshade thresholds 
+* Changed "raw" band filename to "intrpd" (interpreted)
+* Renamed "not-validate-prototype-dswe" directory to "dswe"
 
 ## Installation
 

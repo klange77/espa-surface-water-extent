@@ -8,7 +8,7 @@
 
 include make.config
 
-DIR_DSWE = not-validated-prototype-dswe
+DIR_DSWE = dswe
 DIR_CFWD = cfmask-based-water-detection
 
 #-----------------------------------------------------------------------------
@@ -33,15 +33,15 @@ clean-script:
 
 #-----------------------------------------------------------------------------
 all-dswe:
-	echo "make all in not-validated-prototype-dswe"; \
+	echo "make all in dswe"; \
         (cd $(DIR_DSWE); $(MAKE) all);
 
 install-dswe: check-environment
-	echo "make install in not-validated-prototype-dswe"; \
+	echo "make install in dswe"; \
         (cd $(DIR_DSWE); $(MAKE) install);
 
 clean-dswe:
-	echo "make clean in not-validated-prototype-dswe"; \
+	echo "make clean in dswe"; \
         (cd $(DIR_DSWE); $(MAKE) clean);
 
 #-----------------------------------------------------------------------------

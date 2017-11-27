@@ -41,10 +41,10 @@ Algorithm Description - Overview:
 
     The algorithm provides an output of 3 bands.  
 
-    The first band represents the Raw DSWE (recoded values 0, 1, 2, 3, 4, 9, 
-    and 255).
+    The first band represents the Interpreted DSWE (recoded values 0, 1, 2, 3, 
+    4, 9, and 255).
 
-    The second band represents the Raw DSWE with filtering applied for 
+    The second band represents the Interpreted DSWE with filtering applied for 
     Percent Slope, Hillshade, Cloud, Cloud Shadow, and Snow (recoded values 0, 
     1, 2, 3, 4, 9, and 255).
 
@@ -80,11 +80,11 @@ Algorithm Description - Inputs:
 Algorithm Description - Detailed:
 
 
-    NOTE: Keep in mind during the processing of the Raw DSWE band, the output
-          is filtered for fill data and those values are set to 255.
+    NOTE: Keep in mind during the processing of the Interpreted DSWE band, the 
+          output is filtered for fill data and those values are set to 255.
 
 
-    Raw DSWE -> Output:
+    Interpreted DSWE -> Output:
 
          1) Calculate Modified Normalized Difference Wetness Index (MNDWI)
             from the Green and SWIR1 bands.
@@ -148,7 +148,7 @@ Algorithm Description - Detailed:
                 && NIR < 1500
                 && NDVI < 0.7) set the thousands digit  (Example 01000)
 
-         10) Perform the fifth test by comparing the MNDWI along with the Blue,
+        10) Perform the fifth test by comparing the MNDWI along with the Blue,
             NIR, SWIR1, and SWIR2 bands to the following thresholds.
 
             - Partial Surface Water Test-2 threshold, where the threshold 
@@ -208,10 +208,10 @@ Algorithm Description - Detailed:
             10010 : 4
             10100 : 4
 
-        12) Output the Raw DSWE
+        12) Output the Interpreted DSWE
 
 
-    Raw DSWE -> Percent-Slope -> Hillshade -> Cloud, Cloud Shadow, Snow 
+    Interpreted DSWE -> Percent-Slope -> Hillshade -> Cloud, Cloud Shadow, Snow 
              -> Output:
 
          1) Build a Percent-Slope band from the DEM source.
@@ -228,37 +228,41 @@ Algorithm Description - Detailed:
          4) Perform the following tests by comparing the Percent-Slope band to 
             the Percent-Slope thresholds:
 
-            if (percent-slope >= percent_slope_high) and the Raw DSWE is High
-                Confidence Water (1), set the filtered Raw DSWE to a recoded
-                value of 0, otherwise set it to Raw DSWE
-            if (percent-slope >= percent_slope_moderate) and the Raw DSWE is 
-                Moderate Confidence Water (2), set the filtered Raw DSWE to a 
-                recoded value of 0, otherwise set it to Raw DSWE
-            if (percent-slope >= percent_slope_wetland) and the Raw DSWE is 
-                Potential Wetland (3), set the filtered Raw DSWE to a recoded
-                value of 0, otherwise set it to Raw DSWE
-            if (percent-slope >= percent_slope_low) and the Raw DSWE is Low 
-                Confidence Water or Wetland (4), set the filtered Raw DSWE to 
-                a recoded value of 0, otherwise set it to Raw DSWE
+            if (percent-slope >= percent_slope_high) and the Interpreted DSWE 
+                is High Confidence Water (1), set the filtered Interpreted DSWE
+                to a recoded value of 0, otherwise set it to Interpreted DSWE
+            if (percent-slope >= percent_slope_moderate) and the Interpreted 
+                DSWE is Moderate Confidence Water (2), set the filtered 
+                Interpreted DSWE to a recoded value of 0, otherwise set it to 
+                Interpreted DSWE
+            if (percent-slope >= percent_slope_wetland) and the Interpreted 
+                DSWE is Potential Wetland (3), set the filtered Interpreted 
+                DSWE to a recoded value of 0, otherwise set it to Interpreted 
+                DSWE
+            if (percent-slope >= percent_slope_low) and the Interpreted DSWE is
+                Low Confidence Water or Wetland (4), set the filtered 
+                Interpreted DSWE to a recoded value of 0, otherwise set it to 
+                Interpreted DSWE
 
          5) Define Hillshade threshold (range 0 - 255) with default 110.
 
-         6) If the filtered Raw DSWE was not recoded to a value of 0, perform 
-            the following test by comparing the Hillshade band to the hillshade
-            threshold: 
+         6) If the filtered Interpreted DSWE was not recoded to a value of 0, 
+            perform the following test by comparing the Hillshade band to the 
+            hillshade threshold: 
 
-            if (hillshade <= hillshade threshold), set the filtered Raw DSWE to
-                a recoded value of 0, otherwise set it to Raw DSWE
+            if (hillshade <= hillshade threshold), set the filtered Interpreted 
+                DSWE to a recoded value of 0, otherwise set it to Interpreted 
+                DSWE
 
          7) Perform a test by comparing the Pixel QA (quality/mask) band to the
            Cloud, Snow, and Cloud Shadow values.
 
             if (the Pixel QA cloud, cloud shadow, and/or snow bit is set)
-                set the filtered Raw DSWE to a recoded value of 9, otherwise 
-                leave it alone
+                set the filtered Interpreted DSWE to a recoded value of 9, 
+                otherwise leave it alone
 
          8) Output the Percent-Slope, Hillshade, Cloud, Cloud Shadow, and Snow
-            filtered Raw DSWE.
+            filtered Interpreted DSWE.
 
 
     Mask Output:
@@ -276,12 +280,13 @@ Algorithm Description - Detailed:
 
          3) Add the contribution of the percent slope mask values as follows:
 
-            if (any percent slope test caused the Raw DSWE to be recoded to 0)
+            if (any percent slope test caused Interpreted DSWE to be recoded 
+                to 0)
                 set mask percent slope bit (3) 
                 
          4) Add the contribution of the hillshade mask values as follows:
 
-            if (the hillshade test caused the Raw DSWE to be recoded to 0)
+            if (the hillshade test caused Interpreted DSWE to be recoded to 0)
                 set mask hillshade bit (4) 
 
          5) Output the Mask 
