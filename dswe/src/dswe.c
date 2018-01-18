@@ -443,6 +443,7 @@ main (int argc, char *argv[])
     float band_swir1_float;
     float band_swir2_float;
 
+    float percent_slope;        /* Single percent slope value */
     bool hillshade_flag;
 
     int16_t blue_fill_value;
@@ -985,10 +986,23 @@ main (int argc, char *argv[])
 
     if (include_ps_flag)
     {
+        /* Convert to a scaled 16 bit integer value */
+        for (index = 0; index < pixel_count; index++)
+        {
+            percent_slope = (band_ps[index] * PERCENT_SLOPE_MULT_FACTOR) + 0.5;
+
+            /* If the scaled value is outside the range, pull it back */
+            if (percent_slope > GDAL_INT16_MAX)
+            {
+                percent_slope = GDAL_INT16_MAX;
+            }
+            band_ps_int16[index] = (int16_t)percent_slope; 
+        }
+
         if (add_ps_band_product (xml_filename, use_toa_flag,
                                  PS_PRODUCT_NAME, PS_BAND_NAME,
                                  PS_SHORT_NAME, PS_LONG_NAME,
-                                 0, FLT_MAX, band_ps)
+                                 0, GDAL_INT16_MAX, band_ps_int16)
             != SUCCESS)
         {
             ERROR_MESSAGE ("Failed adding DSWE PERCENT-SLOPE band product",

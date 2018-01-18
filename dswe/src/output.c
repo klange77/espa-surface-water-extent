@@ -109,50 +109,6 @@ write_16bit_dswe_product
 
 
 /*****************************************************************************
-  NAME:  write_float_dswe_product
-
-  PURPOSE:  Create the *.img file and the associated ENVI header.
-
-  RETURN VALUE:  Type = int
-      Value    Description
-      -------  ---------------------------------------------------------------
-      SUCCESS  No errors were encountered.
-      ERROR    An error was encountered.
-*****************************************************************************/
-int
-write_float_dswe_product
-(
-    char *output_filename,
-    int element_count,
-    float *data
-)
-{
-    FILE *fd = NULL;
-    char msg[512];
-
-    fd = fopen(output_filename, "w");
-    if (fd == NULL)
-    {
-        snprintf (msg, sizeof (msg), "Failed creating file %s",
-                  output_filename);
-        RETURN_ERROR (msg, MODULE_NAME, ERROR);
-    }
-
-    if (write_raw_binary(fd, 1, element_count, sizeof (float), data)
-        != SUCCESS)
-    {
-        snprintf (msg, sizeof (msg), "Failed writing file %s",
-                  output_filename);
-        RETURN_ERROR (msg, MODULE_NAME, ERROR);
-    }
-
-    fclose(fd);
-
-    return SUCCESS;
-}
-
-
-/*****************************************************************************
   NAME:  add_dswe_band_product
 
   PURPOSE:  Create a new envi output file including envi header and add the
@@ -690,8 +646,8 @@ add_ps_band_product
     char *short_name,
     char *long_name,
     int min_range,
-    float max_range,
-    float *data
+    int max_range,
+    int16_t *data
 )
 {
     int count;
@@ -789,7 +745,7 @@ add_ps_band_product
                     in_meta.band[src_index].nsamps;
 
     /* First write out the ENVI band and header files */
-    if (write_float_dswe_product (image_filename, element_count, data)
+    if (write_16bit_dswe_product (image_filename, element_count, data)
         != SUCCESS)
     {
         RETURN_ERROR ("Failed creating output ENVI files", MODULE_NAME,
@@ -827,12 +783,13 @@ add_ps_band_product
     bmeta[0].nsamps = in_meta.band[src_index].nsamps;
     bmeta[0].pixel_size[0] = in_meta.band[src_index].pixel_size[0];
     bmeta[0].pixel_size[1] = in_meta.band[src_index].pixel_size[1];
+    bmeta[0].scale_factor = PERCENT_SLOPE_SCALE_FACTOR;
     snprintf (bmeta[0].pixel_units, sizeof (bmeta[0].pixel_units), "meters");
     snprintf (bmeta[0].app_version, sizeof (bmeta[0].app_version),
               "dswe_%s", DSWE_VERSION);
     snprintf (bmeta[0].production_date, sizeof (bmeta[0].production_date),
               "%s", production_date);
-    bmeta[0].data_type = ESPA_FLOAT32;
+    bmeta[0].data_type = ESPA_INT16;
     bmeta[0].fill_value = TESTS_NO_DATA_VALUE;
     bmeta[0].valid_range[0] = min_range;
     bmeta[0].valid_range[1] = max_range;

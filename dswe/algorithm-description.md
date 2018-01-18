@@ -39,7 +39,8 @@ Algorithm Description - Overview:
           9 -> Cloud, Cloud Shadow, or Snow
         255 -> Fill (no data)
 
-    The algorithm provides an output of 3 bands.  
+    The algorithm provides an output of 3 bands and 3 optional intermediate 
+    bands.  
 
     The first band represents the Interpreted DSWE (recoded values 0, 1, 2, 3, 
     4, 9, and 255).
@@ -64,6 +65,12 @@ Algorithm Description - Overview:
     Multiple mask reasons can apply for each pixel in the mask band.  For 
     example, a pixel masked for cloud shadow, percent slope, and hillshade
     will have a value of 25 (2^0 + 2^3 + 2^4 = 1 + 8 + 16 = 25).
+
+    The 3 optional intermediate bands are:
+
+    diagnostic band - shows the results of the initial tests before recoding
+    percent slope band - built from DEM; used for percent slope filtering
+    hillshade band - built from DEM; used for hilshade filtering
 
 ==============================================================================
 Algorithm Description - Inputs:
@@ -290,4 +297,13 @@ Algorithm Description - Detailed:
                 set mask hillshade bit (4) 
 
          5) Output the Mask 
+
+
+    Intermediate Band Output:
+
+         1) If requested, output the diagnostic band
+
+         2) If requested, output the percent slope band, scaled to integer
+
+         3) If requested, output the hillshade band
 
