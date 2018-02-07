@@ -54,7 +54,7 @@ usage ()
 
     printf("    --help will print this usage statement\n\n");
     printf("Example: cfmask_water_detection"
-           " --xml LE70760172000175AGS00.xml\n");
+           " --xml LE07_L1TP_013033_20130330_20160908_01_T2.xml\n");
 }
 
 
