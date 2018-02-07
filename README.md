@@ -26,6 +26,7 @@ This project contains application source code for producing Surface Water Extent
 ## Release Notes
 * Updated version numbers
 * Write percent slope band as an integer and scale it
+* Remove pre-collections software 
 
 ## Installation Notes
 

@@ -4,7 +4,7 @@
 
 
 #define CFWD_APP_NAME "cfmask_water_detection"
-#define CFWD_VERSION "1.1.0"
+#define CFWD_VERSION "1.1.1"
 
 
 #define MODULE_NAME "CFWD"
