@@ -1,6 +1,6 @@
 ## Dynamic Surface Water Extent Version 2.3.0 - Release Notes
 
-Release Date: February 2018
+Release Date: March 2018
 
 See git tag [dswe-v2.3.0]
 

@@ -70,7 +70,7 @@ Algorithm Description - Overview:
 
     diagnostic band - shows the results of the initial tests before recoding
     percent slope band - built from DEM; used for percent slope filtering
-    hillshade band - built from DEM; used for hilshade filtering
+    hillshade band - built from DEM; used for hillshade filtering
 
 ==============================================================================
 Algorithm Description - Inputs:

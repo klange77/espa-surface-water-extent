@@ -1,5 +1,5 @@
 ## ESPA Surface Water Extent - Release Notes
-Release Date: February 2018
+Release Date: March 2018
 
 See git tag [espa-v2.27.0]
 

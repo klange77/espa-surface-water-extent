@@ -1,7 +1,7 @@
 
 ## CFmask Based Water Detection Version 1.1.1 - Release Notes
 
-Release Date: February 2018
+Release Date: March 2018
 
 See git tag [cfbwd-version_1.1.1]
 
