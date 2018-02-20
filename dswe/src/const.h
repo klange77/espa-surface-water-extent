@@ -58,6 +58,9 @@ typedef enum
 
 #define DSWE_NO_DATA_VALUE 255
 #define TESTS_NO_DATA_VALUE -9999
+#define GDAL_INT16_MAX 32767
+#define PERCENT_SLOPE_SCALE_FACTOR 0.1
+#define PERCENT_SLOPE_MULT_FACTOR 10.0
 
 #ifndef RAD
 #define RAD (M_PI / 180.0)

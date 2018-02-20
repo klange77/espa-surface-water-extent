@@ -1,7 +1,7 @@
 ## ESPA Surface Water Extent - Release Notes
-Release Date: November 2017
+Release Date: March 2018
 
-See git tag [espa-v2.25.0]
+See git tag [espa-v2.27.0]
 
 This project contains application source code for producing Surface Water Extent products.
 
@@ -25,7 +25,8 @@ This project contains application source code for producing Surface Water Extent
 
 ## Release Notes
 * Updated version numbers
-* Updated "not-validated-prototype-dswe" directory to "dswe" 
+* Write percent slope band as an integer and scale it
+* Remove pre-collections software 
 
 ## Installation Notes
 
