@@ -1,65 +1,29 @@
-#-----------------------------------------------------------------------------
-# Makefile
-#
-# Simple makefile for building and installing land-surface-temperature
-# applications.
-#-----------------------------------------------------------------------------
-.PHONY: check-environment all install clean all-script install-script clean-script all-dswe install-dswe clean-dswe all-cfbwd install-cfbwd clean-cfbwd
+.DEFAULT_GOAL := build
+VERSION    := $(or $(TRAVIS_TAG),$(shell cat version.txt))
+REPO       := $(or $(DOCKER_USER),$(shell whoami))"/$(shell basename $(shell pwd))"
+BRANCH     := $(or $(TRAVIS_BRANCH),$(shell git rev-parse --abbrev-ref HEAD | tr / -))
+COMMIT     := $(or $(TRAVIS_COMMIT),$(shell git rev-parse HEAD))
+COMMIT_TAG := $(REPO):$(COMMIT)
+BRANCH_TAG := $(REPO):$(BRANCH)-$(VERSION)
 
-include make.config
+build:
+	@docker build --target builder -f Dockerfile -t $(COMMIT_TAG) --rm=true --compress $(PWD)
 
-DIR_DSWE = dswe
-DIR_CFWD = cfmask-based-water-detection
+tag:
+	@docker tag $(COMMIT_TAG) $(BRANCH_TAG)
+	@$(shell [ $(BRANCH) == master ] && docker tag $(COMMIT_TAG) $(REPO):latest)
 
-#-----------------------------------------------------------------------------
-all: all-script all-dswe all-cfbwd
+login:
+	@$(if $(and $(DOCKER_USER), $(DOCKER_PASS)), docker login -u $(DOCKER_USER) -p $(DOCKER_PASS), docker login)
 
-install: check-environment install-script install-dswe install-cfbwd
+push: login
+	docker push $(REPO)
 
-clean: clean-script clean-dswe clean-cfbwd
+debug:
+	@echo "VERSION:    $(VERSION)"
+	@echo "REPO:       $(REPO)"
+	@echo "BRANCH:     $(BRANCH)"
+	@echo "COMMIT_TAG: $(COMMIT_TAG)"
+	@echo "BRANCH_TAG: $(BRANCH_TAG)"
 
-#-----------------------------------------------------------------------------
-all-script:
-	echo "make all in scripts"; \
-        (cd scripts; $(MAKE) all);
-
-install-script: check-environment
-	echo "make install in scripts"; \
-        (cd scripts; $(MAKE) install);
-
-clean-script:
-	echo "make clean in scripts"; \
-        (cd scripts; $(MAKE) clean);
-
-#-----------------------------------------------------------------------------
-all-dswe:
-	echo "make all in dswe"; \
-        (cd $(DIR_DSWE); $(MAKE) all);
-
-install-dswe: check-environment
-	echo "make install in dswe"; \
-        (cd $(DIR_DSWE); $(MAKE) install);
-
-clean-dswe:
-	echo "make clean in dswe"; \
-        (cd $(DIR_DSWE); $(MAKE) clean);
-
-#-----------------------------------------------------------------------------
-all-cfbwd:
-	echo "make all in cfmask-based-water-detection"; \
-        (cd $(DIR_CFWD); $(MAKE) all);
-
-install-cfbwd: check-environment
-	echo "make install in cfmask-based-water-detection"; \
-        (cd $(DIR_CFWD); $(MAKE) install);
-
-clean-cfbwd:
-	echo "make clean in cfmask-based-water-detection"; \
-        (cd $(DIR_CFWD); $(MAKE) clean);
-
-#-----------------------------------------------------------------------------
-check-environment:
-ifndef PREFIX
-    $(error Environment variable PREFIX is not defined)
-endif
-
+docker-deploy: debug build tag push
