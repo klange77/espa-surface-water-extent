@@ -123,9 +123,9 @@ Algorithm Description - Detailed:
 
          6) Perform the first test by comparing the MNDWI to a Wetness Index
             threshold, where the threshold ranges from 0.0 to 2.0 and is
-            defaulted to a value of 0.0124.
+            defaulted to a value of 0.124.
 
-            if (mndwi > 0.0124) set the ones digit  (Example 00001)
+            if (mndwi > 0.124) set the ones digit  (Example 00001)
 
          7) Perform the second test by comparing the MBSRV and MBSRN values to
             each other.
