@@ -7,7 +7,7 @@ See git tag [dswe-v2.3.0]
 This application produces Surface Water Extent products for Landsat 4, 5, 7, and 8.
 
 ## Product Descriptions
-See the [Dynamic Surface Water Extent Product Guide](https://remotesensing.usgs.gov/ecv/document/provisional_dswe_README_v10.pdf) for more information about the DSWE product.
+See the [Landsat Dynamic Surface Water Extent (DSWE) Product Guide](https://landsat.usgs.gov/sites/default/files/documents/LSDS-1331-dswe-product-guide.pdf) for more information about the DSWE product.
 
 ## Release Notes
 * Updated version numbers
